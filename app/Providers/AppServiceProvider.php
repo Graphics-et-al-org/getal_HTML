@@ -13,6 +13,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
+        
     }
 
     /**
@@ -24,5 +25,7 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
             $event->extendSocialite('auth0', \SocialiteProviders\Auth0\Provider::class);
         });
+
+
     }
 }

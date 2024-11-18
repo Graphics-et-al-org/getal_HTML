@@ -2,15 +2,21 @@
 
 namespace App\Models;
 
+use App\Models\Traits\Method\RoleMethod;
+use App\Models\Traits\Method\UserMethod;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class LocalUser extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, UserMethod, RoleMethod;
 
-    
+    public const TYPE_ADMIN = 'admin';
+    public const TYPE_USER = 'user';
+
+
+
     // explicitly define tables
     protected $table = 'users';
 
