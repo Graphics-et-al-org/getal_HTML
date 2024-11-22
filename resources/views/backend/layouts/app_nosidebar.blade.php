@@ -1,4 +1,5 @@
 <!doctype html>
+
 <html lang="{{ htmlLang() }}">
 
 <head>
@@ -11,22 +12,23 @@
     @yield('meta')
 
     @stack('before-styles')
-    @vite('resources/css/backend/backend.css')
 
     @stack('after-styles')
+    @vite('resources/css/backend/backend.css')
 </head>
-
+@include("backend.includes.header")
 <body class="bg-gray-200">
-        @yield('content')
+
+    @yield('content')
 
 
 
-        {{-- @include('backend.includes.footer') --}}
-        <!--c-wrapper-->
+    {{-- @include('backend.includes.footer') --}}
+    <!--c-wrapper-->
 
-        @stack('before-scripts')
 
-        @stack('after-scripts')
 </body>
+@stack('before-scripts')
 
+    @stack('after-scripts')
 </html>

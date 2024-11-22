@@ -9,6 +9,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
+                "resources/css/backend/backend.css",
                 'resources/js/backend/template_builder/builder.js',
                 'resources/css/backend/template_builder/builder.css',
             ],

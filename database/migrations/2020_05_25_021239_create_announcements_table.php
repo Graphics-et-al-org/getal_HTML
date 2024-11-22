@@ -21,7 +21,7 @@ class CreateAnnouncementsTable extends Migration
             $table->boolean('enabled')->default(true);
             $table->timestamp('starts_at')->nullable();
             $table->timestamp('ends_at')->nullable();
-            $table->timestamps();
+            
         });
     }
 

@@ -5,15 +5,21 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-
-    return view('welcome');
-})->name('home');
+   // dd(Auth::user());
+    if (Auth::check()) {
+        return view('dashboard');
+    } else {
+        return view('welcome');
+    }
+}) ->middleware('auth.custom')
+->name('home');
 
 Route::get('/dashboard', function () {
+    dd(Auth::user());
     return view('dashboard');
 })
-->middleware('auth.custom')
-->name('dashboard');
+    ->middleware('auth.custom')
+    ->name('dashboard');
 
 Route::middleware('auth.custom')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -34,7 +40,7 @@ Route::group(['namespace' => 'Frontend', 'prefix' => 'frontent', 'as' => 'fronte
      * Note: Administrator has all permissions so you do not have to specify the administrator role everywhere.
      * These routes can not be hit if the password is expired
      */
-    include_route_files(__DIR__.'/frontend/');
+    include_route_files(__DIR__ . '/frontend/');
 });
 
 /*
@@ -50,7 +56,7 @@ Route::group(['namespace' => 'Backend', 'prefix' => 'admin', 'as' => 'admin.', '
      * Note: Administrator has all permissions so you do not have to specify the administrator role everywhere.
      * These routes can not be hit if the password is expired
      */
-    include_route_files(__DIR__.'/backend/');
+    include_route_files(__DIR__ . '/backend/');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

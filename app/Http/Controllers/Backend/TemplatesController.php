@@ -3,21 +3,57 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Page\Page;
 use Illuminate\Http\Request;
 
 class TemplatesController extends Controller
 {
     //
-     /**
+    /**
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
+    // show the index
     public function index()
     {
-        return view('backend.templates.index');
+        // get templates
+       $templates = Page::where('is_template', '1')->get();
+     //  dd($templates);
+        return view('backend.templates.index')
+        ->with('templates', $templates);
     }
 
-    public function editor()
+    // show the editor
+    public function edit($id)
     {
-        return view('backend.templates.editor');
+        $page = Page::findOr($id, function(){
+            return view('backend.templates.index');
+
+        });
+        return view('backend.templates.editor')
+        ->with('page', $page);
+    }
+
+    // store the page
+    public function create(Request $request)
+    {
+        dd($request);
+    }
+
+    // read the page
+    public function read(Request $request)
+    {
+        dd($request);
+    }
+
+    // store the page
+    public function update(Request $request)
+    {
+        dd($request);
+    }
+
+    // destroy the page
+    public function destroy(Request $request)
+    {
+        dd($request);
     }
 }

@@ -11,9 +11,11 @@
 
     @stack('before-styles')
      @vite('resources/css/backend/backend.css')
+     @vite('resources/js/backend/backend.js')
 
     @stack('after-styles')
 </head>
+@include("backend.includes.header")
 <body class="bg-gray-200">
     @include('backend.includes.sidebar')
     <div class="w-9/12">

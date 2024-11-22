@@ -14,11 +14,12 @@ Route::get('dashboard', [DashboardController::class, 'index'])
     });
 
 
-Route::get('templates', [TemplatesController::class, 'index'])
-    ->name('templates.index');
+// Route::get('templates', [TemplatesController::class, 'index'])
+//     ->name('templates.index');
 // ->breadcrumbs(function (Trail $trail) {
 //     $trail->push(__('Home'), route('admin.dashboard'));
 // });
 
-Route::get('editor', [TemplatesController::class, 'editor'])
-    ->name('templates.editor');
+// Route::get('editor', [TemplatesController::class, 'editor'])
+//     ->name('templates.editor');
+
