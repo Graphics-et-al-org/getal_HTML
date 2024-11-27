@@ -44,8 +44,11 @@
         @endforeach
     ];
 
+    const tailwindcsspath = "{{ Vite::asset('resources/css/app.css') }}";
     </script>
+       {{-- @vite('resources/js/backend/template_builder/blocks.js') --}}
     @vite('resources/js/backend/template_builder/builder.js')
+
     {{-- CSS goes *after* js --}}
     @vite('resources/css/backend/template_builder/builder.css')
 @endpush

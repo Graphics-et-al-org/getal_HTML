@@ -11,6 +11,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 "resources/css/backend/backend.css",
                 'resources/js/backend/template_builder/builder.js',
+                'resources/js/backend/template_builder/blocks.js',
                 'resources/css/backend/template_builder/builder.css',
             ],
             refresh: true,

@@ -13,8 +13,10 @@
 
     @stack('before-styles')
 
-    @stack('after-styles')
+    @vite('resources/js/backend/backend.js')
     @vite('resources/css/backend/backend.css')
+    @stack('after-styles')
+
 </head>
 @include("backend.includes.header")
 <body class="bg-gray-200">
