@@ -3,7 +3,7 @@
 namespace App\Models\Page;
 
 use App\Models\Page\PagePage as PagePage;
-use App\Models\User;
+use App\Models\User as User;
 use Database\Factories\PageFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

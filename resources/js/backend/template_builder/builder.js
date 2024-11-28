@@ -2,7 +2,7 @@ import "grapesjs/dist/css/grapes.min.css";
 
 import grapesjs from "grapesjs";
 import BlocksBasic from "grapesjs-blocks-basic";
-import html2canvas from "html2canvas-pro";
+// import html2canvas from "html2canvas-pro";
 import { headercontent, footercontent, keypoints_section_content } from "./blocks"
 
 var projectEndpoint = `${baseurl}/admin/pagepage/${page_pages[0]}`;

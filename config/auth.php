@@ -38,19 +38,8 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'localusers',
+            'provider' => 'users',
         ],
-        'auth0-session' => [
-            'driver' => 'auth0.authenticator',
-            'provider' => 'auth0-provider',
-            'configuration' => 'web',
-        ],
-        'auth0-api' => [
-            'driver' => 'auth0.authorizer',
-            'provider' => 'auth0-provider',
-            'configuration' => 'api',
-        ],
-
     ],
 
     /*
@@ -71,13 +60,9 @@ return [
     */
 
     'providers' => [
-        'localusers' => [
+        'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\LocalUser::class),
-        ],
-        'auth0-provider' => [
-            'driver' => 'auth0.provider',
-            'repository' => 'auth0.repository',
+            'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
 
         // 'users' => [

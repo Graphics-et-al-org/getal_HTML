@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 use Ramsey\Uuid\Uuid;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Auth\User>
  */
 class PagePageFactory extends Factory
 {

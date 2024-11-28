@@ -17,8 +17,8 @@ class TemplatesController extends Controller
     {
         // get templates
        $templates = Page::where('is_template', '1')->get();
-     //  dd($templates);
-        return view('backend.templates.index')
+       //dd($templates);
+        return view('backend.pages_templates.index')
         ->with('templates', $templates);
     }
 
@@ -26,10 +26,10 @@ class TemplatesController extends Controller
     public function edit($id)
     {
         $page = Page::findOr($id, function(){
-            return view('backend.templates.index');
+            return view('backend.pages_templates.index');
 
         });
-        return view('backend.templates.editor')
+        return view('backend.pages_templates.editor')
         ->with('page', $page);
     }
 
