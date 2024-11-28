@@ -1,0 +1,54 @@
+{
+  "_module.esm-2dnDAs40.js": {
+    "file": "assets/module.esm-2dnDAs40.js",
+    "name": "module.esm"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-DEDxEGCf.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/css/backend/backend.css": {
+    "file": "assets/app-DEDxEGCf.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/css/backend/template_builder/builder.css": {
+    "file": "assets/builder-C10_IxGU.css",
+    "src": "resources/css/backend/template_builder/builder.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-C9H5EgBl.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "imports": [
+      "_module.esm-2dnDAs40.js"
+    ]
+  },
+  "resources/js/backend/backend.js": {
+    "file": "assets/backend-rn9SQEbd.js",
+    "name": "backend",
+    "src": "resources/js/backend/backend.js",
+    "isEntry": true,
+    "imports": [
+      "_module.esm-2dnDAs40.js"
+    ]
+  },
+  "resources/js/backend/template_builder/blocks.js": {
+    "file": "assets/blocks-l0sNRNKZ.js",
+    "name": "blocks",
+    "src": "resources/js/backend/template_builder/blocks.js",
+    "isEntry": true
+  },
+  "resources/js/backend/template_builder/builder.js": {
+    "file": "assets/builder-b6-wE2Eb.js",
+    "name": "builder",
+    "src": "resources/js/backend/template_builder/builder.js",
+    "isEntry": true,
+    "css": [
+      "assets/builder-Hhxc3Cda.css"
+    ]
+  }
+}
