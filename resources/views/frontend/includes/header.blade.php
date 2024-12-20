@@ -1,10 +1,8 @@
-{{-- Backend header --}}
-
 <header class="antialiased">
-    <nav class="bg-red-200 fixed w-full border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800 h-16">
+    <nav class="bg-green-200 border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800 h-16 fixed w-full">
         <div class="flex flex-wrap justify-between items-center">
             <div class="flex justify-start items-center">
-             Backend
+             Frontend
               </div>
             <div class="flex items-center lg:order-2">
 
@@ -100,7 +98,7 @@
                     </div>
                     <ul class="py-1 text-gray-500 dark:text-gray-400" aria-labelledby="dropdown">
                         <li>
-                            <a href="{{ route('home') }}" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">Frontend</a>
+                            <a href="{{ route('admin.dashboard') }}" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">Administration</a>
                         </li>
                         <li>
                             <a href="#" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">My profile</a>
@@ -109,7 +107,16 @@
                             <a href="#" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">Account settings</a>
                         </li>
                     </ul>
+                    <ul class="py-1 text-gray-500 dark:text-gray-400" aria-labelledby="dropdown">
 
+                        <li>
+                            <a href="#" class="flex items-center py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                              <svg class="mr-2 w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"> <path d="m1.56 6.245 8 3.924a1 1 0 0 0 .88 0l8-3.924a1 1 0 0 0 0-1.8l-8-3.925a1 1 0 0 0-.88 0l-8 3.925a1 1 0 0 0 0 1.8Z"/> <path d="M18 8.376a1 1 0 0 0-1 1v.163l-7 3.434-7-3.434v-.163a1 1 0 0 0-2 0v.786a1 1 0 0 0 .56.9l8 3.925a1 1 0 0 0 .88 0l8-3.925a1 1 0 0 0 .56-.9v-.786a1 1 0 0 0-1-1Z"/> <path d="M17.993 13.191a1 1 0 0 0-1 1v.163l-7 3.435-7-3.435v-.163a1 1 0 1 0-2 0v.787a1 1 0 0 0 .56.9l8 3.925a1 1 0 0 0 .88 0l8-3.925a1 1 0 0 0 .56-.9v-.787a1 1 0 0 0-1-1Z"/> </svg>
+                              Pages
+                            </a>
+                        </li>
+
+                    </ul>
                     <ul class="py-1 text-gray-500 dark:text-gray-400" aria-labelledby="dropdown">
                         <li>
                             <a href="{{ route('logout') }}" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</a>

@@ -1,15 +1,22 @@
 {
-  "_module.esm-2dnDAs40.js": {
-    "file": "assets/module.esm-2dnDAs40.js",
-    "name": "module.esm"
+  "__commonjsHelpers-Cpj98o6Y.js": {
+    "file": "assets/_commonjsHelpers-Cpj98o6Y.js",
+    "name": "_commonjsHelpers"
+  },
+  "_module.esm-C-OBrVxT.js": {
+    "file": "assets/module.esm-C-OBrVxT.js",
+    "name": "module.esm",
+    "imports": [
+      "__commonjsHelpers-Cpj98o6Y.js"
+    ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-DEDxEGCf.css",
+    "file": "assets/app-BhuLtIns.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/css/backend/backend.css": {
-    "file": "assets/app-DEDxEGCf.css",
+    "file": "assets/app-BhuLtIns.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -19,21 +26,23 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-C9H5EgBl.js",
+    "file": "assets/app-Ce3hxSXO.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
-      "_module.esm-2dnDAs40.js"
+      "_module.esm-C-OBrVxT.js",
+      "__commonjsHelpers-Cpj98o6Y.js"
     ]
   },
   "resources/js/backend/backend.js": {
-    "file": "assets/backend-rn9SQEbd.js",
+    "file": "assets/backend-Ce3hxSXO.js",
     "name": "backend",
     "src": "resources/js/backend/backend.js",
     "isEntry": true,
     "imports": [
-      "_module.esm-2dnDAs40.js"
+      "_module.esm-C-OBrVxT.js",
+      "__commonjsHelpers-Cpj98o6Y.js"
     ]
   },
   "resources/js/backend/template_builder/blocks.js": {
@@ -43,10 +52,13 @@
     "isEntry": true
   },
   "resources/js/backend/template_builder/builder.js": {
-    "file": "assets/builder-b6-wE2Eb.js",
+    "file": "assets/builder-B_Q_2RkF.js",
     "name": "builder",
     "src": "resources/js/backend/template_builder/builder.js",
     "isEntry": true,
+    "imports": [
+      "__commonjsHelpers-Cpj98o6Y.js"
+    ],
     "css": [
       "assets/builder-Hhxc3Cda.css"
     ]

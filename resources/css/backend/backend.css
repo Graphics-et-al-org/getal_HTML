@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  .modal-backdrop {
+    z-index: 40;
+  }
+  .modal {
+    z-index: 50;
+  }

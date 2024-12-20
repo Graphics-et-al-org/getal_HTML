@@ -1,5 +1,4 @@
 <!doctype html>
-
 <html lang="{{ htmlLang() }}">
 
 <head>
@@ -10,25 +9,24 @@
     <meta name="description" content="@yield('meta_description', appName())">
     <meta name="author" content="@yield('meta_author', 'Anthony Rappa')">
     @yield('meta')
-
     @stack('before-styles')
-
-
     @vite('resources/css/backend/backend.css')
-    @stack('after-styles')
-
+    @stack('before-scripts')
 </head>
-@include('backend.includes.header')
 
 <body class="bg-gray-200">
-    @yield('modals')
+    <div class="antialiased bg-gray-50 dark:bg-gray-900">
+        @include('frontend.includes.header')
 
-    @yield('content')
+
+            @yield('content')
+        
+
+    </div>
 
 </body>
-
-@stack('before-scripts')
+@stack('after-styles')
 @stack('after-scripts')
+@vite('resources/js/frontend/frontend.js')
 
-@vite('resources/js/backend/backend.js')
 </html>

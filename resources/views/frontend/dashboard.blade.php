@@ -1,4 +1,4 @@
-@extends('backend.layouts.app')
+@extends('frontend.layouts.app')
 
 @section(__('Dashboard'))
 
@@ -53,5 +53,6 @@
       ></div>
     </div>
   </main>
+
 
 @endsection

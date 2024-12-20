@@ -12,7 +12,7 @@ const csrfToken = document
     .querySelector('meta[name="csrf-token"]')
     .getAttribute("content");
 
-const editor = grapesjs.init({
+editor = grapesjs.init({
     container: "#gjs",
     fromElement: true,
     height: "85vh",
