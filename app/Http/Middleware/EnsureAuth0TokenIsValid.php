@@ -40,10 +40,11 @@ class EnsureAuth0TokenIsValid
 
             // Set the user for this request
             Auth::setUser($user);
+           // dd($user);
             //$request->user = $user;
             return $next($request);
         } catch (\Exception $e) {
-           // dd($e);
+            dd($e);
            // if anything goes wrong, send a generic unauthorised error
             return response()->json(['error' => 'Unauthorised'], 401);
         }

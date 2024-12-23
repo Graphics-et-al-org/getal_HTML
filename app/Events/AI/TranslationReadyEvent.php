@@ -10,6 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Auth;
 
 class TranslationReadyEvent implements ShouldBroadcastNow
 {
@@ -36,11 +37,19 @@ class TranslationReadyEvent implements ShouldBroadcastNow
      */
     public function broadcastOn(): array
     {
+        // use email as an identifier, we don't always know user id
+        //return [new Channel('translation-status.' . Auth::user()->email)];
+        // return [new PrivateChannel('private-channel')];
+        //return [new PrivateChannel($this->channelName)];
+        // return [
+        //new Channel('translation-job.'.$this->id),
+        //  new PrivateChannel('translation-job'),
+        //  ];
+        return [];
+    }
 
-        return [new Channel($this->channelName)];
-       // return [
-            //new Channel('translation-job.'.$this->id),
-          //  new PrivateChannel('translation-job'),
-      //  ];
+    public function broadcastAs()
+    {
+        return 'translationcomplete.event';
     }
 }
