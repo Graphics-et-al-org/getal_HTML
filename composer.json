@@ -10,6 +10,7 @@
         "ably/ably-php": "^1.1",
         "ably/laravel-broadcaster": "^1.0",
         "firebase/php-jwt": "^6.10",
+        "intervention/image": "^3.10",
         "laravel/framework": "^11.31",
         "laravel/reverb": "^1.0",
         "laravel/sanctum": "^4.0",

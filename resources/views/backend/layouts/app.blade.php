@@ -15,15 +15,17 @@
 </head>
 
 <body class="bg-gray-200">
-    <div class="antialiased bg-gray-50 dark:bg-gray-900">
-        @include('backend.includes.header')
+    @include('backend.includes.header')
+    <div class="flex h-screen pt-16">
         @include('backend.includes.sidebar')
-        <div class="pl-64">
-            @yield('content')
-        </div>
+           <!-- Scrollable Main Content -->
+           <main class="ml-64 flex-1 overflow-y-auto">
+                @include('includes.flashmessages')
+                @yield('content')
+        </main>
 
     </div>
-
+    @yield('modals')
 </body>
 @stack('after-styles')
 @stack('after-scripts')

@@ -1,8 +1,8 @@
 {{-- Backend header --}}
 
-<header class="antialiased">
-    <nav class="bg-red-200 fixed w-full border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800 h-16">
-        <div class="flex flex-wrap justify-between items-center">
+{{-- <header class="antialiased"> --}}
+    <nav class="bg-red-200 fixed fixed w-full z-20 top-0 start-0 border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800 h-16">
+        <div class="flex flex-wrap justify-between items-center container">
             <div class="flex justify-start items-center">
              Backend
               </div>
@@ -119,4 +119,4 @@
             </div>
         </div>
     </nav>
-  </header>
+  {{-- </header> --}}

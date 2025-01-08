@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 Route::post('/broadcasting/auth', [CustomBroadcastAuthController::class, 'authenticate'])->middleware(EnsureAuth0TokenIsValid::class);
 
 
+// validate a token
 Route::post('/extension/token', function (Request $request) {
     //dd($request->header('Authorization'));
     $token = Str::chopStart($request->header('Authorization'), 'Bearer ');
@@ -50,3 +51,7 @@ Route::get('triggerjobs', function(){
         return response()->json(['status' => 'Queue worker started and will exit when empty']);
     }
 )->middleware('guest');
+
+// trigger jobs
+Route::get('tags', [ApiController::class, 'tags'])->middleware('guest');
+

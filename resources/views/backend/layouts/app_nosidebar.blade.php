@@ -21,14 +21,19 @@
 @include('backend.includes.header')
 
 <body class="bg-gray-200">
+    <div class="flex pt-16 h-screen">
+           <!-- Scrollable Main Content -->
+           <main class="flex-1 overflow-y-auto">
+                @include('includes.flashmessages')
+                @yield('content')
+        </main>
+    </div>
     @yield('modals')
-
-    @yield('content')
-
 </body>
 
 @stack('before-scripts')
 @stack('after-scripts')
 
 @vite('resources/js/backend/backend.js')
+
 </html>

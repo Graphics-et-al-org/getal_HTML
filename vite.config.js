@@ -14,6 +14,7 @@ export default defineConfig({
                 'resources/js/backend/template_builder/builder.js',
                 'resources/js/backend/template_builder/blocks.js',
                 'resources/css/backend/template_builder/builder.css',
+                'resources/js/backend/clipart/create.js',
             ],
             refresh: true,
         }),

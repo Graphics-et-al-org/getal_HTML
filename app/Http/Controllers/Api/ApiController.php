@@ -9,6 +9,7 @@ use App\Events\AI\TranslationReadyEvent;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Messaging\AblyController;
 use App\Jobs\AI\SubmitTextForTranslation;
+use App\Models\Tag;
 use App\Traits\AblyFunctions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -21,7 +22,8 @@ class ApiController extends Controller
     use AblyFunctions;
     //
     /**
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     * Placeholder
+     * @return
      */
     public function index()
     {
@@ -29,23 +31,21 @@ class ApiController extends Controller
     }
 
     /**
-     *Handle an upload from an extension
+     *Get an token from the Ably service, to exchange messges
+     *
      * @return
-     *     */
+     */
     public function getAblyToken(Request $request)
     {
         try {
-            // Initialize Ably client with your API key
+            // Initialize Ably client with the API key
             $ably = new AblyRest([
                 'key' => env('ABLY_KEY'),
                 //'queryTime' => true, // Use Ably's server time for all timestamp-related operations
             ]);
-            // Generate a token request
-
-    // Create a token request
-    $tokenRequest = $ably->auth->createTokenRequest();
-    return response()->json($tokenRequest, 200, ['Content-Type' => 'application/json']);
-
+            // Create and return a token request
+            $tokenRequest = $ably->auth->createTokenRequest();
+            return response()->json($tokenRequest, 200, ['Content-Type' => 'application/json']);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -63,8 +63,6 @@ class ApiController extends Controller
         //Jay's magic happens here
         // Pass some .env secret, get a connection to Jay's thing
 
-        // Simulated long job
-
         // a unique identifier
         $uuid = Str::uuid()->toString();
 
@@ -78,23 +76,22 @@ class ApiController extends Controller
             "prompt" => "Summarise the text from this document",
         ];
 
-        $job = SubmitTextForTranslation::dispatch($job_params, $template_id, $uuid, Auth::user()->id)->onConnection('database')->onQueue('summarisedocument')  ;
+        $job = SubmitTextForTranslation::dispatch($job_params, $template_id, $uuid, Auth::user()->id)->onConnection('database')->onQueue('summarisedocument');
 
-       // dd($job);
+        // dd($job);
         // send the job now. Later we'll use a queueing system
         //$exitCode = Artisan::call('queue:work', []);
 
-        // $ably = new AblyRest(env('ABLY_KEY'));
-        // try {
-        //     $ably->channels->get('test-channel')->publish('test-event', 'Tell my wife, hello');
-        //     return response()->json(['success' => true, 'message' => 'Broadcast sent']);
-        // } catch (\Exception $e) {
-        //     return response()->json(['success' => false, 'error' => $e->getMessage()]);
-        // }
-        // dd($event);
-       //  broadcast($event);
-        // dd($event);
-        // //dd(Auth::user());
-         return response()->json(['success' => true, 'uuid' => $uuid]);
+        return response()->json(['success' => true, 'uuid' => $uuid]);
+    }
+
+    // expose tags search
+    public function tags(Request $request)
+    {
+        $tags = Tag::where('text', 'like', '%' . $request->q . '%')->get();
+        $tags->transform(function ($item, $key) {
+            return ['value' => $item->id, 'text' => $item->text];
+        });
+        return response()->json($tags);
     }
 }
