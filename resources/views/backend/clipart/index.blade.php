@@ -8,10 +8,13 @@
         <h5 class="text-xl dark:text-white">Clipart admin</h5>
     </div>
     <div class="inline-flex rounded-md shadow-sm w-100">
-
         <a href="{{ route('admin.clipart.create') }}"
             class="px-4 py-2 m-4 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
             New
+        </a>
+        <a href="#" data-modal-toggle="addbulkclipartdialog" data-modal-target="addbulkclipartdialog"
+            class="px-4 py-2 m-4 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+            Bulk upload
         </a>
     </div>
     {{ $clipart->onEachSide(5)->links() }}
@@ -74,8 +77,13 @@
         </table>
         {{ $clipart->onEachSide(5)->links() }}
     </div>
-
-
 @endsection
 
+@section('modals')
+    <div id="addbulkclipartdialog" role="dialog" tabindex="-1" aria-hidden="true"
+        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        @include('backend.clipart.form.bulkclipart')
 
+    </div>
+
+@endsection

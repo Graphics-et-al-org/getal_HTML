@@ -5,7 +5,9 @@
              Frontend
               </div>
             <div class="flex items-center lg:order-2">
-
+                <div class="relative">
+                    {{ Auth::user()->name }}
+                 </div>
                 <!-- Notifications -->
                 <button type="button" data-dropdown-toggle="notification-dropdown" class="p-2 mr-1 text-gray-500 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600">
                     <span class="sr-only">View notifications</span>
@@ -93,8 +95,10 @@
                 <!-- Dropdown menu -->
                 <div class="hidden z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600" id="dropdown">
                     <div class="py-3 px-4">
-                        <span class="block text-sm font-semibold text-gray-900 dark:text-white">Neil sims</span>
-                        <span class="block text-sm text-gray-500 truncate dark:text-gray-400">name@flowbite.com</span>
+                        <span class="block text-sm font-semibold text-gray-900 dark:text-white"> <div class="relative">
+                            {{ Auth::user()->name }}
+                         </div></span>
+                        <span class="block text-sm text-gray-500 truncate dark:text-gray-400"> {{ Auth::user()->email }}</span>
                     </div>
                     <ul class="py-1 text-gray-500 dark:text-gray-400" aria-labelledby="dropdown">
                         <li>

@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Domains\Auth\Models\Role;
-use App\Domains\Auth\Models\User;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -26,8 +26,9 @@ class RoleFactory extends Factory
     public function definition()
     {
         return [
-            'type' => $this->faker->randomElement([User::TYPE_ADMIN, User::TYPE_USER]),
             'name' => $this->faker->word,
+            'display_name' => $this->faker->word,
+            'description' =>  $this->faker->sentence(6),
         ];
     }
 }
