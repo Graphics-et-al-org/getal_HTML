@@ -239,7 +239,7 @@ return [
         | Please check the docs to see what you need to do in case you have the package already configured.
         |
         */
-        'enabled' => false,
+        'enabled' => true,
 
         /*
         |--------------------------------------------------------------------------
@@ -262,7 +262,7 @@ return [
     | Determines if you can check if a user has a permission using the "can" method.
     |
     */
-    'permissions_as_gates' => false,
+    'permissions_as_gates' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -282,7 +282,7 @@ return [
         | Turn this value to false if you don't want to use Laratrust admin panel
         |
         */
-        'register' => false,
+        'register' => true,
 
         /*
         |--------------------------------------------------------------------------
@@ -314,7 +314,7 @@ return [
         | The route where the go back link should point
         |
         */
-        'go_back_route' => '/',
+        'go_back_route' => '/admin/dashboard',
 
         /*
         |--------------------------------------------------------------------------

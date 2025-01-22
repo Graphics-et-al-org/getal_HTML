@@ -27,7 +27,7 @@
                         <path fill-rule="evenodd"
                             d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5" />
                     </svg>
-                    <span class="flex-1 ml-3 text-left whitespace-nowrap">Users</span>
+                    <span class="flex-1 ml-3 text-left whitespace-nowrap">Auth</span>
                     <svg aria-hidden="true" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"
                         xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd"
@@ -37,14 +37,17 @@
                 </button>
                 <ul id="dropdown-users" class="hidden py-2 space-y-2">
                     <li>
-                        <a href="#"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Manage</a>
+                        <a href="{{ route('admin.users.index') }}"
+                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Users</a>
                     </li>
                     <li>
-                        <a href="#"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Roles</a>
+                        <a href="/laratrust"
+                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Permissions/Roles</a>
                     </li>
-
+                    <li>
+                        <a href="{{ route('admin.teams.index') }}"
+                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Teams</a>
+                    </li>
                 </ul>
             </li>
             <li>
