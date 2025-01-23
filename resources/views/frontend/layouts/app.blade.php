@@ -17,11 +17,7 @@
 <body class="bg-gray-200">
     <div class="antialiased bg-gray-50 dark:bg-gray-900">
         @include('frontend.includes.header')
-
-
-            @yield('content')
-
-
+        @yield('content')
     </div>
 
 </body>

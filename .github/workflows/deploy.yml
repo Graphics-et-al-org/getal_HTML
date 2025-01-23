@@ -21,14 +21,22 @@ jobs:
           php-version: "8.2"
           extensions: mbstring, xml, ctype, json, curl, pdo_mysql, bcmath, zip, gd, intl
 
-      - name: Install Dependencies
-        run: |
-          composer install --no-dev --prefer-dist
-          php artisan storage:link
-
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v2
         with:
           app-name: web-laravel
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
+
+      - name: Install composer Dependencies
+        run: |
+          composer install --optimize-autoloader
+          php artisan cache:clear
+          php artisan config:clear
+          php artisan storage:link
+
+      - name: Install npm Dependencies
+        run: |
+          npm install
+          npm run build
+
