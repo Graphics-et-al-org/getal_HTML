@@ -1,0 +1,34 @@
+#name
+name: Deploy G et al app to Azure
+
+#trigger
+on:
+  push:
+    branches:
+      - main
+
+# the actual actions
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, xml, ctype, json, curl, pdo_mysql, bcmath, zip, gd, intl
+
+      - name: Install Dependencies
+        run: |
+          composer install --no-dev --prefer-dist
+          php artisan storage:link
+
+      - name: Deploy to Azure
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: web-laravel
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: .
