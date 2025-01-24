@@ -88,27 +88,27 @@ jobs:
         run: |
           composer install --optimize-autoloader
 
-      - name: Clear environment cache
-        run: |
-           php artisan cache:clear
+      # - name: Clear environment cache
+      #   run: |
+      #      php artisan cache:clear
 
-      - name: Debug database config
-        run: |
-           php artisan config:show database
+      # - name: Debug database config
+      #   run: |
+      #      php artisan config:show database
 
-      - name: Run Migrations
-        run: |
-          php artisan migrate --force
+      # - name: Run Migrations
+      #   run: |
+      #     php artisan migrate --force
 
-      - name: Clear Cache
-        run: |
-          composer install --optimize-autoloader
-          php artisan cache:clear
-          php artisan config:clear
-          php artisan storage:link
+      # - name: Clear Cache
+      #   run: |
+      #     composer install --optimize-autoloader
+      #     php artisan cache:clear
+      #     php artisan config:clear
+      #     php artisan storage:link
 
-      - name: Install npm Dependencies
-        run: |
-          npm install
-          npm run build --if-present
+      # - name: Install npm Dependencies
+      #   run: |
+      #     npm install
+      #     npm run build --if-present
 
