@@ -74,7 +74,7 @@ jobs:
 
       - name: Test MySQL Connection
         run: |
-              mysql -h ${{ secrets.DB_HOST }} -u ${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }} -e "SHOW DATABASES;"
+              mysql -h mysql-laravel.mysql.database.azure.com -u ${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }} -e "SHOW DATABASES;"
 
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v2
