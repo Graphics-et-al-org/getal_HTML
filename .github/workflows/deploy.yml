@@ -15,11 +15,37 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Set Up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.2"
           extensions: mbstring, xml, ctype, json, curl, pdo_mysql, bcmath, zip, gd, intl
+
+      - name: Set Laravel Environment Variables in Azure
+        run: |
+          az webapp config appsettings set --resource-group rg-laravel \
+            --name web-laravel \
+            --settings \
+              APP_ENV=production \
+              APP_DEBUG=false \
+              APP_KEY=${{ secrets.APP_KEY }} \
+              DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              BROADCAST_CONNECTION=ably \
+              QUEUE_CONNECTION=database \
+              SESSION_DRIVER=database \
+              SESSION_LIFETIME=120 \
+              SESSION_ENCRYPT=false \
+              SESSION_PATH=/ \
+              SESSION_DOMAIN=null \
+              FILESYSTEM_DISK=local \
+              AZURE_STORAGE_NAME=${{ secrets.AZURE_STORAGE_NAME }} \
+              AZURE_STORAGE_KEY=${{ secrets.AZURE_STORAGE_KEY }} \
+              AZURE_CONTAINER=laravel-files
 
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v2
