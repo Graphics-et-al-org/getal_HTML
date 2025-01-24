@@ -28,7 +28,7 @@ jobs:
 
       - name: Set Laravel Environment Variables in Azure
         run: |
-          az webapp config appsettings set --resource-group rg-laravel \
+          az webapp config appsettings set --resource-group laravelResourceGroup \
             --name web-laravel \
             --settings \
               APP_ENV=production \
