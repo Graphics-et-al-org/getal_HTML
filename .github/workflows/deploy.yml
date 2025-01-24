@@ -88,9 +88,13 @@ jobs:
         run: |
           composer install --optimize-autoloader
 
+      - name: Clear environment cache
+        run: |
+           php artisan cache:clear
+
       - name: Debug database config
         run: |
-              php artisan config:show database
+           php artisan config:show database
 
       - name: Run Migrations
         run: |
