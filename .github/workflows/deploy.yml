@@ -71,6 +71,11 @@ jobs:
               AZURE_STORAGE_KEY=${{ secrets.AZURE_STORAGE_KEY }} \
               AZURE_CONTAINER=laravel-files
 
+
+      - name: Test MySQL Connection
+        run: |
+              mysql -h ${{ secrets.DB_HOST }} -u ${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }} -e "SHOW DATABASES;"
+
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v2
         with:
@@ -79,6 +84,14 @@ jobs:
           package: .
 
       - name: Install composer Dependencies
+        run: |
+          composer install --optimize-autoloader
+
+      - name: Run Migrations
+        run: |
+          php artisan migrate
+
+      - name: Clear Cache
         run: |
           composer install --optimize-autoloader
           php artisan cache:clear
