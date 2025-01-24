@@ -76,6 +76,7 @@ jobs:
         run: |
               mysql -h mysql-laravel.mysql.database.azure.com -u ${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }} -e "SHOW DATABASES;"
 
+
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v2
         with:
@@ -86,6 +87,10 @@ jobs:
       - name: Install composer Dependencies
         run: |
           composer install --optimize-autoloader
+
+      - name: Debug database config
+        run: |
+              php artisan config:show database
 
       - name: Run Migrations
         run: |
