@@ -80,9 +80,6 @@ jobs:
 
       - name: Install composer Dependencies
         run: |
-          php artisan cache:clear
-          php artisan config:clear
-          php artisan storage:link
           composer install --optimize-autoloader
           php artisan cache:clear
           php artisan config:clear
