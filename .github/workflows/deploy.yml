@@ -12,19 +12,33 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
 
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - uses: actions/checkout@v4
 
       - name: Set Up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.2"
           extensions: mbstring, xml, ctype, json, curl, pdo_mysql, bcmath, zip, gd, intl
+
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Check npm version on Azure Web App
+        id: check_npm
+        run: |
+          OUTPUT=$(az webapp ssh --resource-group laravelResourceGroup --name web-laravel --command "npm -v" || echo "not_installed")
+          echo "npm_version=$OUTPUT" >> $GITHUB_ENV
+          echo "::set-output name=npm_exists::$OUTPUT"
+
+      - name: Install Node.js
+        if: steps.check_npm.outputs.npm_exists == 'not_installed'
+        uses: actions/setup-node@v3
+        with:
+         node-version: '18'
 
       - name: Set Laravel Environment Variables in Azure
         run: |
@@ -72,9 +86,10 @@ jobs:
               AZURE_CONTAINER=laravel-files
 
 
-      - name: Test MySQL Connection
-        run: |
-              mysql -h mysql-laravel.mysql.database.azure.com -u ${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }} -e "SHOW DATABASES;"
+
+      # - name: Test MySQL Connection
+      #   run: |
+      #         mysql -h mysql-laravel.mysql.database.azure.com -u ${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }} -e "SHOW DATABASES;"
 
 
       - name: Deploy to Azure
@@ -84,9 +99,19 @@ jobs:
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
 
-      - name: Install composer Dependencies
-        run: |
-          composer install --optimize-autoloader
+      - name: Check if composer.json exists
+        id: check_files
+        uses: andstor/file-existence-action@v1
+        with:
+          files: 'composer.json'
+
+      - name: Run composer install if composer.json exists
+        if: steps.check_files.outputs.files_exists == 'true'
+        run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
+
+      # - name: Install composer Dependencies
+      #   run: |
+      #     composer install --optimize-autoloader
 
       # - name: Clear environment cache
       #   run: |
