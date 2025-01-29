@@ -62,7 +62,6 @@ jobs:
             "DB_DATABASE": "laravel_db",
             "DB_USERNAME": "${{ secrets.DB_USERNAME }}",
             "DB_PASSWORD": "${{ secrets.DB_PASSWORD }}",
-            "MYSQL_ATTR_SSL_CA": "/etc/ssl/certs/DigiCert_Global_Root_CA.pem",
             "SESSION_DRIVER": "database",
             "SESSION_LIFETIME": "120",
             "SESSION_ENCRYPT": "false",

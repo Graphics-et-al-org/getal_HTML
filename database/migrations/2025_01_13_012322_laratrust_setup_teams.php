@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -22,6 +23,8 @@ class LaratrustSetupTeams extends Migration
         });
 
         Schema::table('role_user', function (Blueprint $table) {
+            // Step 1: Add a temporary primary key
+            $table->bigIncrements('temp_id'); // Ensure table always has a primary key
             // Drop role foreign key and primary key
             $table->dropForeign(['role_id']);
             $table->dropPrimary(['user_id', 'role_id', 'user_type']);
@@ -40,7 +43,7 @@ class LaratrustSetupTeams extends Migration
         });
 
         Schema::table('permission_user', function (Blueprint $table) {
-           // Drop permission foreign key and primary key
+            // Drop permission foreign key and primary key
             $table->dropForeign(['permission_id']);
             $table->dropPrimary(['permission_id', 'user_id', 'user_type']);
 
