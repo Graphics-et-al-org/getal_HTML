@@ -27,15 +27,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Check npm version on Azure Web App
-        id: check_npm
-        run: |
-          OUTPUT=$(az webapp ssh --resource-group laravelResourceGroup --name web-laravel --command "npm -v" || echo "not_installed")
-          echo "npm_version=$OUTPUT" >> $GITHUB_ENV
-          echo "::set-output name=npm_exists::$OUTPUT"
-
       - name: Install Node.js
-        if: steps.check_npm.outputs.npm_exists == 'not_installed'
         uses: actions/setup-node@v3
         with:
          node-version: '18'
@@ -68,11 +60,12 @@ jobs:
               CACHE_STORE=database \
               CACHE_PREFIX= \
               DB_CONNECTION=mysql \
-              DB_HOST=mysql-laravel.mysql.database.azure.com \
+              DB_HOST=mysql-laravel.privatelink.mysql.database.azure.com \
               DB_PORT=3306 \
               DB_DATABASE=laravel_db \
               DB_USERNAME=${{ secrets.DB_USERNAME }} \
               DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              MYSQL_ATTR_SSL_CA='--ssl-ca=/etc/ssl/certs/DigiCert_Global_Root_CA.pem' \
               BROADCAST_CONNECTION=ably \
               QUEUE_CONNECTION=database \
               SESSION_DRIVER=database \
@@ -83,7 +76,8 @@ jobs:
               FILESYSTEM_DISK=local \
               AZURE_STORAGE_NAME=${{ secrets.AZURE_STORAGE_NAME }} \
               AZURE_STORAGE_KEY=${{ secrets.AZURE_STORAGE_KEY }} \
-              AZURE_CONTAINER=laravel-files
+              AZURE_CONTAINER=laravel-files \
+              ABLY_KEY=${{ secrets.ABLY_KEY }} \
 
 
 
