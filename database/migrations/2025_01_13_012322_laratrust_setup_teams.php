@@ -42,6 +42,14 @@ class LaratrustSetupTeams extends Migration
             $table->unique(['user_id', 'role_id', 'user_type', 'team_id']);
         });
 
+        Schema::table('role_user', function (Blueprint $table) {
+            // Step 7: Restore proper primary key (if needed)
+            $table->primary(['user_id', 'role_id', 'user_type', 'team_id']);
+
+            // Step 8: Remove temporary primary key
+            $table->dropColumn('temp_id');
+        });
+
         Schema::table('permission_user', function (Blueprint $table) {
             // Drop permission foreign key and primary key
             $table->dropForeign(['permission_id']);
