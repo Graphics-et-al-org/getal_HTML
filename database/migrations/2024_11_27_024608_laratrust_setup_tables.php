@@ -74,7 +74,6 @@ class LaratrustSetupTables extends Migration
 
         // Create table for associating permissions to roles (Many-to-Many)
         Schema::create('permission_role', function (Blueprint $table) {
-            $table->id();
             $table->unsignedBigInteger('permission_id');
             $table->unsignedBigInteger('role_id');
 
