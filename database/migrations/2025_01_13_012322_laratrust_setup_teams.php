@@ -24,7 +24,7 @@ class LaratrustSetupTeams extends Migration
 
         Schema::table('role_user', function (Blueprint $table) {
             // Step 1: Add a temporary primary key
-            $table->bigIncrements('temp_id')->unique(); // Ensure table always has a primary key
+            $table->bigInteger('temp_id')->unsigned()->autoIncrement();
             // Drop role foreign key and primary key
             $table->dropForeign(['role_id']);
             $table->dropPrimary(['user_id', 'role_id', 'user_type']);
