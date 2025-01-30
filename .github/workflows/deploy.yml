@@ -20,6 +20,9 @@ jobs:
           php-version: "8.2"
           extensions: mbstring, xml, ctype, json, curl, pdo_mysql, bcmath, zip, gd, intl
 
+      - name: Install PHP Dependencies
+        run:  composer validate --no-check-publish && composer install --prefer-dist --no-progress
+
       - name: Login to Azure
         uses: azure/login@v1
         with:
@@ -38,11 +41,18 @@ jobs:
         run: npm run build
 
       # Upload Build Artifacts (Optional)
-      - name: Upload Vite Build Output
-        uses: actions/upload-artifact@v3
-        with:
-          name: vite-build
-          path: public/build/ # Laravel Vite output directory
+      # - name: Upload Vite Build Output
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: vite-build
+      #     path: public/build/ # Laravel Vite output directory
+
+           #  Pre-Optimize Laravel Cache
+      - name: Cache Laravel Config & Routes
+        run: |
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
 
       - name: Generate Azure App Settings JSON
         run: |
@@ -112,15 +122,15 @@ jobs:
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: deployment.zip
 
-      - name: Check if composer.json exists
-        id: check_files
-        uses: andstor/file-existence-action@v1
-        with:
-          files: "composer.json"
+      # - name: Check if composer.json exists
+      #   id: check_files
+      #   uses: andstor/file-existence-action@v1
+      #   with:
+      #     files: "composer.json"
 
-      - name: Run composer install if composer.json exists
-        if: steps.check_files.outputs.files_exists == 'true'
-        run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
+      # - name: Run composer install if composer.json exists
+      #   if: steps.check_files.outputs.files_exists == 'true'
+      #   run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
 
       # - name: Install composer Dependencies
       #   run: |
