@@ -52,6 +52,7 @@ jobs:
             "APP_DEBUG": "true",
             "APP_KEY": "${{ secrets.APP_KEY }}",
             "APP_URL": "https://web-laravel.azurewebsites.net/",
+            "VITE_APP_URL":"https://web-laravel.azurewebsites.net/",
             "APP_MAINTENANCE_DRIVER": "file",
             "APP_LOCALE": "en",
             "APP_FALLBACK_LOCALE": "en",
