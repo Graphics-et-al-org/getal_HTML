@@ -103,7 +103,14 @@ jobs:
         with:
           app-name: web-laravel
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: .
+          package: |
+            ./
+            !node_modules/
+            !tests/
+            !storage/logs/
+            !storage/framework/
+            !.git/
+            !.github/
 
       - name: Check if composer.json exists
         id: check_files
