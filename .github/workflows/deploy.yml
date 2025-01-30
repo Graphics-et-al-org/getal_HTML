@@ -51,7 +51,7 @@ jobs:
 
       # Upload Build Artifacts (Optional)
       - name: Upload Vite Build Output
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: vite-build
           path: public/build/ # Laravel Vite output directory
