@@ -36,6 +36,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -59,7 +60,7 @@ jobs:
         run: |
           cat <<EOF > appsettings.json
           {
-            "APP_ENV": "development",
+            "APP_ENV": "production",
             "APP_DEBUG": "true",
             "APP_KEY": "${{ secrets.APP_KEY }}",
             "APP_URL": "https://web-laravel.azurewebsites.net/",
