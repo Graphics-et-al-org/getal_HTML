@@ -25,10 +25,24 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Install Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: "20"
+
+      - name: Install NPM dependencies
+        run: npm install
+
+      # Run Vite build
+      - name: Build Vite Assets
+        run: npm run build
+
+      # Upload Build Artifacts (Optional)
+      - name: Upload Vite Build Output
+        uses: actions/upload-artifact@v3
+        with:
+          name: vite-build
+          path: public/build/ # Laravel Vite output directory
 
       - name: Generate Azure App Settings JSON
         run: |
