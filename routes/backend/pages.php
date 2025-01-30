@@ -44,7 +44,7 @@ Route::group([
             //    Route::get('/', [BoardsBackendController::class, 'show'])->name('board.show');
             Route::get('data', [PagesPagesController::class, 'read'])->name('pagepage.data');
 
-            Route::patch('update', [PagesPagesController::class, 'update'])->name('page.update');
+            Route::patch('update', [PagesPagesController::class, 'update'])->name('pagepage.update');
             //  Route::delete('/', [BoardsBackendController::class, 'destroy'])->name('board.destroy');
         });
 
