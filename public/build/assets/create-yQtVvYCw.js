@@ -1,1 +1,0 @@
-import{T as e}from"./tom-select.complete-CAMqsX_J.js";new e("#roles",{create:!0,allowEmptyOption:!0,plugins:{clear_button:{title:"Remove all selected options"},remove_button:{title:"Remove this item"}}});

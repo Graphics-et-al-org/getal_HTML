@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - main
+      - dev
 
 # the actual actions
 jobs:
@@ -20,29 +21,39 @@ jobs:
           php-version: "8.2"
           extensions: mbstring, xml, ctype, json, curl, pdo_mysql, bcmath, zip, gd, intl
 
+      - name: Check if composer.json exists
+        id: check_files
+        uses: andstor/file-existence-action@v1
+        with:
+         files: "composer.json"
+
+      - name: Run composer install if composer.json exists
+        if: steps.check_files.outputs.files_exists == 'true'
+        run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
+
       - name: Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # - name: Setup Node.js
-      #   uses: actions/setup-node@v3
-      #   with:
-      #     node-version: "20"
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
 
-      # - name: Install NPM dependencies
-      #   run: npm install
+      - name: Install NPM dependencies
+        run: npm install
 
-      # # Run Vite build
-      # - name: Build Vite Assets
-      #   run: npm run build
+      # Run Vite build
+      - name: Build Vite Assets
+        run: npm run build
 
-      # # Upload Build Artifacts (Optional)
-      # - name: Upload Vite Build Output
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: vite-build
-      #     path: public/build/ # Laravel Vite output directory
+      # Upload Build Artifacts (Optional)
+      - name: Upload Vite Build Output
+        uses: actions/upload-artifact@v3
+        with:
+          name: vite-build
+          path: public/build/ # Laravel Vite output directory
 
       - name: Generate Azure App Settings JSON
         run: |
@@ -94,9 +105,7 @@ jobs:
           az webapp config appsettings set --resource-group laravelResourceGroup \
           --name web-laravel --settings @appsettings.json
 
-      # - name: Test MySQL Connection
-      #   run: |
-      #         mysql -h mysql-laravel.mysql.database.azure.com -u ${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }} -e "SHOW DATABASES;"
+
 
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v2
@@ -105,12 +114,3 @@ jobs:
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
 
-      - name: Check if composer.json exists
-        id: check_files
-        uses: andstor/file-existence-action@v1
-        with:
-          files: "composer.json"
-
-      - name: Run composer install if composer.json exists
-        if: steps.check_files.outputs.files_exists == 'true'
-        run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
