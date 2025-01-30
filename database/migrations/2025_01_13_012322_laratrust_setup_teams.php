@@ -24,10 +24,13 @@ class LaratrustSetupTeams extends Migration
 
         Schema::table('role_user', function (Blueprint $table) {
             // Step 1: Add a temporary primary key
-            $table->bigInteger('temp_id')->unsigned()->nullable();
+            $table->bigInteger('temp_id')->unsigned()->nullable()->first();;
             // Drop role foreign key and primary key
             $table->dropForeign(['role_id']);
-            $table->dropPrimary(['user_id', 'role_id', 'user_type']);
+
+            $table->dropPrimary();
+            $table->unique(['user_id', 'role_id', 'user_type', 'team_id']);
+            //$table->dropPrimary(['user_id', 'role_id', 'user_type']);
 
             // Add team_id column
             $table->unsignedInteger('team_id')->nullable();
@@ -43,10 +46,7 @@ class LaratrustSetupTeams extends Migration
         });
 
         Schema::table('role_user', function (Blueprint $table) {
-            // Step 7: Restore proper primary key (if needed)
-            $table->primary(['user_id', 'role_id', 'user_type', 'team_id']);
-
-            // Step 8: Remove temporary primary key
+        //Remove temporary primary key
             $table->dropColumn('temp_id');
         });
 
