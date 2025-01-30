@@ -1,0 +1,1 @@
+import{T as a}from"./tom-select.complete-CAMqsX_J.js";new a("#tags",{create:!0,load:function(o,t){var n=baseurl+"/api/tags?q="+o;fetch(n).then(e=>e.json()).then(e=>{t(e)}).catch(()=>{t()})},plugins:{clear_button:{title:"Remove all selected options"},remove_button:{title:"Remove this item"}}});
