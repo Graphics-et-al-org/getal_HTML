@@ -60,6 +60,7 @@ jobs:
         run: |
           cat <<EOF > appsettings.json
           {
+            "ABLY_KEY": "${{ secrets.ABLY_KEY }}",
             "APP_ENV": "production",
             "APP_DEBUG": "true",
             "APP_KEY": "${{ secrets.APP_KEY }}",
@@ -99,7 +100,7 @@ jobs:
             "AZURE_STORAGE_NAME": "${{ secrets.AZURE_STORAGE_NAME }}",
             "AZURE_STORAGE_KEY": "${{ secrets.AZURE_STORAGE_KEY }}",
             "AZURE_CONTAINER": "laravel-files",
-            "ABLY_KEY": "${{ secrets.ABLY_KEY }}"
+
           }
           EOF
 
