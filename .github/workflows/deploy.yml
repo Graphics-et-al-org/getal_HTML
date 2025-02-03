@@ -1,11 +1,11 @@
 #name
-name: Deploy G et al app to Azure
+name: DEV Deploy G et al app to Azure
 
 #trigger
 on:
   push:
     branches:
-      - main
+     # - main
       - dev
 
 # the actual actions
@@ -63,8 +63,8 @@ jobs:
             "APP_ENV": "production",
             "APP_DEBUG": "true",
             "APP_KEY": "${{ secrets.APP_KEY }}",
-            "APP_URL": "https://web-laravel.azurewebsites.net/",
-            "VITE_APP_URL":"https://web-laravel.azurewebsites.net/",
+            "APP_URL": "https://mediguides-dev.azurewebsites.net/",
+            "VITE_APP_URL":"https://mediguides-dev.azurewebsites.net/",
             "APP_MAINTENANCE_DRIVER": "file",
             "APP_LOCALE": "en",
             "APP_FALLBACK_LOCALE": "en",
@@ -82,15 +82,15 @@ jobs:
             "AUTH0_DOMAIN": "${{ secrets.AUTH0_DOMAIN }}",
             "AUTH0_CLIENT_ID": "${{ secrets.AUTH0_CLIENT_ID }}",
             "AUTH0_CLIENT_SECRET": "${{ secrets.AUTH0_CLIENT_SECRET }}",
-            "AUTH0_REDIRECT_URI": "https://web-laravel.azurewebsites.net/login/auth0/callback",
+            "AUTH0_REDIRECT_URI": "https://mediguides-dev.azurewebsites.net/login/auth0/callback",
             "CACHE_STORE": "database",
             "CACHE_PREFIX": "",
             "DB_CONNECTION": "mysql",
-            "DB_HOST": "mysql-laravel.privatelink.mysql.database.azure.com",
+            "DB_HOST": "${{ secrets.DEV_DB_HOST }}",
             "DB_PORT": "3306",
-            "DB_DATABASE": "laravel_db",
-            "DB_USERNAME": "${{ secrets.DB_USERNAME }}",
-            "DB_PASSWORD": "${{ secrets.DB_PASSWORD }}",
+            "DB_DATABASE": "${{ secrets.DEV_DB_DATABASE }}",
+            "DB_USERNAME": "${{ secrets.DEV_DB_USERNAME }}",
+            "DB_PASSWORD": "${{ secrets.DEV_DB_PASSWORD }}",
             "SESSION_DRIVER": "database",
             "SESSION_LIFETIME": "120",
             "SESSION_ENCRYPT": "false",
@@ -103,17 +103,15 @@ jobs:
           }
           EOF
 
-      - name: Set Laravel Environment Variables in Azure
+      - name: Set DEV Laravel Environment Variables in Azure
         run: |
-          az webapp config appsettings set --resource-group laravelResourceGroup \
-          --name web-laravel --settings @appsettings.json
+          az webapp config appsettings set --resource-group MediGuides_dev_ResourceGroup \
+          --name mediguides-dev --settings @appsettings.json
 
-
-
-      - name: Deploy to Azure
+      - name: DEV Deploy to Azure
         uses: azure/webapps-deploy@v2
         with:
-          app-name: web-laravel
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          app-name: mediguides-dev
+          publish-profile: ${{ secrets.DEV_AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
 
