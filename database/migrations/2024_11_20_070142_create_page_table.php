@@ -19,6 +19,9 @@ return new class extends Migration
             $table->boolean('is_template')->nullable();
             $table->text('label')->nullable();
             $table->text('description')->nullable();
+            $table->longText('content')->nullable();
+            $table->longText('html')->nullable();
+            $table->longText('css')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

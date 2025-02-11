@@ -2,17 +2,24 @@
 
 namespace Database\Factories;
 
-use App\Models\Page\Page;
+
+use App\Models\Page\PageStaticComponent;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Auth\User>
  */
-class PageFactory extends Factory
+class PageStaticComponentFactory extends Factory
 {
 
-    protected $model = Page::class;
+    protected $model = PageStaticComponent::class;
+
+
+
+
 
     /**
      * Define the model's default state.
@@ -25,12 +32,7 @@ class PageFactory extends Factory
         $content = fake()->sentence();
 
         return [
-            'uuid' => Str::uuid(),
-            'user_id' => 1,
-            'group_id' => null,
-            'is_template' => (fake()->boolean() ? 1 : null),
-            'label' => fake()->sentence(2),
-            'description' => fake()->text(),
+            'uuid' => Str::uuid()->toString(),
             'content' => json_encode([
                 'gjs-html' => "<header class='header'>\n  <h1 class='header-title'>" . $title . "</h1>\n</header>\n<main class='main'>\n  <section class='section'>\n    <p class='text'>" . $content . "</p>\n  </section>\n</main>\n<footer class='footer'>\n  <p class='footer-text'>Footer Content</p>\n</footer>",
                 'gjs-css' => ".header {\n  background-color: #f5f5f5;\n  text-align: center;\n  padding: 20px;\n}\n.header-title {\n  font-size: 24px;\n  color: #333;\n}\n.main {\n  padding: 20px;\n}\n.section {\n  border: 1px solid #ddd;\n  padding: 10px;\n  margin: 10px 0;\n}\n.text {\n  font-size: 16px;\n  color: #666;\n}\n.footer {\n  background-color: #333;\n  color: white;\n  text-align: center;\n  padding: 10px;\n}\n.footer-text {\n  font-size: 14px;\n}",

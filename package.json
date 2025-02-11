@@ -28,6 +28,7 @@
         "grapesjs-navbar": "^1.0.2",
         "grapesjs-plugin-forms": "^2.0.6",
         "grapesjs-preset-webpage": "^1.0.3",
+        "jquery": "^3.7.1",
         "sass": "^1.81.0",
         "tom-select": "^2.4.1",
         "vite-plugin-sass": "^0.1.0"

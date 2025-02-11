@@ -23,7 +23,7 @@
 <body class="bg-gray-200">
     <div class="flex pt-16 h-screen">
            <!-- Scrollable Main Content -->
-           <main class="flex-1 overflow-y-auto">
+           <main class="flex-1 overflow-y-auto m-4">
                 @include('includes.flashmessages')
                 @yield('content')
         </main>
