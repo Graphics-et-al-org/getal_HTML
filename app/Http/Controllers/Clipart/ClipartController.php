@@ -120,7 +120,18 @@ class ClipartController extends Controller
         $clipart->type =  $request->type_radio;
         $clipart->save();
         // sync tags
-        $clipart->tags()->sync($request->tags);
+        if (isset($request['tags'])) {
+            $tags = [];
+            foreach ($request['tags'] as $item) {
+                if (!(Tag::where('id', $item)->exists())) {
+                    $new = Tag::updateOrCreate(['text' => $item]);
+                    $tags[] = $new->id;
+                } else {
+                    $tags[] = $item;
+                }
+            }
+            $clipart->tags()->sync($tags);
+        }
         // save files
         // first filter out the colourways into an array
         $files = array_filter($request->all(), function ($key) {
@@ -346,16 +357,14 @@ class ClipartController extends Controller
                     //sync tags
 
                     $tagsSyncArr = [];
+
                     foreach ($tags as $tag) {
-                        $tagsSyncArr[] = Tag::firstOrCreate(['text' => $tag])->id;
+                        if (strlen($tag) > 0) {
+                            $tagsSyncArr[] = Tag::firstOrCreate(['text' => $tag])->id;
+                        }
                     }
                     $clipart->tags()->sync($tagsSyncArr);
 
-                    // sync labs (if uploaded from a lab management path)
-                    //@TODO implement multiple lab assignments- right now we're doing it manually
-                    //$labsSyncArr = isset($request['labid']) ? [$request['labid']] : [];
-
-                    //$clipart->labs()->sync($labsSyncArr);
 
                     // make the colourways
                     // find the files
@@ -380,7 +389,7 @@ class ClipartController extends Controller
                     // make the thumbnail
 
 
-                    if ($clipart->colourways->where('colour_id', '=', $baselineid)->count()>0) {
+                    if ($clipart->colourways->where('colour_id', '=', $baselineid)->count() > 0) {
                         $response = Http::withHeaders([
                             'Content-Type' => 'application/json',
                             'X-Second' => 'bar'
@@ -417,6 +426,115 @@ class ClipartController extends Controller
         return redirect()->route('admin.clipart.index')->withFlashSuccess('Clipart created success!');
 
         //        return redirect()->route('admin.clipart.index')->withFlashSuccess('Clipart uploaded success!');
+    }
+
+    /**
+     * Show the edit view for a clipart
+     * @param $id
+     *
+     * @return mixed
+     */
+    public function edit(Request $request, $id)
+    {
+        $clipart = Clipart::find($id);
+        $colourway_colours = ClipartColourwayColour::all();
+
+        return view('backend.clipart.edit')
+            ->with('clipart', $clipart)
+            ->with('colourway_colours', $colourway_colours);
+    }
+
+    /**
+     * updates a clipart entry
+     *
+     * @param Request $request
+     * @param Clipart $clipart
+     *
+     * @return mixed
+     * @throws \Throwable
+     * @throws \App\Exceptions\GeneralException
+     */
+    public function update(Request $request, $id)
+    {
+        // new clipart entry
+        $clipart = Clipart::updateOrCreate(
+            ['id' => $id],
+            [
+                'name' => $request['name'],
+                'description' => $request['description'],
+                'citations' => $request['citations'],
+                'type' => $request['type'] ? $request['type'] : 'svg'
+            ]
+
+        );
+
+        // tags
+        if (isset($request['tags'])) {
+            $tags = [];
+            foreach ($request['tags'] as $tag) {
+                if (!(Tag::where('id', $tag)->exists())) {
+                    if (strlen($tag) > 0) {
+                        $tags[] = Tag::updateOrCreate(['text' => $tag])->id;
+                    }
+                } else {
+                    $tags[] = $tag;
+                }
+            }
+            $clipart->tags()->sync($tags);
+        }
+
+
+        // save files
+        // first filter out the colourways into an array
+        $files = array_filter($request->all(), function ($key) {
+            return strpos($key, 'colourway_') !== false;
+        }, ARRAY_FILTER_USE_KEY);
+
+        // then save them as data
+        foreach ($files as $key => $file) {
+            $colourway = new ClipartColourway();
+            $colourway_id = explode('_', $key)[1];
+            $colourway->clipart_id = $clipart->id;
+            $colourway->colour_id = ClipartColourwayColour::find($colourway_id)->id;
+            $colourway->data = $file->get();
+            $colourway->save();
+            // save the thumbnail
+            if (ClipartColourwayColour::find($colourway_id)->name == 'baseline') {
+
+                $url = env('CAIRO_URL', "http://127.0.0.1:5000/convert");
+
+                $response = Http::withHeaders([
+                    'Content-Type' => 'application/json',
+                    'X-Second' => 'bar'
+                ])->post($url, [
+                    'svg' =>  $colourway->data
+                ]);
+                if ($response->successful()) {  //
+                    // dd($response->json()['png_base64']);
+                    $manager = new ImageManager(new Driver());
+                    $clipart->thumb = $manager->read($response->json()['png_base64'])->toPng();
+                    $clipart->save();
+                }
+            }
+        }
+        session()->flash('flash_success', 'Updated Clipart Successfully');
+        return redirect()->route('admin.clipart.index');
+    }
+
+
+
+    public
+    function destroy(Request $request)
+    {
+        $clipart = Clipart::find($request['id']);
+        // clean up the colourways
+        $clipart->colourways()->delete();
+        // clean up tags
+        $clipart->tags()->detach();
+        // remove clipart
+        $clipart->delete();
+
+        return redirect()->route('admin.clipart.index')->withFlashSuccess('Clipart deleted success!');
     }
 
     // @TODO does the user have the ability to retrive this clipart?

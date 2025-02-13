@@ -17,8 +17,47 @@
             Bulk upload
         </a>
     </div>
+    <div class="col m-2">
+
+
+        <form action="{{ route('admin.clipart.index') }}" method="GET">
+
+            <div class="flex">
+                <div class="flex-initial min-w-80 ml-2 mr-2">
+                    <div class="w-full">
+                        <label for="tags">Tags</label>
+                    </div>
+                    <div class="w-full">
+                        <select id="tags" name="tags[]" data-placeholder="Tags" autocomplete="on" multiple>
+                            <option value="">None</option>
+                        </select>
+                    </div>
+                </div>
+
+
+                <div class="flex-initial min-w-80">
+                    <div class="w-full">
+                        <label for="search">Search label/description</label>
+                    </div>
+
+                    <input type="text" name="search" id="search" value = "{{ session('admin_clipart_search') }}"
+                        class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                        placeholder="name">
+
+                </div>
+
+                <div class="flex-initial flex items-end ml-2">
+                    <button type="submit"
+                        class="text-green-700  mb-0 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-green-500 dark:text-green-500 dark:hover:text-white dark:hover:bg-green-600 dark:focus:ring-green-800">
+                        Search
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
     {{ $clipart->onEachSide(5)->links() }}
-    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg m-2">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
@@ -30,6 +69,9 @@
                     </th>
                     <th scope="col" class="px-6 py-3">
                         Description
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Tags
                     </th>
                     <th scope="col" class="px-6 py-3">
                         Type
@@ -59,6 +101,9 @@
                             {{ $item->description }}
                         </td>
                         <td class="px-6 py-4">
+                            {{ $item->tags->implode('text', ', ') }}
+                        </td>
+                        <td class="px-6 py-4">
                             {{ $item->type }}
                         </td>
                         <td class="px-6 py-4">
@@ -70,6 +115,9 @@
                         <td class="px-6 py-4">
                             <a href="{{ route('admin.clipart.edit', $item->id) }}"
                                 class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+                            <br />
+                            <a href="{{ route('admin.clipart.destroy', $item->id) }}"
+                                class="font-medium text-red-600 dark:text-blue-500 hover:underline">Delete</a>
                         </td>
                     </tr>
                 @endforeach
@@ -85,5 +133,26 @@
         @include('backend.clipart.form.bulkclipart')
 
     </div>
-
 @endsection
+
+@push('after-scripts')
+    <script>
+        const baseurl = '{{ URL::to('/') }}';
+
+        const tailwindcsspath = "{{ Vite::asset('resources/css/app.css') }}";
+        var tags = [
+            @if (session('admin_clipart_tags'))
+
+                @foreach (session('admin_clipart_tags') as $tag)
+                    {
+
+                        value: "{{ $tag }}",
+                        text: "{{ App\Models\Tag::find($tag)->text }}"
+                    },
+                @endforeach
+            @endif
+        ]
+    </script>
+    {{-- @vite('resources/js/backend/template_builder/blocks.js') --}}
+    @vite('resources/js/backend/clipart/index.js')
+@endpush

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
-use App\Models\Page\Page;
 use App\Models\Tag;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Page\Page;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+
 
 
 class TemplatesController extends Controller
@@ -17,10 +20,57 @@ class TemplatesController extends Controller
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
     // show the index
-    public function index()
+    public function index(Request $request)
     {
         // get templates
-        $templates = Page::where('is_template', '1')->get();
+        if (isset($request['tags'])) {
+            if (!$request->has('search')) {
+                Session::forget('admin_templates_search');
+            }
+            session(['admin_templates_page' => 1]);
+            session(['admin_templates_tags' => $request['tags']]);
+        }
+
+
+        if ($request->has('search')) {
+            if (!$request->has('tags')) {
+                Session::forget('admin_templates_tags');
+            }
+            session(['admin_templates_page' => 1]);
+            session(['admin_templates_search' => $request['search']]);
+        }
+
+
+        if (isset($request['page'])) {
+            session(['admin_templates_page' => $request['page']]);
+            $currentPage = session('admin_templates_page');
+            Paginator::currentPageResolver(function () use ($currentPage) {
+                return $currentPage;
+            });
+        }
+
+        if (Session::has('admin_templates_search')) {
+            $request['search'] = session('admin_templates_search');
+        }
+
+        if (Session::has('admin_templates_tags')) {
+            $request['tags'] = session('admin_templates_tags');
+        }
+
+        $templates = Page::where('is_template', '1')
+            ->when($request->has('tags'), function ($query) use ($request) {
+                $query->whereHas('tags', function ($q) use ($request) {
+                    $q->whereIn('tags.id', $request['tags']);
+                });
+            })
+            ->when($request->has('search'), function ($query) use ($request) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('label', 'like', "%{$request['search']}%")
+                        ->orWhere('description', 'LIKE', "%{$request['search']}%");
+                });
+            })
+            ->paginate(10);
+
         //dd($templates);
         return view('backend.pages_templates.index')
             ->with('templates', $templates);
@@ -38,7 +88,7 @@ class TemplatesController extends Controller
 
     public function store(Request $request)
     {
-       // dd($request);
+        // dd($request);
         $page = new Page();
         $page->uuid = (string) Str::uuid();
         $page->user_id = Auth::user()->id;
@@ -84,9 +134,9 @@ class TemplatesController extends Controller
         $page->is_template = 1;
         $page->label = $request->label;
         $page->description = $request->description ?? '';
-        $page->content = $request->content?? '';
-        $page->html = $request->html?? '';
-        $page->css = $request->css?? '';
+        $page->content = $request->content ?? '';
+        $page->html = $request->html ?? '';
+        $page->css = $request->css ?? '';
         $page->save();
 
         $tags = [];
@@ -94,8 +144,10 @@ class TemplatesController extends Controller
         if (isset($request->tags)) {
             foreach ($request->tags as $tag) {
                 if (!Tag::find($tag)) {
-                    $tagModel = \App\Models\Tag::firstOrCreate(['text' => $tag]);
-                    $tag = $tagModel->id;
+                    if (strlen($tag) > 0) {
+                        $tagModel = \App\Models\Tag::firstOrCreate(['text' => $tag]);
+                        $tag = $tagModel->id;
+                    }
                 }
                 $tags[] = $tag;
             }
@@ -115,22 +167,22 @@ class TemplatesController extends Controller
         return $page->content;
     }
 
-    
+
 
 
 
     // destroy the page
     public function destroy($id, Request $request)
     {
-    $page = Page::findOrFail($id);
+        $page = Page::findOrFail($id);
 
-    // Detach all tags
-    $page->tags()->detach();
+        // Detach all tags
+        $page->tags()->detach();
 
-    // Delete the page
-    $page->delete();
+        // Delete the page
+        $page->delete();
 
-    session()->flash('flash_success', 'Deleted Successfully');
-    return redirect()->route('admin.templates.index');
+        session()->flash('flash_success', 'Deleted Successfully');
+        return redirect()->route('admin.templates.index');
     }
 }

@@ -1,21 +1,69 @@
 <?php
-
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
-use App\Models\Page\PageStaticComponent;
-use App\Models\Tag;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Tag;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use App\Models\Page\PageStaticComponent;
 
 class PageStaticComponentsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // get components
-        $components = PageStaticComponent::all();
+         // get templates
+         if (isset($request['tags'])) {
+            if (!$request->has('search')) {
+                Session::forget('admin_static_component_search');
+            }
+            session(['admin_static_component_page' => 1]);
+            session(['admin_static_component_tags' => $request['tags']]);
+        }
+
+
+        if ($request->has('search')) {
+            if (!$request->has('tags')) {
+                Session::forget('admin_static_component_tags');
+            }
+            session(['admin_static_component_page' => 1]);
+            session(['admin_static_component_search' => $request['search']]);
+        }
+
+
+        if (isset($request['page'])) {
+            session(['admin_templates_page' => $request['page']]);
+            $currentPage = session('admin_templates_page');
+            Paginator::currentPageResolver(function () use ($currentPage) {
+                return $currentPage;
+            });
+        }
+
+        if (Session::has('admin_static_component_search')) {
+            $request['search'] = session('admin_static_component_search');
+        }
+
+        if (Session::has('admin_static_component_tags')) {
+            $request['tags'] = session('admin_static_component_tags');
+        }
+
+        $components = PageStaticComponent::when($request->has('tags'), function ($query) use ($request) {
+                $query->whereHas('tags', function ($q) use ($request) {
+                    $q->whereIn('tags.id', $request['tags']);
+                });
+            })
+            ->when($request->has('search'), function ($query) use ($request) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('label', 'like', "%{$request['search']}%")
+                        ->orWhere('description', 'LIKE', "%{$request['search']}%");
+                });
+            })
+            ->paginate(10);
+
         return view('backend.page_static_components.index')
             ->with('components', $components);
     }
@@ -63,16 +111,52 @@ class PageStaticComponentsController extends Controller
          return redirect()->route('admin.page_static_components.index');;
     }
 
-    // store the page
-    public function update(Request $request)
+    // store the thing
+    public function update($id, Request $request)
     {
-        dd($request);
+        $component = PageStaticComponent::find($id);
+        $component->user_id = Auth::user()->id;
+        $component->is_template = 1;
+        $component->label = $request->label;
+        $component->description = $request->description ?? '';
+        $component->content = $request->content ?? '';
+        $component->html = $request->html ?? '';
+        $component->css = $request->css ?? '';
+        $component->save();
+
+        $tags = [];
+        // add tags, making if necessary
+        if (isset($request->tags)) {
+            foreach ($request->tags as $tag) {
+                if (!Tag::find($tag)) {
+                    if (strlen($tag) > 0) {
+                        $tagModel = \App\Models\Tag::firstOrCreate(['text' => $tag]);
+                        $tag = $tagModel->id;
+                    }
+                }
+                $tags[] = $tag;
+            }
+        }
+        // sync
+        $component->tags()->sync($tags);
+
+        session()->flash('flash_success', 'Updated Successfully');
+        return redirect()->route('admin.page_static_components.index');;
     }
 
-    // destroy the page
-    public function destroy(Request $request)
+    // destroy the thing
+    public function destroy($id, Request $request)
     {
-        dd($request);
+        $component = PageStaticComponent::findOrFail($id);
+
+        // Detach all tags
+        $component->tags()->detach();
+
+        // Delete the page
+        $component->delete();
+
+        session()->flash('flash_success', 'Deleted Successfully');
+        return redirect()->route('admin.page_static_components.index');
     }
 
     // get the data for a snippet

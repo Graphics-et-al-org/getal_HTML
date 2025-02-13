@@ -12,20 +12,34 @@ import $ from "jquery";
 // initial setup
 document.addEventListener("DOMContentLoaded", function () {
     // intercept form submission
-    $("#storeForm").on("submit", (e) => {
-        const form = document.getElementById("storeForm");
-        addHiddenField(
-            form,
-            "content",
-            JSON.stringify(editor.getProjectData())
-        );
-        form.submit();
-    });
+    // $("#storeForm").on("submit", (e) => {
+    //     const form = document.getElementById("storeForm");
+    //     addHiddenField(
+    //         form,
+    //         "content",
+    //         JSON.stringify(editor.getProjectData())
+    //     );
+    //     form.submit();
+    // });
     // You can add any additional code to run after the document is loaded here
 });
 
+window.save = () => {
+    const form = document.getElementById("storeForm");
+    addHiddenField(form, "content", JSON.stringify(editor.getProjectData()));
+    addHiddenField(form, "html", editor.getHtml());
+    addHiddenField(form, "css", editor.getCss());
+    form.submit();
+};
+
 new TomSelect("#tags", {
     create: true,
+    options: tags,
+    preload: true,
+    valueField: "value",
+    items: tags.map((item) => {
+        return item.value;
+    }),
     load: function (query, callback) {
         var url = baseurl + "/api/tags?q=" + query;
         fetch(url)

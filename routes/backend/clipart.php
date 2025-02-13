@@ -12,13 +12,16 @@ Route::group([], function () {
         Route::get('clipart', [ClipartController::class, 'index'])->name('clipart.index');
         Route::get('clipart/create', [ClipartController::class, 'create'])->name('clipart.create');
         Route::post('clipart/store', [ClipartController::class, 'store'])->name('clipart.store');
-        Route::post('clipart/delete', [ClipartController::class, 'delete'])->name('clipart.delete');
+
         Route::post('clipart/bulkimport', [ClipartController::class, 'bulkImport'])->name('clipart.bulkimport');
 
-        // Specific page
+        // Specific clipart
         Route::group(['prefix' => 'clipart/{id}'], function () {
             Route::get('edit', [ClipartController::class, 'edit'])->name('clipart.edit');
-        });
 
+            Route::patch('/', [ClipartController::class, 'update'])->name('clipart.update');
+
+            Route::get('/', [ClipartController::class, 'destroy'])->name('clipart.destroy');
+        });
     });
 });

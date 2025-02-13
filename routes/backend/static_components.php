@@ -23,7 +23,7 @@ Route::group([], function () {
 
             Route::patch('/', [PageStaticComponentsController::class, 'update'])->name('page_static_component.update');
 
-            Route::delete('/', [PageStaticComponentsController::class, 'destroy'])->name('page_static_component.destroy');
+            Route::get('/destroy', [PageStaticComponentsController::class, 'destroy'])->name('page_static_component.destroy');
 
             Route::get('data', [PageStaticComponentsController::class, 'data'])->name('page_static_component.data');
         });

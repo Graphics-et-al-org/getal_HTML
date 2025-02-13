@@ -5,7 +5,13 @@ import TomSelect from "tom-select";
 console.log(baseurl);
 
 new TomSelect("#tags",{
-	create: true,
+	create: false,
+    options: tags,
+    preload: true,
+    valueField: "value",
+    items: tags.map((item) => {
+        return item.value;
+    }),
     load: function(query, callback) {
         var url = baseurl+'/api/tags?q=' + query;
         fetch(url)

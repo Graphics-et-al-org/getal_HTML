@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\Clipart\ClipartController;
 use App\Http\Controllers\CustomBroadcastAuthController;
 use App\Http\Middleware\EnsureAuth0TokenIsValid;
 use Illuminate\Http\Request;
@@ -31,11 +32,8 @@ Route::post('/extension/token', function (Request $request) {
     dd($response);
 })->middleware('guest');
 
-
-
 // Get an Ably token for client communication. See https://ably.com/docs/auth/token#ably-token
 Route::post('/ablytoken',[ApiController::class, 'getAblyToken'])->middleware(EnsureAuth0TokenIsValid::class);
-
 
 // handle an upload from the extension and create a job
 Route::post('/extension/upload',[ApiController::class, 'uploadFromExtension'])
@@ -52,6 +50,9 @@ Route::get('triggerjobs', function(){
     }
 )->middleware('guest');
 
-// trigger jobs
+// list tags
 Route::get('tags', [ApiController::class, 'tags'])->middleware('guest');
+
+// open clipart search (for now)
+Route::get('clipart/searchbytagsandtext', [ClipartController::class, 'searchByTagsAndText']);
 

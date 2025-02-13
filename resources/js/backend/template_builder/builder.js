@@ -106,7 +106,7 @@ editor = grapesjs.init({
         // ],
         upload: false, // Disable upload for now
         autoAdd: true,
-        custom: true,
+        // custom: true,
     },
     pluginsOpts: {
         [BlocksBasic]: {
@@ -115,40 +115,79 @@ editor = grapesjs.init({
     },
 });
 
+const modal = editor.Modal;
+const am = editor.AssetManager;
 
-const searchBox = document.createElement("input");
+// A small helper to add a search bar if it doesn't already exist
+function injectSearchBar() {
+    // The 'body' of the GrapesJS modal
+    const modalBodyEl = modal.getContentEl();
 
-searchBox.type = "text";
-searchBox.placeholder = "Search assets...";
-searchBox.style.width = "100%";
-searchBox.style.marginBottom = "10px";
-searchBox.style.padding = "5px";
+    // Check if we've already inserted the search bar
+    if (!modalBodyEl.querySelector(".search-container")) {
+        // Create the container + input
+        const searchContainer = document.createElement("div");
+        searchContainer.className = "search-container";
+
+        const searchInput = document.createElement("input");
+        searchInput.type = "text";
+        searchInput.placeholder = "Search assets...";
+
+        // Insert into the modal body, above the asset manager
+        searchContainer.appendChild(searchInput);
+        // By default, the Asset Manager content is in the modal body,
+        // so we prepend the search bar there
+        modalBodyEl.prepend(searchContainer);
+
+        // Listen for input changes
+        searchInput.addEventListener("input", (e) => {
+            const query = e.target.value.trim().toLowerCase();
+
+            // Option A: client-side filtering of the currently loaded assets
+            // -------------------------------------------------------------
+            // 1. Get the existing assets
+            // const allAssets = am.getAll();
+
+            // // 2. Filter them in-memory
+            // const filtered = allAssets.filter((asset) =>
+            //     asset.get("src").toLowerCase().includes(query)
+            // );
+
+            // // 3. Clear and re-add
+            // am.clear();
+            // am.add(filtered.map((a) => a.attributes));
+
+            // Option B: server-side searching
+            // -------------------------------------------------------------
+            // If you want to re-fetch from a server for each query, you'd do:
+
+            am.load({
+              params: {
+                q: query, // or any param your backend expects
+              },
+              reset: true,
+            });
+
+        });
+    }
+}
+
+// Listen for when the asset manager is opened
+editor.on("run:open-assets", () => {
+    injectSearchBar();
+});
 
 // events handling
-
-editor.on('asset:custom', (props) => {
-    console.log('asset:custom event')
-    console.log(props)
-    // The `props` will contain all the information you need in order to update your UI.
-    // props.open (boolean) - Indicates if the Asset Manager is open
-    // props.assets (Array<Asset>) - Array of all assets
-    // props.types (Array<String>) - Array of asset types requested, eg. ['image'],
-    // props.close (Function) - A callback to close the Asset Manager
-    // props.remove (Function<Asset>) - A callback to remove an asset
-    // props.select (Function<Asset, boolean>) - A callback to select an asset
-    // props.container (HTMLElement) - The element where you should append your UI
-    // Here you would put the logic to render/update your UI.
-  });
 
 editor.on("load", () => {
     const blockBtn = editor.Panels.getButton("views", "open-blocks");
     blockBtn.set("active", 1);
-    editor.Panels.addButton("views", {
-        id: "open-assets",
-        className: "fa fa-folder-open",
-        command: "open-assets",
-        attributes: { title: "Open Assets" },
-    });
+    // editor.Panels.addButton("views", {
+    //     id: "open-assets",
+    //     className: "fa fa-folder-open",
+    //     command: "open-assets",
+    //     attributes: { title: "Open Assets" },
+    // });
     // Manually add assets
     const assets = [
         { src: "https://dummyimage.com/600x400", name: "Placeholder 1" },

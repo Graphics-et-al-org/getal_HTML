@@ -10,10 +10,15 @@
 
 @section('content')
     <div class="w-100 mb-2">
-        New page static component
+        {{ isset($component->id) ? 'Update' : 'New' }} page static component
     </div>
     <div class="w-100">
-        <form id="storeForm" action="{{ route('admin.page_static_component.store') }}" method="POST">
+        <form id="storeForm"
+            action="{{ isset($component->id) ? route('admin.page_static_component.update', $component->id) : route('admin.page_static_component.store') }}"    method="POST">
+            @if (isset($component))
+                {{ method_field('PATCH') }}
+            @endif
+            @csrf
             <input type="hidden" name="id" value="{{ $component->id ?? '-1' }}" />
             <div class="grid gap-4 mb-4 sm:grid-cols-2">
                 <div class="sm:col-span-2">
@@ -78,10 +83,21 @@
 
         const tailwindcsspath = "{{ Vite::asset('resources/css/app.css') }}";
 
+        var tags = [
+            @if (isset($component))
+                @foreach ($component->tags as $tag)
+                    {
+                        value: "{{ $tag->id }}",
+                        text: "{{ $tag->text }}"
+                    },
+                @endforeach
+            @endif
+        ]
+
         var editor;
     </script>
 
-    @vite('resources/js/backend/page_static_components_builder/builder.js')
+    @vite('resources/js/backend/page_static_components/builder.js')
 
     {{-- CSS goes *after* js --}}
     @vite('resources/css/backend/template_builder/builder.css')
