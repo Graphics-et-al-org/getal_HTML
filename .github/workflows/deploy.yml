@@ -38,7 +38,7 @@ jobs:
       # This will only work if you have a database setup
       - name: Optimize views n routes etc
         if: steps.check_files.outputs.files_exists == 'true'
-        run: php artisan route:clear && php artisan view:clear $$ php artisan config:clear
+        run: php artisan route:clear && php artisan view:clear && php artisan config:clear
 
       - name: Login to Azure
         uses: azure/login@v1
