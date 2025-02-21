@@ -117,10 +117,9 @@
 
         const tailwindcsspath = "{{ Vite::asset('resources/css/app.css') }}";
         var tags = [
-            @if (session('admin_static_components_tags'))
+            @if (session('admin_static_component_tags')!=null)
                 @foreach (session('admin_static_components_tags') as $tag)
                     {
-
                         value: "{{ $tag }}",
                         text: "{{ App\Models\Tag::find($tag)->text }}"
                     },

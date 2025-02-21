@@ -19,6 +19,7 @@ return new class extends Migration
             $table->longText('html')->nullable();
             $table->longText('css')->nullable();
             $table->binary('thumb')->nullable();
+            $table->bigInteger('weight')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Clipart\ClipartColourway;
 use Intervention\Image\Drivers\Gd\Driver;
 use App\Models\Clipart\ClipartColourwayColour;
-
+use Illuminate\Support\Facades\URL;
 
 class ClipartController extends Controller
 {
@@ -110,14 +110,21 @@ class ClipartController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
+        //   dd($request->all());
         // save clipart metadata
         $clipart = new Clipart();
         $clipart->name = $request->name;
         $clipart->owner_id = Auth::user()->id;
         $clipart->created_by = Auth::user()->id;
-        $clipart->description = $request->description;
+        $clipart->preferred_description = $request->preferred_description;
+        $clipart->fallback_description = $request->fallback_description;
         $clipart->type =  $request->type_radio;
+        if (isset($request['preferred']) && ($request['preferred'] == 'true')) {
+            $clipart->preferred =  true;
+        }
+        if (isset($request['fallback']) && ($request['fallback'] == 'true')) {
+            $clipart->fallback =  true;
+        }
         $clipart->save();
         // sync tags
         if (isset($request['tags'])) {
@@ -149,19 +156,28 @@ class ClipartController extends Controller
             // save the thumbnail
             if (ClipartColourwayColour::find($colourway_id)->name == 'baseline') {
 
-                $url = env('CAIRO_URL', "http://127.0.0.1:5000/convert");
+                $url = env('SVG_PROCESS_URL', false);
+                if ($url) {
+                    $response = Http::withHeaders([
+                        'Content-Type' => 'application/json',
+                    ])->post($url, [
+                        'svg' =>  $colourway->data,
+                        'name' => $clipart->name,
+                        'description' => $clipart->preferred_description,
+                        'tags' => $clipart->tags->pluck('text')->join(','),
+                    ]);
+                    if ($response->successful()) {  //
 
-                $response = Http::withHeaders([
-                    'Content-Type' => 'application/json',
-                    'X-Second' => 'bar'
-                ])->post($url, [
-                    'svg' =>  $colourway->data
-                ]);
-                if ($response->successful()) {  //
-                    // dd($response->json()['png_base64']);
-                    $manager = new ImageManager(new Driver());
-                    $clipart->thumb = $manager->read($response->json()['png_base64'])->toPng();
-                    $clipart->save();
+                        $data = $response->json();
+                        //  thumbnail
+                        $manager = new ImageManager(new Driver());
+                        $clipart->thumb = $manager->read($data['png_base64'])->toPng();
+                        //  other parameters
+                        $clipart->gpt4_description = $data['gpt4_description'];
+                        $clipart->clip_image_embedding_b64 = $data['clip_image_embedding_b64'];
+                        $clipart->bert_text_embedding_b64 = $data['bert_text_embedding_b64'];
+                        $clipart->save();
+                    }
                 }
             }
         }
@@ -387,7 +403,11 @@ class ClipartController extends Controller
                     $url = env('CAIRO_URL', "http://127.0.0.1:5000/convert");
 
                     // make the thumbnail
-
+                    //
+                    //
+                    //@TODO also get AI generated metadata here
+                    //
+                    //
 
                     if ($clipart->colourways->where('colour_id', '=', $baselineid)->count() > 0) {
                         $response = Http::withHeaders([
@@ -457,13 +477,17 @@ class ClipartController extends Controller
     public function update(Request $request, $id)
     {
         // new clipart entry
+       // dd($request->all());
         $clipart = Clipart::updateOrCreate(
             ['id' => $id],
             [
                 'name' => $request['name'],
-                'description' => $request['description'],
-                'citations' => $request['citations'],
-                'type' => $request['type'] ? $request['type'] : 'svg'
+                'preferred_description' => $request['preferred_description'],
+                'fallback_description' => $request['fallback_description'],
+                // 'citations' => $request['citations'],
+                'type' => $request['type'] ? $request['type'] : 'svg',
+                'preferred' => (isset($request['preferred']) && ($request['preferred'] == 'true')) ? true : null,
+                'fallback' => (isset($request['fallback']) && ($request['fallback'] == 'true')) ? true : null,
             ]
 
         );
@@ -489,7 +513,7 @@ class ClipartController extends Controller
         $files = array_filter($request->all(), function ($key) {
             return strpos($key, 'colourway_') !== false;
         }, ARRAY_FILTER_USE_KEY);
-
+        $colour_id = ClipartColourwayColour::where('name', '=', 'baseline')->first()->id;
         // then save them as data
         foreach ($files as $key => $file) {
             $colourway = new ClipartColourway();
@@ -499,24 +523,105 @@ class ClipartController extends Controller
             $colourway->data = $file->get();
             $colourway->save();
             // save the thumbnail
-            if (ClipartColourwayColour::find($colourway_id)->name == 'baseline') {
 
-                $url = env('CAIRO_URL', "http://127.0.0.1:5000/convert");
+            if (ClipartColourwayColour::find($colourway_id)->id == $colour_id) {
+                $url = env('CAIRO_URL', false);
+                if ($url) {
+                    $response = Http::withHeaders([
+                        'Content-Type' => 'application/json',
+                    ])->post($url, [
+                        'svg' =>    $clipart->colourways->where('colour_id', '=', $colour_id)->first()->data
+                        // also other params here
+                    ]);
 
-                $response = Http::withHeaders([
-                    'Content-Type' => 'application/json',
-                    'X-Second' => 'bar'
-                ])->post($url, [
-                    'svg' =>  $colourway->data
-                ]);
-                if ($response->successful()) {  //
-                    // dd($response->json()['png_base64']);
-                    $manager = new ImageManager(new Driver());
-                    $clipart->thumb = $manager->read($response->json()['png_base64'])->toPng();
-                    $clipart->save();
+                    if ($response->successful()) {  //
+                        // dd($response->json()['png_base64']);
+                        $manager = new ImageManager(new Driver());
+                        $clipart->thumb = $manager->read($response->json()['png_base64'])->toPng();
+                        $clipart->save();
+                    }
                 }
             }
         }
+        $url = env('SVG_PROCESS_URL', false);
+        if ($url && ($request['updategpt'] == 'true')) {
+
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post($url, [
+                'svg' => $clipart->colourways->where('colour_id', '=', $colour_id)->first()->data,
+                'name' => $clipart->name,
+                'description' => $clipart->preferred_description,
+                'tags' => $clipart->tags->pluck('text')->join(','),
+            ]);
+            if ($response->successful()) {  //
+
+                $data = $response->json();
+                //  thumbnail
+                // $manager = new ImageManager(new Driver());
+                // $clipart->thumb = $manager->read($data['png_base64'])->toPng();
+                //  other parameters
+                $clipart->gpt4_description = $data['gpt4_description'];
+                $clipart->clip_image_embedding_b64 = $data['clip_image_embedding_b64'];
+                $clipart->bert_text_embedding_b64 = $data['bert_text_embedding_b64'];
+                $clipart->save();
+            }
+        }
+        session()->flash('flash_success', 'Updated Clipart Successfully');
+        return redirect()->route('admin.clipart.index');
+    }
+
+    /**
+     * Gets the AI
+     *
+     * @param Request $request
+     * @param Clipart $clipart
+     *
+     * @return mixed
+     * @throws \Throwable
+     * @throws \App\Exceptions\GeneralException
+     */
+    public function update_ai_params(Request $request, $id)
+    {
+        // new clipart entry
+        $clipart = Clipart::find($id);
+        //$colourway = Clipart
+        // dd($colour);
+        $colour_id = ClipartColourwayColour::where('name', '=', 'baseline')->first()->id;
+
+        $url = env('CAIRO_URL', "http://127.0.0.1:5000/convert");
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->post($url, [
+            'svg' =>    $clipart->colourways->where('colour_id', '=', $colour_id)->first()->data
+            // also other params here
+        ]);
+
+        if ($response->successful()) {  //
+            // dd($response->json()['png_base64']);
+            $manager = new ImageManager(new Driver());
+            $clipart->thumb = $manager->read($response->json()['png_base64'])->toPng();
+            $clipart->save();
+        }
+
+        // tags
+        if (isset($request['tags'])) {
+            $tags = [];
+            foreach ($request['tags'] as $tag) {
+                if (!(Tag::where('id', $tag)->exists())) {
+                    if (strlen($tag) > 0) {
+                        $tags[] = Tag::updateOrCreate(['text' => $tag])->id;
+                    }
+                } else {
+                    $tags[] = $tag;
+                }
+            }
+            $clipart->tags()->sync($tags);
+        }
+
+
+
         session()->flash('flash_success', 'Updated Clipart Successfully');
         return redirect()->route('admin.clipart.index');
     }
@@ -585,5 +690,61 @@ class ClipartController extends Controller
             $response->header("Content-Type", $content_typestr);
             return $response;
         }
+    }
+
+    // seach by tags or text, returning a json array
+    public function searchByTagsAndText(Request $request)
+    {
+        $clipart = Clipart::when($request->has('tags'), function ($query) use ($request) {
+            $query->whereHas('tags', function ($q) use ($request) {
+                $q->whereIn('tags.text', $request['tags']);
+            });
+        })->when($request->has('search'), function ($query) use ($request) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', "%{$request['search']}%")
+                    ->orWhere('preferred_description', 'LIKE', "%{$request['search']}%");
+            });
+        })->when($request->has('preferred'), function ($query) use ($request) {
+            $query->where(function ($q) use ($request) {
+                $q->where('preferred', '=', true);
+            });
+        })->when($request->has('fallback'), function ($query) use ($request) {
+            $query->where(function ($q) use ($request) {
+                $q->where('fallback', '=', true);
+            });
+        })->get();
+
+        $colour_id = ClipartColourwayColour::where('name', '=', 'baseline')->first()->id;
+        //  $baseline = $clipart->colourways->where('colour_id', '=', $colour_id)->first(); // ?? Storage::get('/public/questionmark.svg');
+
+        $output = [];
+        // preload baseline ID
+        $clipart->each(function ($item, $key) use ($colour_id, &$output) {
+            //   dd($colour_id);
+            $baseline = $item->colourways->where('colour_id', '=', $colour_id)->first();
+
+            // @TODO make baseline path
+            $appendobj = array(
+                'id' => $item->id,
+                'name' => $item->name,
+                'preferred' => $item->preferred ? 'true' : '',
+                'fallback' => $item->fallback ? 'true' : '',
+                'preferred_description' => $item->preferred_description,
+                'fallback_description' => $item->fallback_description,
+                'gpt4_description' => $item->gpt4_description,
+                'bert_text_embedding_b64' => $item->bert_text_embedding_b64,
+                'clip_image_embedding_b64' => $item->clip_image_embedding_b64,
+                'tags' => $item->tags->pluck('text')->join(','),
+                'colourways_ids' => $item->colourways->pluck('id')->join(',')
+            );
+            if ($baseline) {
+                $appendobj['baseline_id'] = $baseline->id ?? null;
+                $appendobj['baseline_path'] = $baseline->path() ?? null;
+            }
+            $output[] = $appendobj;
+        });
+
+        // dd($output);
+        return response()->json($output, 200);
     }
 }

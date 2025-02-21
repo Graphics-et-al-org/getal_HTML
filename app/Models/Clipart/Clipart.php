@@ -14,7 +14,18 @@ class Clipart extends Model
     protected $table = 'clipart';
 
     protected $fillable = [
-        'owner_id', 'name', 'description', 'type', 'created_by', 'thumb'
+        'owner_id',
+        'name',
+        'type',
+        'preferred',
+        'fallback',
+        'preferred_description',
+        'fallback_description',
+        'gpt4_description',
+        'bert_text_embedding_b64',
+        'clip_image_embedding_b64',
+        'created_by',
+        'thumb'
     ];
 
     //
@@ -34,5 +45,4 @@ class Clipart extends Model
     {
         return $this->hasOne('App\Models\User', 'id', 'owner_id');
     }
-
 }

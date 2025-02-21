@@ -17,12 +17,13 @@ class PageStaticComponentsController extends Controller
     {
         // get components
          // get templates
-         if (isset($request['tags'])) {
+    //dd($request->has('tags'));
+         if ($request->has('tags')) {
             if (!$request->has('search')) {
                 Session::forget('admin_static_component_search');
             }
             session(['admin_static_component_page' => 1]);
-            session(['admin_static_component_tags' => $request['tags']]);
+            session(['admin_static_component_tags' => $request->tags]);
         }
 
 
@@ -35,9 +36,9 @@ class PageStaticComponentsController extends Controller
         }
 
 
-        if (isset($request['page'])) {
-            session(['admin_templates_page' => $request['page']]);
-            $currentPage = session('admin_templates_page');
+        if ($request->has('page')) {
+            session(['admin_static_component_page' => $request['page']]);
+            $currentPage = session('admin_static_component_page');
             Paginator::currentPageResolver(function () use ($currentPage) {
                 return $currentPage;
             });
@@ -63,6 +64,7 @@ class PageStaticComponentsController extends Controller
                 });
             })
             ->paginate(10);
+
 
         return view('backend.page_static_components.index')
             ->with('components', $components);
@@ -91,9 +93,12 @@ class PageStaticComponentsController extends Controller
         $component = new PageStaticComponent();
         $component->uuid =(string) Str::uuid();
         $component->user_id = Auth::user()->id;
-        $component->label = $request['name'];
-        $component->description = $request->description??'';
-        $component->content = $request['content'];
+        $component->label = $request->label;
+        $component->description = $request->description ?? '';
+        $component->content = $request->content ?? '';
+        $component->html = $request->html ?? '';
+        $component->css = $request->css ?? '';
+        $component->weight = $request->weight??0;
         $component->save();
 
         // add tags, making if necessary
@@ -116,12 +121,12 @@ class PageStaticComponentsController extends Controller
     {
         $component = PageStaticComponent::find($id);
         $component->user_id = Auth::user()->id;
-        $component->is_template = 1;
         $component->label = $request->label;
         $component->description = $request->description ?? '';
         $component->content = $request->content ?? '';
         $component->html = $request->html ?? '';
         $component->css = $request->css ?? '';
+        $component->weight = $request->weight??0;
         $component->save();
 
         $tags = [];

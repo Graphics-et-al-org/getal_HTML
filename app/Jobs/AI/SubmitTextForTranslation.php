@@ -2,12 +2,13 @@
 
 namespace App\Jobs\AI;
 
-use App\Traits\AblyFunctions;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Str;
+use App\Traits\AblyFunctions;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
 class SubmitTextForTranslation implements ShouldQueue
 {
@@ -16,20 +17,19 @@ class SubmitTextForTranslation implements ShouldQueue
     protected $_params;
     protected $_uuid;
     protected $_user_id;
-    protected $_documentForSummary;
+    protected $_inputStr;
     protected $_template_id;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($params, $template_id, $uuid, $user_id)
+    public function __construct($inputStr, $template_id, $uuid, $user_id)
     {
 
-        $this->_params = $params;
+        $this->_inputStr = $inputStr;
         $this->_uuid = $uuid;
         $this->_template_id = $template_id;
         $this->_user_id = $user_id;
-
     }
 
     /**
@@ -38,11 +38,34 @@ class SubmitTextForTranslation implements ShouldQueue
     public function handle(): void
     {
         //
-       // dd('handling');
-       $result_uuid = Str::uuid()->toString();
+        // dd('handling');
+        $result_uuid = Str::uuid()->toString();
+        //
+        $payload = array("extracted_text" => $this->_inputStr);
+        $apiURL = env('AI_API_SESSION_URL');
+
+        //$client = new \GuzzleHttp\Client(['verify' => false]);
+        $response = Http::withHeaders([
+            'Accept' => 'application/json',
+        ])->post($apiURL, $payload);
+
+        $status = $response->getStatusCode();
+        //
+        //If status is 200, there's a useful response
+        if ($response->successful()) {
+            // get the results from the uuid
+            $resultsURL =  env('AI_API_RESULT_URL');
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+            ])->post($resultsURL, $payload);
+
+            $status = $response->getStatusCode();
+        } else {
+        }
+
         // simulate a long function
         //sleep(10);
-        $this->sendMessage('translation-status.'. $this->_uuid, json_encode(['message'=>'success', 'uuid'=>$result_uuid]));
+        $this->sendMessage('translation-status.' . $this->_uuid, json_encode(['message' => 'success', 'uuid' => $result_uuid]));
         return;
     }
 }

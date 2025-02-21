@@ -1,54 +1,26 @@
 <x-guest-layout>
-
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-    <form method="POST" action="{{ route('login') }}">
+    <div class="w-fill text-center"><h1>Log in to Graphics et al HTML version</h1></div>
+    <div id="accordion-collapse" data-accordion="collapse">
+        <h2 id="accordion-collapse-heading-1">
+            <button type="button"
+                class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 rounded-t-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
+                data-accordion-target="#accordion-collapse-body-1" aria-expanded="true"
+                aria-controls="accordion-collapse-body-1">
+                <span>Local login</span>
+                <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5 5 1 1 5" />
+                </svg>
+            </button>
+        </h2>
+        <div id="accordion-collapse-body-1" class="hidden" aria-labelledby="accordion-collapse-heading-1">
+            <div class="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
+ <form method="POST" action="{{ route('login') }}">
         @csrf
 
-        {{-- <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div> --}}
-        <div>
-            <a href='{{ route('social.login', 'auth0') }}' class='btn btn-outline-info btn-block m-1'>
-
-                Federated login (Auth0)
-            </a>
-        </div>
         <form class="max-w-sm mx-auto">
             <div class="mb-5">
                 <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your
@@ -78,4 +50,33 @@
         </form>
 
     </form>
+            </div>
+        </div>
+        <h2 id="accordion-collapse-heading-2">
+            <button type="button"
+                class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
+                data-accordion-target="#accordion-collapse-body-2" aria-expanded="false"
+                aria-controls="accordion-collapse-body-2">
+                <span>Federated login (Auth0)</span>
+                <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5 5 1 1 5" />
+                </svg>
+            </button>
+        </h2>
+        <div id="accordion-collapse-body-2" class="hidden" aria-labelledby="accordion-collapse-heading-2">
+            <div class="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
+                <div class="w-full flex">
+                    <a href='{{ route('social.login', 'auth0') }}' class="grow px-3.5 py-3.5 text-base font-medium text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        Click for Federated login (Auth0)
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- Session Status -->
+    <x-auth-session-status class="mb-4" :status="session('status')" />
+
 </x-guest-layout>

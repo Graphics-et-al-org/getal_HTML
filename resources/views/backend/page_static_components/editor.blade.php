@@ -14,7 +14,8 @@
     </div>
     <div class="w-100">
         <form id="storeForm"
-            action="{{ isset($component->id) ? route('admin.page_static_component.update', $component->id) : route('admin.page_static_component.store') }}"    method="POST">
+            action="{{ isset($component->id) ? route('admin.page_static_component.update', $component->id) : route('admin.page_static_component.store') }}"
+            method="POST">
             @if (isset($component))
                 {{ method_field('PATCH') }}
             @endif
@@ -23,7 +24,7 @@
             <div class="grid gap-4 mb-4 sm:grid-cols-2">
                 <div class="sm:col-span-2">
                     <label for="label" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Label</label>
-                    <input type="text" name="name" id="label"
+                    <input type="text" name="label" id="label"
                         value="{{ $component->label ?? 'New static component' }}"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                 </div>
@@ -35,12 +36,20 @@
                         class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="Write a description...">{{ $component->description ?? '' }}</textarea>
                 </div>
-                <div class="col-span-full">
-                    <label for="tags" class="block text-sm/6 font-medium text-gray-900">Tags</label>
-                    <div class="mt-2 flex items-center gap-x-3">
-                        <select id="tags" name="tags[]" data-placeholder="Tags" autocomplete="off" multiple>
-                            <option value="">None</option>
-                        </select>
+                <div class="col-span-full flex">
+                    <div class="flex-1">
+                        <label for="tags" class="block text-sm/6 font-medium text-gray-900">Tags</label>
+                        <div class="mt-2 flex items-center gap-x-3">
+                            <select id="tags" name="tags[]" data-placeholder="Tags" autocomplete="off" multiple>
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <label for="weight" class="block text-sm/6 font-medium text-gray-900">Weighting (order in page)</label>
+                        <div class="mt-2 flex items-center gap-x-3">
+                            <input type="number" name="weight"  value="{{ $component->weight ?? '0' }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                        </div>
                     </div>
                 </div>
         </form>
@@ -61,9 +70,9 @@
         <div id="blocks"></div>
     </div>
     <footer class="fixed bottom-0 left-0 z-20 w-full bg-gray-200">
-        <button type="button"
+        <a href="{{ route('admin.page_static_components.index') }}" type="button"
             class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"><-
-                Back</button>
+                Back</a>
                 <button type="button" onclick="window.save()"
                     class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">
                     Save</button>
