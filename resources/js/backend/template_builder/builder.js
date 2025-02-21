@@ -7,7 +7,7 @@ import parserPostCSS from "grapesjs-parser-postcss";
 import presetplugin from "grapesjs-preset-webpage";
 import customcode from "grapesjs-custom-code";
 import BlocksBasic from "grapesjs-blocks-basic";
-import suggestions from "@alandow/grapesjs-ui-suggest-classes";
+import suggestions from "./plugins";
 
 var projectEndpoint;
 

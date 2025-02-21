@@ -37,6 +37,7 @@
         "grapesjs-preset-webpage": "^1.0.3",
         "grapesjs-ui-suggest-classes": "file:../grapesjs/grapesjs-ui-suggest-classes",
         "jquery": "^3.7.1",
+        "lit-html": "^3.2.1",
         "pretty-checkbox": "^3.0.3",
         "sass": "^1.81.0",
         "tom-select": "^2.4.1",
