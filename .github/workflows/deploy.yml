@@ -112,7 +112,8 @@ jobs:
             "CAIRO_URL":"https://mediguides-dev-svg2png.azurewebsites.net/api/convert",
             "SVG_PROCESS_URL":"https://mediguides-dev-process-svg.azurewebsites.net/api/process",
             "PHP_INI_SCAN_DIR":":/home/site/config/php",
-            "PHP_CLI_SERVER_WORKERS":"5"
+            "PHP_CLI_SERVER_WORKERS":"5",
+            "WEBSITES_ENABLE_APP_SERVICE_STORAGE":"true"
           }
           EOF
 

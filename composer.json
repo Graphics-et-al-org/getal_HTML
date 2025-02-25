@@ -17,7 +17,8 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.16",
         "laravel/tinker": "^2.9",
-        "phpoffice/phpspreadsheet": "^3.7",
+        "phpoffice/phpspreadsheet": "^3.8",
+        "romanzipp/laravel-queue-monitor": "^5.3",
         "santigarcor/laratrust": "^8.3",
         "socialiteproviders/auth0": "^4.2"
     },
