@@ -331,13 +331,13 @@ class ClipartController extends Controller
                                 break;
                             case 'preferred_description':
                                 if (isset($data[1])) {
-                                    $clipart_data['preferred_description'] = $data[1];
+                                    $clipart_data['preferred_description'] = $data[1]??'No description';
                                 }
 
                                 break;
                             case 'fallback_description':
                                 if (isset($data[1])) {
-                                    $clipart_data['preferred_description'] = $data[1];
+                                    $clipart_data['preferred_description'] = $data[1]??'No description';
                                 }
 
                                 break;
@@ -348,18 +348,18 @@ class ClipartController extends Controller
                                 break;
                             case 'preferred':
 
-                                $clipart_data['preferred'] = (strtolower($data[1]) == 'true');
+                                $clipart_data['preferred'] = isset($data[1])?(strtolower($data[1]) == 'true'):false;
                                 break;
                             case 'fallback':
 
-                                $clipart_data['fallback'] = (strtolower($data[1]) == 'true');
+                                $clipart_data['fallback'] = isset($data[1])?(strtolower($data[1]) == 'true'):false;
                                 break;
                             case 'labs':
                                 //@TODO implement  multiple lab assignments- right now we're doing it manually
                                 // comma separated
                                 //
                                 break;
-                  
+
                             default:
                                 break;
                         }
