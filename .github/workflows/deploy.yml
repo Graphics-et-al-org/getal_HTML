@@ -5,7 +5,7 @@ name: DEV Deploy G et al app to Azure
 on:
   push:
     branches:
-     # - main
+      # - main
       - dev
 
 # the actual actions
@@ -25,7 +25,7 @@ jobs:
         id: check_files
         uses: andstor/file-existence-action@v1
         with:
-         files: "composer.json"
+          files: "composer.json"
 
       - name: Run composer install if composer.json exists
         if: steps.check_files.outputs.files_exists == 'true'
@@ -44,7 +44,6 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -70,29 +69,33 @@ jobs:
           cat <<EOF > appsettings.json
           {
             "ABLY_KEY": "${{ secrets.ABLY_KEY }}",
-            "APP_ENV": "production",
-            "APP_DEBUG": "true",
-            "APP_KEY": "${{ secrets.APP_KEY }}",
-            "APP_URL": "https://mediguides-dev.azurewebsites.net/",
-            "VITE_APP_URL":"https://mediguides-dev.azurewebsites.net/",
-            "APP_MAINTENANCE_DRIVER": "file",
-            "APP_LOCALE": "en",
-            "APP_FALLBACK_LOCALE": "en",
-            "APP_FAKER_LOCALE": "en_US",
-            "PHP_CLI_SERVER_WORKERS": "4",
-            "BCRYPT_ROUNDS": "12",
-            "LOG_CHANNEL": "stack",
-            "LOG_STACK": "single",
-            "LOG_DEPRECATIONS_CHANNEL": "null",
-            "LOG_LEVEL": "debug",
-            "BROADCAST_CONNECTION": "ably",
-            "FILESYSTEM_DISK": "local",
-            "QUEUE_CONNECTION": "database",
             "AUTH0_AUDIENCE": "https://dev.graphicsetal.com/api",
             "AUTH0_DOMAIN": "${{ secrets.AUTH0_DOMAIN }}",
             "AUTH0_CLIENT_ID": "${{ secrets.AUTH0_CLIENT_ID }}",
             "AUTH0_CLIENT_SECRET": "${{ secrets.AUTH0_CLIENT_SECRET }}",
             "AUTH0_REDIRECT_URI": "https://mediguides-dev.azurewebsites.net/login/auth0/callback",
+            "APP_ENV": "production",
+            "APP_DEBUG": "true",
+            "APP_KEY": "${{ secrets.APP_KEY }}",
+            "APP_URL": "https://mediguides-dev.azurewebsites.net/",
+            "APP_MAINTENANCE_DRIVER": "file",
+            "APP_LOCALE": "en",
+            "APP_FALLBACK_LOCALE": "en",
+            "APP_FAKER_LOCALE": "en_US",
+            "AZURE_STORAGE_NAME": "${{ secrets.AZURE_STORAGE_NAME }}",
+            "AZURE_STORAGE_KEY": "${{ secrets.AZURE_STORAGE_KEY }}",
+            "AZURE_STORAGE_CONTAINER_NAME": "mediguide-dev-files",
+            "AZURE_CONTAINER": "laravel-files",
+            "AZURE_STORAGE_URL": "https://mediguidesdevstorage.blob.core.windows.net/mediguide-dev-files",
+            "BCRYPT_ROUNDS": "12",
+            "BROADCAST_CONNECTION": "ably",
+            "PHP_CLI_SERVER_WORKERS": "4",
+            "LOG_CHANNEL": "stack",
+            "LOG_STACK": "single",
+            "LOG_DEPRECATIONS_CHANNEL": "null",
+            "LOG_LEVEL": "debug",
+            "FILESYSTEM_DISK": "local",
+            "QUEUE_CONNECTION": "database",
             "CACHE_STORE": "database",
             "CACHE_PREFIX": "",
             "DB_CONNECTION": "mysql",
@@ -106,16 +109,15 @@ jobs:
             "SESSION_ENCRYPT": "false",
             "SESSION_PATH": "/",
             "SESSION_DOMAIN": "",
-            "AZURE_STORAGE_NAME": "${{ secrets.AZURE_STORAGE_NAME }}",
-            "AZURE_STORAGE_KEY": "${{ secrets.AZURE_STORAGE_KEY }}",
-            "AZURE_STORAGE_CONTAINER_NAME": "mediguide-dev-files",
-            "AZURE_CONTAINER": "laravel-files",
-            "AZURE_STORAGE_URL": "https://mediguidesdevstorage.blob.core.windows.net/mediguide-dev-files",
             "CAIRO_URL":"https://mediguides-dev-svg2png.azurewebsites.net/api/convert",
             "SVG_PROCESS_URL":"https://mediguides-dev-process-svg.azurewebsites.net/api/process",
             "PHP_INI_SCAN_DIR":":/home/site/config/php",
             "PHP_CLI_SERVER_WORKERS":"5",
-            "WEBSITES_ENABLE_APP_SERVICE_STORAGE":"true"
+            "WEBSITES_ENABLE_APP_SERVICE_STORAGE":"true",
+            "WEBSITE_CONTENTOVERVNET":"1",
+            "WEBSITE_SKIP_RUNNING_KUDUAGENT":"false",
+            "WEBSITE_VNET_ROUTE_ALL":"1",
+            "VITE_APP_URL":"https://mediguides-dev.azurewebsites.net/"
           }
           EOF
 
@@ -124,12 +126,9 @@ jobs:
           az webapp config appsettings set --resource-group MediGuides_dev_ResourceGroup \
           --name mediguides-dev --settings @appsettings.json
 
-
-
       - name: DEV Deploy to Azure
         uses: azure/webapps-deploy@v2
         with:
           app-name: mediguides-dev
           publish-profile: ${{ secrets.DEV_AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
-
