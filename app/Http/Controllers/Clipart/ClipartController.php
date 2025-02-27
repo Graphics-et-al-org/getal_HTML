@@ -729,4 +729,48 @@ class ClipartController extends Controller
         // dd($output);
         return response()->json($output, 200);
     }
+
+    // Upload the JSON string used as a
+    public function uploadJsonToCache()
+    {
+        $clipart = Clipart::all();
+
+        $colour_id = ClipartColourwayColour::where('name', '=', 'baseline')->first()->id;
+        //  $baseline = $clipart->colourways->where('colour_id', '=', $colour_id)->first(); // ?? Storage::get('/public/questionmark.svg');
+
+        $output = [];
+        // preload baseline ID
+        $clipart->each(function ($item, $key) use ($colour_id, &$output) {
+            //   dd($colour_id);
+            $baseline = $item->colourways->where('colour_id', '=', $colour_id)->first();
+
+            // @TODO make baseline path
+            $appendobj = array(
+                'id' => $item->id,
+                'name' => $item->name,
+                'preferred' => $item->preferred ? 'true' : '',
+                'fallback' => $item->fallback ? 'true' : '',
+                'preferred_description' => $item->preferred_description,
+                'fallback_description' => $item->fallback_description,
+                'gpt4_description' => $item->gpt4_description,
+                'bert_text_embedding_b64' => $item->bert_text_embedding_b64,
+                'clip_image_embedding_b64' => $item->clip_image_embedding_b64,
+                'tags' => $item->tags->pluck('text')->join(','),
+                'colourways_ids' => $item->colourways->pluck('id')->join(',')
+            );
+            if ($baseline) {
+                $appendobj['baseline_id'] = $baseline->id ?? null;
+                $appendobj['baseline_path'] = $baseline->path() ?? null;
+            }
+            $output[] = $appendobj;
+        });
+
+        $fileName = 'cache.json';
+
+        Storage::disk('azure')->put($fileName, json_encode($output));
+        return response()->json([
+            'status' => 0
+        ], 200);
+
+    }
 }

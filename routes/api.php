@@ -55,4 +55,4 @@ Route::get('tags', [ApiController::class, 'tags'])->middleware('guest');
 
 // open clipart search (for now)
 Route::get('clipart/searchbytagsandtext', [ClipartController::class, 'searchByTagsAndText']);
-
+Route::get('clipart/cache', [ClipartController::class, 'uploadJsonToCache']);
