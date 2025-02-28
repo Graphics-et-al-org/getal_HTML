@@ -9,16 +9,20 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use romanzipp\QueueMonitor\Traits\IsMonitored;
 
 class SubmitTextForTranslation implements ShouldQueue
 {
-    use Queueable, InteractsWithQueue, Queueable, SerializesModels, AblyFunctions;
+    use Queueable, InteractsWithQueue, Queueable, SerializesModels, AblyFunctions, IsMonitored;
 
     protected $_params;
     protected $_uuid;
     protected $_user_id;
     protected $_inputStr;
     protected $_template_id;
+
+ //👇 Making the timeout larger
+ public $timeout = 300;
 
     /**
      * Create a new job instance.

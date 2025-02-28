@@ -19,6 +19,9 @@ class SubmitSvgForProcesing implements ShouldQueue
 
     protected $_clipart;
 
+     //👇 Making the timeout larger
+     public $timeout = 300;
+
     /**
      * Create a new job instance.
      */
