@@ -211,9 +211,6 @@
                     <div class="mt-6 flex items-center justify-end gap-x-6">
                         <a href="{{ route('admin.clipart.index') }}" type="button"
                             class="text-sm/6 font-semibold text-gray-900">Cancel</a>
-                        <button onclick="event.preventDefault(); window.saveAndRegenerate()"
-                            class="text-white bg-[#1da1f2] hover:bg-[#1da1f2]/90 focus:ring-4 focus:outline-none focus:ring-[#1da1f2]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#1da1f2]/55 me-2 ">Save and regenerate
-                            AI params</button>
                         <button type="submit"
                             class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ">Save</button>
 

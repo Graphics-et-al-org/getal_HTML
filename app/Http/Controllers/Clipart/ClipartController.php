@@ -331,13 +331,13 @@ class ClipartController extends Controller
                                 break;
                             case 'preferred_description':
                                 if (isset($data[1])) {
-                                    $clipart_data['preferred_description'] = $data[1] ?? 'No description';
+                                    $clipart_data['preferred_description'] = $data[1]??'No description';
                                 }
 
                                 break;
                             case 'fallback_description':
                                 if (isset($data[1])) {
-                                    $clipart_data['preferred_description'] = $data[1] ?? 'No description';
+                                    $clipart_data['preferred_description'] = $data[1]??'No description';
                                 }
 
                                 break;
@@ -348,11 +348,11 @@ class ClipartController extends Controller
                                 break;
                             case 'preferred':
 
-                                $clipart_data['preferred'] = isset($data[1]) ? (strtolower($data[1]) == 'true') : false;
+                                $clipart_data['preferred'] = isset($data[1])?(strtolower($data[1]) == 'true'):false;
                                 break;
                             case 'fallback':
 
-                                $clipart_data['fallback'] = isset($data[1]) ? (strtolower($data[1]) == 'true') : false;
+                                $clipart_data['fallback'] = isset($data[1])?(strtolower($data[1]) == 'true'):false;
                                 break;
                             case 'labs':
                                 //@TODO implement  multiple lab assignments- right now we're doing it manually
@@ -399,8 +399,7 @@ class ClipartController extends Controller
                         }
                     }
 
-                    // make async job, low priprity
-                    SubmitSvgForProcesing::dispatch($clipart)->onConnection('database')->onQueue('low');
+                    SubmitSvgForProcesing::dispatch($clipart)->onConnection('database')->onQueue('svgprocess');
                 } catch (\Exception $e) {
                     // do nothing
                     Storage::delete($files);
@@ -500,56 +499,10 @@ class ClipartController extends Controller
             $colourway->colour_id = ClipartColourwayColour::find($colourway_id)->id;
             $colourway->data = $file->get();
             $colourway->save();
-            // save the thumbnail
 
-            //  if (ClipartColourwayColour::find($colourway_id)->id == $colour_id) {
-
-
-            // dd($job);
-            // $url = env('CAIRO_URL', false);
-            // if ($url) {
-            //     $response = Http::withHeaders([
-            //         'Content-Type' => 'application/json',
-            //     ])->post($url, [
-            //         'svg' =>    $clipart->colourways->where('colour_id', '=', $colour_id)->first()->data
-            //         // also other params here
-            //     ]);
-
-            //     if ($response->successful()) {  //
-            //         // dd($response->json()['png_base64']);
-            //         $manager = new ImageManager(new Driver());
-            //         $clipart->thumb = $manager->read($response->json()['png_base64'])->toPng();
-            //         $clipart->save();
-            //     }
-            // }
-            //}
         }
-        
-        SubmitSvgForProcesing::dispatch($clipart)->onConnection('database')->onQueue('low');
-        // $url = env('SVG_PROCESS_URL', false);
-        // if ($url && ($request['updategpt'] == 'true')) {
+        SubmitSvgForProcesing::dispatch($clipart)->onConnection('database')->onQueue('svgprocess');
 
-        //     $response = Http::withHeaders([
-        //         'Content-Type' => 'application/json',
-        //     ])->post($url, [
-        //         'svg' => $clipart->colourways->where('colour_id', '=', $colour_id)->first()->data,
-        //         'name' => $clipart->name,
-        //         'description' => $clipart->preferred_description,
-        //         'tags' => $clipart->tags->pluck('text')->join(','),
-        //     ]);
-        //     if ($response->successful()) {  //
-
-        //         $data = $response->json();
-        //         //  thumbnail
-        //          $manager = new ImageManager(new Driver());
-        //         // $clipart->thumb = $manager->read($data['png_base64'])->toPng();
-        //         //  other parameters
-        //         $clipart->gpt4_description = $data['gpt4_description'];
-        //         $clipart->clip_image_embedding_b64 = $data['clip_image_embedding_b64'];
-        //         $clipart->bert_text_embedding_b64 = $data['bert_text_embedding_b64'];
-        //         $clipart->save();
-        //     }
-        // }
         session()->flash('flash_success', 'Updated Clipart Successfully');
         return redirect()->route('admin.clipart.index');
     }
@@ -566,47 +519,7 @@ class ClipartController extends Controller
      */
     public function update_ai_params(Request $request, $id)
     {
-        // new clipart entry
-        $clipart = Clipart::find($id);
-        //$colourway = Clipart
-        // dd($colour);
-        $colour_id = ClipartColourwayColour::where('name', '=', 'baseline')->first()->id;
-
-        $url = env('CAIRO_URL', "http://127.0.0.1:5000/convert");
-
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json',
-        ])->post($url, [
-            'svg' =>    $clipart->colourways->where('colour_id', '=', $colour_id)->first()->data
-            // also other params here
-        ]);
-
-        if ($response->successful()) {  //
-            // dd($response->json()['png_base64']);
-            $manager = new ImageManager(new Driver());
-            $clipart->thumb = $manager->read($response->json()['png_base64'])->toPng();
-            $clipart->save();
-        }
-
-        // tags
-        if (isset($request['tags'])) {
-            $tags = [];
-            foreach ($request['tags'] as $tag) {
-                if (!(Tag::where('id', $tag)->exists())) {
-                    if (strlen($tag) > 0) {
-                        $tags[] = Tag::updateOrCreate(['text' => $tag])->id;
-                    }
-                } else {
-                    $tags[] = $tag;
-                }
-            }
-            $clipart->tags()->sync($tags);
-        }
-
-
-
-        session()->flash('flash_success', 'Updated Clipart Successfully');
-        return redirect()->route('admin.clipart.index');
+       return;
     }
 
 
@@ -772,5 +685,17 @@ class ClipartController extends Controller
         return response()->json([
             'status' => 0
         ], 200);
+
+    }
+
+    public function refreshAllAiMetadata(){
+        $clipart = Clipart::all();
+        foreach($clipart as $item) {
+           // dd($item);
+            SubmitSvgForProcesing::dispatch($item)->onConnection('database')->onQueue('svgprocess');
+            return response()->json([
+                'status' => 0
+            ], 200);
+        }
     }
 }

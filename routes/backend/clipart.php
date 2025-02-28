@@ -14,6 +14,7 @@ Route::group([], function () {
         Route::post('clipart/store', [ClipartController::class, 'store'])->name('clipart.store');
 
         Route::post('clipart/bulkimport', [ClipartController::class, 'bulkImport'])->name('clipart.bulkimport');
+        Route::post('clipart/refreshallaimetadata', [ClipartController::class, 'refreshAllAiMetadata']);
 
         // Specific clipart
         Route::group(['prefix' => 'clipart/{id}'], function () {
