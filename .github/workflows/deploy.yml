@@ -170,8 +170,8 @@ jobs:
 
       - name: Deploy WebJobs to Azure Web App
         run: |
-          scp -o StrictHostKeyChecking=no -r webjobs/continuous ${{ secrets.DEV_AZURE_WEBAPP_NAME }}@scm.${{ secrets.DEV_AZURE_WEBAPP_NAME }}.azurewebsites.net:/home/site/wwwroot/App_Data/jobs/
+          scp -o StrictHostKeyChecking=no -r webjobs/continuous mediguides-dev@mediguides-dev.scm.azurewebsites.net:/home/site/wwwroot/App_Data/jobs/
 
       - name: Restart Azure Web App
         run: |
-          az webapp restart --resource-group ${{ secrets.DEV_AZURE_RESOURCE_GROUP }} --name ${{ secrets.DEV_AZURE_WEBAPP_NAME }}
+          az webapp restart --resource-group mediguides_dev_resourcegroup --name mediguides_dev
