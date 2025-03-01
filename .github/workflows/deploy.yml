@@ -147,8 +147,8 @@ jobs:
       - name: Set up SSH for Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          app-name: ${{ secrets.DEV_AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.DEV_AZURE_WEBAPP_PUBLISH_PROFILE }}
 
       - name: Create WebJobs Directory
         run: |
@@ -170,8 +170,8 @@ jobs:
 
       - name: Deploy WebJobs to Azure Web App
         run: |
-          scp -o StrictHostKeyChecking=no -r webjobs/continuous ${{ secrets.AZURE_WEBAPP_NAME }}@scm.${{ secrets.AZURE_WEBAPP_NAME }}.azurewebsites.net:/home/site/wwwroot/App_Data/jobs/
+          scp -o StrictHostKeyChecking=no -r webjobs/continuous ${{ secrets.DEV_AZURE_WEBAPP_NAME }}@scm.${{ secrets.DEV_AZURE_WEBAPP_NAME }}.azurewebsites.net:/home/site/wwwroot/App_Data/jobs/
 
       - name: Restart Azure Web App
         run: |
-          az webapp restart --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ secrets.AZURE_WEBAPP_NAME }}
+          az webapp restart --resource-group ${{ secrets.DEV_AZURE_RESOURCE_GROUP }} --name ${{ secrets.DEV_AZURE_WEBAPP_NAME }}
