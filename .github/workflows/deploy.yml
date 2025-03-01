@@ -11,6 +11,7 @@ on:
 # the actual actions
 jobs:
   build-and-deploy:
+    name: Build and Deploy web app
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -139,12 +140,13 @@ jobs:
   deploy-webjobs:
     name: Deploy Laravel WebJobs
     runs-on: ubuntu-latest
+    needs: build-and-deploy
 
     steps:
-      - name: 🛠 Checkout Code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: 🔹 Set up SSH for Azure Web App
+      - name: Set up SSH for Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
@@ -167,7 +169,7 @@ jobs:
             "run_mode": "continuous",
             "log": "output.log"
           }' > webjobs/continuous/svgprocess/settings.job
-          
+
       - name: Deploy WebJobs to Azure Web App
         run: |
           scp -o StrictHostKeyChecking=no -r webjobs/continuous ${{ secrets.AZURE_WEBAPP_NAME }}@scm.${{ secrets.AZURE_WEBAPP_NAME }}.azurewebsites.net:/home/site/wwwroot/App_Data/jobs/
