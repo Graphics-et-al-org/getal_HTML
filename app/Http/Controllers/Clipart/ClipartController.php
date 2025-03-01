@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Clipart\ClipartColourway;
 use Intervention\Image\Drivers\Gd\Driver;
 use App\Models\Clipart\ClipartColourwayColour;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 
 class ClipartController extends Controller
@@ -688,14 +689,32 @@ class ClipartController extends Controller
 
     }
 
+    // refresh *all* AI metedata for clipart. Takes a while.
     public function refreshAllAiMetadata(){
         $clipart = Clipart::all();
         foreach($clipart as $item) {
            // dd($item);
             SubmitSvgForProcesing::dispatch($item)->onConnection('database')->onQueue('svgprocess');
-            return response()->json([
-                'status' => 0
-            ], 200);
+
         }
+        return response()->json([
+            'status' => 0
+        ], 200);
+    }
+
+    // process clipart entries where metadata hasn't been created
+     public function processPendingAiMetadata(){
+        // clean up existing jobs
+        DB::table('jobs')->where('queue', 'svgprocess')->delete();
+        // process all
+        $clipart = Clipart::where('gpt4_description', null)->get();
+       // dd($clipart->count());
+        foreach($clipart as $item) {
+            SubmitSvgForProcesing::dispatch($item)->onConnection('database')->onQueue('svgprocess');
+
+        }
+        return response()->json([
+            'status' => 0
+        ], 200);
     }
 }

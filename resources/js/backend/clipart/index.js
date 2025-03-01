@@ -67,3 +67,33 @@ window.confirmRefreshMetadata = () => {
         }
     });
 };
+
+window.confirmPendingMetadata = () => {
+    Swal.fire({
+        title: "Complete pending/unfinished AI metadata?",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        customClass: {
+            actions: "my-actions",
+            cancelButton: "order-1 right-gap",
+            confirmButton: "order-2",
+        },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var url = baseurl + "/admin/clipart/processpendingaimetadata"
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    "X-CSRF-Token": csrfToken
+                  }})
+                .then((response) => response.json())
+                .then((json) => {
+                    console.log(json);
+                    Swal.fire("Submitted!", "", "success");
+                })
+                .catch(() => {
+
+                });
+        }
+    });
+};

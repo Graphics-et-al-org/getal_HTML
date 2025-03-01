@@ -21,18 +21,18 @@ class SubmitTextForTranslation implements ShouldQueue
     protected $_inputStr;
     protected $_template_id;
 
- //👇 Making the timeout larger
- public $timeout = 300;
+    //👇 Making the timeout larger
+    public $timeout = 300;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($inputStr, $template_id, $uuid, $user_id)
+    public function __construct($inputStr, $uuid, $user_id)
     {
 
         $this->_inputStr = $inputStr;
         $this->_uuid = $uuid;
-        $this->_template_id = $template_id;
+        //$this->_template_id = $template_id;
         $this->_user_id = $user_id;
     }
 

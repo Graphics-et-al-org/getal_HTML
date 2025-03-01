@@ -115,6 +115,9 @@ jobs:
             "PHP_CLI_SERVER_WORKERS":"5",
             "WEBSITES_ENABLE_APP_SERVICE_STORAGE":"true",
             "WEBSITE_CONTENTOVERVNET":"1",
+            "WEBSITE_CONTENTSHARE":"webjobs",
+            "WEBJOBS_ENABLED":"1",
+            "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING":"${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}",
             "WEBSITE_SKIP_RUNNING_KUDUAGENT":"false",
             "WEBSITE_VNET_ROUTE_ALL":"1",
             "VITE_APP_URL":"https://mediguides-dev.azurewebsites.net/"
@@ -132,3 +135,43 @@ jobs:
           app-name: mediguides-dev
           publish-profile: ${{ secrets.DEV_AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
+
+  deploy-webjobs:
+    name: Deploy Laravel WebJobs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛠 Checkout Code
+        uses: actions/checkout@v3
+
+      - name: 🔹 Set up SSH for Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+
+      - name: Create WebJobs Directory
+        run: |
+          mkdir -p webjobs/continuous/laravel-worker
+
+      - name: Create WebJob Script (Laravel Queue Worker)
+        run: |
+          echo "#!/bin/bash
+          while true; do php artisan queue:work --tries=3 --queue=svgprocess; sleep 1; done" > webjobs/continuous/svgprocess/run.sh
+          chmod +x webjobs/continuous/svgprocess/run.sh
+
+      - name: Create WebJob Script (Laravel Queue Worker)
+        run: |
+         echo '{
+            "is_in_place": true,
+            "run_mode": "continuous",
+            "log": "output.log"
+          }' > webjobs/continuous/svgprocess/settings.job
+          
+      - name: Deploy WebJobs to Azure Web App
+        run: |
+          scp -o StrictHostKeyChecking=no -r webjobs/continuous ${{ secrets.AZURE_WEBAPP_NAME }}@scm.${{ secrets.AZURE_WEBAPP_NAME }}.azurewebsites.net:/home/site/wwwroot/App_Data/jobs/
+
+      - name: Restart Azure Web App
+        run: |
+          az webapp restart --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ secrets.AZURE_WEBAPP_NAME }}

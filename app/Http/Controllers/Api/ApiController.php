@@ -6,6 +6,7 @@ use Ably\AblyRest;
 use Ably;
 use Ably\LaravelBroadcaster\AblyBroadcaster;
 use App\Events\AI\TranslationReadyEvent;
+use App\Helpers\GPT\GPTHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Messaging\AblyController;
 use App\Jobs\AI\SubmitTextForTranslation;
@@ -61,24 +62,23 @@ class ApiController extends Controller
     public function uploadFromExtension(Request $request)
     {
         //Jay's magic happens here
-        // Pass some .env secret, get a connection to Jay's thing
+        // Pass some .env secret, get a connection to the thing
+       // dd($request->text);
 
         // a unique identifier
         $uuid = Str::uuid()->toString();
 
-        // some fake job parameters
-        $template_id = '69';
+        // strip PII
+        $redacted = GPTHelper::anonymize($request->text);
 
         // these wil be extracted from the template.
         $job_params = [
-            "input_document" => 'blah blah blah',
-            "system_prompt" => 'this is a system prompt',
-            "prompt" => "Summarise the text from this document",
+            "doctor_text" => $request->text,
         ];
 
-        $job = SubmitTextForTranslation::dispatch($job_params, $template_id, $uuid, Auth::user()->id)->onConnection('database')->onQueue('summarisedocument');
+        SubmitTextForTranslation::dispatch($job_params, $uuid, Auth::user()->id)->onConnection('database')->onQueue('textprocess');
 
-        // dd($job);
+         //dd($job);
         // send the job now. Later we'll use a queueing system
         //$exitCode = Artisan::call('queue:work', []);
 
