@@ -152,7 +152,7 @@ jobs:
 
       - name: Create WebJobs Directory
         run: |
-          mkdir -p webjobs/continuous/laravel-worker
+          mkdir -p webjobs/continuous/svgprocess
 
       - name: Create WebJob Script (Laravel Queue Worker)
         run: |
