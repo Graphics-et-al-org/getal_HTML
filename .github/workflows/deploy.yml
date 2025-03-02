@@ -85,6 +85,7 @@ jobs:
             "APP_FAKER_LOCALE": "en_US",
             "AZURE_STORAGE_NAME": "${{ secrets.AZURE_STORAGE_NAME }}",
             "AZURE_STORAGE_KEY": "${{ secrets.AZURE_STORAGE_KEY }}",
+            "AZURE_STORAGE_CONNECTION_STRING": "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}",
             "AZURE_STORAGE_CONTAINER_NAME": "mediguide-dev-files",
             "AZURE_CONTAINER": "laravel-files",
             "AZURE_STORAGE_URL": "https://mediguidesdevstorage.blob.core.windows.net/mediguide-dev-files",
