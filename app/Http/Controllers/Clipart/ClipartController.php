@@ -674,7 +674,6 @@ class ClipartController extends Controller
                 'preferred' => $item->preferred ? 'true' : '',
                 'fallback' => $item->fallback ? 'true' : '',
                 'description' => $item->description,
-                'description' => $item->description,
                 'preferred_description' => $item->preferred_description,
                 'fallback_description' => $item->fallback_description,
                 'gpt4_description' => $item->gpt4_description,
