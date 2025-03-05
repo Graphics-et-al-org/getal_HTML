@@ -19,6 +19,7 @@ class Clipart extends Model
         'type',
         'preferred',
         'fallback',
+        'description',
         'preferred_description',
         'fallback_description',
         'gpt4_description',

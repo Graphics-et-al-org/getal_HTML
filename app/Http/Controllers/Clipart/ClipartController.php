@@ -117,6 +117,7 @@ class ClipartController extends Controller
         $clipart->name = $request->name;
         $clipart->owner_id = Auth::user()->id;
         $clipart->created_by = Auth::user()->id;
+        $clipart->description = $request->description;
         $clipart->preferred_description = $request->preferred_description;
         $clipart->fallback_description = $request->fallback_description;
         $clipart->type =  $request->type_radio;
@@ -164,7 +165,7 @@ class ClipartController extends Controller
                     ])->post($url, [
                         'svg' =>  $colourway->data,
                         'name' => $clipart->name,
-                        'description' => $clipart->preferred_description,
+                        'description' => $clipart->description,
                         'tags' => $clipart->tags->pluck('text')->join(','),
                     ]);
                     if ($response->successful()) {  //
@@ -330,15 +331,21 @@ class ClipartController extends Controller
                                 }
                                 $filename = $data[1];
                                 break;
+                            case 'description':
+                                if (isset($data[1])) {
+                                    $clipart_data['description'] = $data[1] ?? 'No description';
+                                }
+
+                                break;
                             case 'preferred_description':
                                 if (isset($data[1])) {
-                                    $clipart_data['preferred_description'] = $data[1]??'No description';
+                                    $clipart_data['preferred_description'] = $data[1] ?? 'No description';
                                 }
 
                                 break;
                             case 'fallback_description':
                                 if (isset($data[1])) {
-                                    $clipart_data['preferred_description'] = $data[1]??'No description';
+                                    $clipart_data['preferred_description'] = $data[1] ?? 'No description';
                                 }
 
                                 break;
@@ -349,11 +356,11 @@ class ClipartController extends Controller
                                 break;
                             case 'preferred':
 
-                                $clipart_data['preferred'] = isset($data[1])?(strtolower($data[1]) == 'true'):false;
+                                $clipart_data['preferred'] = isset($data[1]) ? (strtolower($data[1]) == 'true') : false;
                                 break;
                             case 'fallback':
 
-                                $clipart_data['fallback'] = isset($data[1])?(strtolower($data[1]) == 'true'):false;
+                                $clipart_data['fallback'] = isset($data[1]) ? (strtolower($data[1]) == 'true') : false;
                                 break;
                             case 'labs':
                                 //@TODO implement  multiple lab assignments- right now we're doing it manually
@@ -460,6 +467,7 @@ class ClipartController extends Controller
             ['id' => $id],
             [
                 'name' => $request['name'],
+                'description' => $request['description'],
                 'preferred_description' => $request['preferred_description'],
                 'fallback_description' => $request['fallback_description'],
                 // 'citations' => $request['citations'],
@@ -500,7 +508,6 @@ class ClipartController extends Controller
             $colourway->colour_id = ClipartColourwayColour::find($colourway_id)->id;
             $colourway->data = $file->get();
             $colourway->save();
-
         }
         SubmitSvgForProcesing::dispatch($clipart)->onConnection('database')->onQueue('svgprocess');
 
@@ -520,7 +527,7 @@ class ClipartController extends Controller
      */
     public function update_ai_params(Request $request, $id)
     {
-       return;
+        return;
     }
 
 
@@ -599,7 +606,7 @@ class ClipartController extends Controller
         })->when($request->has('search'), function ($query) use ($request) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', "%{$request['search']}%")
-                    ->orWhere('preferred_description', 'LIKE', "%{$request['search']}%");
+                    ->orWhere('description', 'LIKE', "%{$request['search']}%");
             });
         })->when($request->has('preferred'), function ($query) use ($request) {
             $query->where(function ($q) use ($request) {
@@ -626,6 +633,7 @@ class ClipartController extends Controller
                 'name' => $item->name,
                 'preferred' => $item->preferred ? 'true' : '',
                 'fallback' => $item->fallback ? 'true' : '',
+                'description' => $item->description,
                 'preferred_description' => $item->preferred_description,
                 'fallback_description' => $item->fallback_description,
                 'gpt4_description' => $item->gpt4_description,
@@ -665,6 +673,8 @@ class ClipartController extends Controller
                 'name' => $item->name,
                 'preferred' => $item->preferred ? 'true' : '',
                 'fallback' => $item->fallback ? 'true' : '',
+                'description' => $item->description,
+                'description' => $item->description,
                 'preferred_description' => $item->preferred_description,
                 'fallback_description' => $item->fallback_description,
                 'gpt4_description' => $item->gpt4_description,
@@ -686,16 +696,15 @@ class ClipartController extends Controller
         return response()->json([
             'status' => 0
         ], 200);
-
     }
 
     // refresh *all* AI metedata for clipart. Takes a while.
-    public function refreshAllAiMetadata(){
+    public function refreshAllAiMetadata()
+    {
         $clipart = Clipart::all();
-        foreach($clipart as $item) {
-           // dd($item);
+        foreach ($clipart as $item) {
+            // dd($item);
             SubmitSvgForProcesing::dispatch($item)->onConnection('database')->onQueue('svgprocess');
-
         }
         return response()->json([
             'status' => 0
@@ -703,15 +712,15 @@ class ClipartController extends Controller
     }
 
     // process clipart entries where metadata hasn't been created
-     public function processPendingAiMetadata(){
+    public function processPendingAiMetadata()
+    {
         // clean up existing jobs
         DB::table('jobs')->where('queue', 'svgprocess')->delete();
         // process all
         $clipart = Clipart::where('gpt4_description', null)->get();
-       // dd($clipart->count());
-        foreach($clipart as $item) {
+        // dd($clipart->count());
+        foreach ($clipart as $item) {
             SubmitSvgForProcesing::dispatch($item)->onConnection('database')->onQueue('svgprocess');
-
         }
         return response()->json([
             'status' => 0

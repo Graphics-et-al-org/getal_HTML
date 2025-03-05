@@ -9,7 +9,10 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Log;
 use romanzipp\QueueMonitor\Traits\IsMonitored;
+
+use function Illuminate\Log\log;
 
 class SubmitTextForTranslation implements ShouldQueue
 {
@@ -45,8 +48,8 @@ class SubmitTextForTranslation implements ShouldQueue
         // dd('handling');
         $result_uuid = Str::uuid()->toString();
         //
-        $payload = array("extracted_text" => $this->_inputStr);
-        $apiURL = env('AI_API_SESSION_URL');
+        $payload = array("doctor_text" => $this->_inputStr);
+        $apiURL = env('AI_MAIN_FUNC_URL');
 
         //$client = new \GuzzleHttp\Client(['verify' => false]);
         $response = Http::withHeaders([
@@ -56,20 +59,9 @@ class SubmitTextForTranslation implements ShouldQueue
         $status = $response->getStatusCode();
         //
         //If status is 200, there's a useful response
-        if ($response->successful()) {
-            // get the results from the uuid
-            $resultsURL =  env('AI_API_RESULT_URL');
-            $response = Http::withHeaders([
-                'Accept' => 'application/json',
-            ])->post($resultsURL, $payload);
+        Log::info($response->json());
 
-            $status = $response->getStatusCode();
-        } else {
-        }
-
-        // simulate a long function
-        //sleep(10);
-        $this->sendMessage('translation-status.' . $this->_uuid, json_encode(['message' => 'success', 'uuid' => $result_uuid]));
+        $this->sendMessage('translation-status.' . $this->_uuid, json_encode(['message' => 'success', 'uuid' => $result_uuid, 'content'=>$response->json()]));
         return;
     }
 }

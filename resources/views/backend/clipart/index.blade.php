@@ -110,7 +110,7 @@
                             {{ $item->name }}
                         </td>
                         <td class="px-6 py-4">
-                            {{ $item->preferred_description }}
+                            {{ $item->description }}
                         </td>
                         <td class="px-6 py-4">
                             {{ $item->tags->implode('text', ', ') }}
