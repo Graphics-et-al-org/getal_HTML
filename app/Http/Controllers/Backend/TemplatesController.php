@@ -82,7 +82,7 @@ class TemplatesController extends Controller
         $page = Page::findOr($id, function () {
             return view('backend.pages_templates.index');
         });
-        return view('backend.pages_templates.editor')
+        return view('backend.pages_templates.editor_tinymce')
             ->with('page', $page);
     }
 
@@ -96,8 +96,8 @@ class TemplatesController extends Controller
         $page->label = $request->label;
         $page->description = $request->description ?? '';
         $page->content = $request->content;
-        $page->html = $request->html;
-        $page->css = $request->css;
+       // $page->html = $request->html;
+       // $page->css = $request->css;
         $page->save();
 
         $tags = [];
@@ -121,7 +121,7 @@ class TemplatesController extends Controller
     // store the page
     public function create(Request $request)
     {
-        return view('backend.pages_templates.editor');
+        return view('backend.pages_templates.editor_tinymce');
     }
 
 
@@ -135,8 +135,8 @@ class TemplatesController extends Controller
         $page->label = $request->label;
         $page->description = $request->description ?? '';
         $page->content = $request->content ?? '';
-        $page->html = $request->html ?? '';
-        $page->css = $request->css ?? '';
+       // $page->html = $request->html ?? '';
+       // $page->css = $request->css ?? '';
         $page->save();
 
         $tags = [];

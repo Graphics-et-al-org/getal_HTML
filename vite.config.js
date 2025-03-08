@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import laravel from "laravel-vite-plugin";
 import sass from "vite-plugin-sass";
+import path from 'path';
 
 export default defineConfig({
     plugins: [
@@ -11,11 +12,14 @@ export default defineConfig({
                 "resources/js/app.js",
                 "resources/js/frontend/frontend.js",
                 "resources/js/backend/backend.js",
+                "resources/js/backend/common/editor_tailwind_classes.js",
                 "resources/js/backend/template/index.js",
                 "resources/js/backend/template_builder/builder.js",
+                "resources/js/backend/template_builder/builder_tinymce.js",
                 "resources/js/backend/template_builder/blocks.js",
                 "resources/js/backend/page_static_components/index.js",
                 "resources/js/backend/page_static_components/builder.js",
+                "resources/js/backend/page_static_components/builder_tinymce.js",
                 "resources/js/backend/clipart/index.js",
                 "resources/js/backend/clipart/create.js",
                 "resources/js/backend/clipart/edit.js",
@@ -25,6 +29,11 @@ export default defineConfig({
                 "resources/css/backend/backend.css",
                 "resources/css/backend/template_builder/builder.css",
             ],
+            resolve: {
+                alias: {
+                    'tinymce': path.resolve(__dirname, 'node_modules/tinymce')
+                }
+            },
             refresh: true,
         }),
     ],

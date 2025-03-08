@@ -26,6 +26,8 @@ class PageStaticComponent extends Model
         'uuid',
         'user_id',
         'team_id',
+        'weight',
+        'keypoint',
         'label',
         'description',
         'content',
@@ -38,13 +40,13 @@ class PageStaticComponent extends Model
         return $this->belongsTo(User::class);
     }
 
-     // team relationship
-     public function team(): BelongsTo
-     {
-         return $this->belongsTo(Team::class);
-     }
+    // team relationship
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
 
-         // clipart tags
+    // clipart tags
     public function tags()
     {
         return $this->belongsToMany('App\Models\Tag', 'static_component_tags', 'tag_id', 'static_component_id')->withPivot('tag_id', 'static_component_id');

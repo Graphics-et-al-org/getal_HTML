@@ -7,6 +7,7 @@ export default (editor, opts = {}) => {
   const prefix = editor.Config.selectorManager.pStylePrefix;
   const selIdAttr = "data-sel-id";
 
+
   const options = {
     ...{
       // default options
@@ -41,12 +42,15 @@ export default (editor, opts = {}) => {
       // extra arbitrary classes list
       extraClasses: [],
       // a switch to allow parsing for CSS classes from a URL
-      parseCssURLForClasses: false,
+      parseCssURLForClasses: true,
       // the URL to parse
       cssToParseURL: "",
     },
     ...opts,
   };
+
+  console.log(options);
+
 
   function update(show, filter = "") {
     options.enablePerformance ?? console.time("update");
@@ -114,6 +118,7 @@ export default (editor, opts = {}) => {
   }
 
   editor.on("load", () => {
+    console.log('loading options in suggestions plugin')
     console.log(options)
     // build the UI
     const tags = editor.getContainer().querySelector(`#${prefix}clm-tags-field`);
@@ -130,7 +135,7 @@ export default (editor, opts = {}) => {
 
      // add classes from a CSS file
     if (options.parseCssURLForClasses) {
-      fetchAndExtractClasses(options.cssFileToParseURL).then((classes) => {
+      fetchAndExtractClasses(options.cssToParseURL).then((classes) => {
         classes.forEach((cls) => {
           sm.addClass(cls);
         });

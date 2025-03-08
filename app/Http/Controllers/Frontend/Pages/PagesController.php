@@ -26,7 +26,7 @@ class PagesController extends Controller
     public function data($id)
     {
         $page = Page::findOrFail($id);
-        return $page->content;
+        return ['content'=>$page->content??"Create content here"];
     }
 
     // get the html

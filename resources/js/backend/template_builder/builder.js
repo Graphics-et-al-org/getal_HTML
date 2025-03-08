@@ -19,7 +19,7 @@ const csrfToken = document
     .querySelector('meta[name="csrf-token"]')
     .getAttribute("content");
 
-console.log(projectEndpoint + `${page_id}/data`);
+console.log(projectEndpoint + `/${page_id}/data`);
 
 const editor = grapesjs.init({
     container: "#gjs",
@@ -428,7 +428,7 @@ const editor = grapesjs.init({
                 "image",
             ],
         },
-        suggestions: {
+        [suggestions]: {
             enableCount: false,
             parseCssURLForClasses:true,
             cssToParseURL:tailwindcsspath,

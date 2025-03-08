@@ -77,7 +77,7 @@ class PageStaticComponentsController extends Controller
         $component = PageStaticComponent::findOr($id, function () {
             return view('backend.page_static_components.index');
         });
-        return view('backend.page_static_components.editor')
+        return view('backend.page_static_components.editor_tinymce')
             ->with('component', $component);
     }
 
@@ -85,7 +85,7 @@ class PageStaticComponentsController extends Controller
     // Show the creation page
     public function create(Request $request)
     {
-        return view('backend.page_static_components.editor');
+        return view('backend.page_static_components.editor_tinymce');
     }
 
     public function store(Request $request)
@@ -99,6 +99,7 @@ class PageStaticComponentsController extends Controller
         $component->html = $request->html ?? '';
         $component->css = $request->css ?? '';
         $component->weight = $request->weight??0;
+        $component->keypoint = $request->keypoint??null;
         $component->save();
 
         // add tags, making if necessary
@@ -113,7 +114,7 @@ class PageStaticComponentsController extends Controller
         }
 
          session()->flash('flash_success', 'Created Successfully');
-         return redirect()->route('admin.page_static_components.index');;
+         return redirect()->route('admin.page_static_components.editor_tinymce');;
     }
 
     // store the thing
@@ -127,6 +128,7 @@ class PageStaticComponentsController extends Controller
         $component->html = $request->html ?? '';
         $component->css = $request->css ?? '';
         $component->weight = $request->weight??0;
+        $component->keypoint = $request->keypoint=='true'??null;
         $component->save();
 
         $tags = [];
@@ -168,7 +170,7 @@ class PageStaticComponentsController extends Controller
     public function data($id)
     {
         $component = PageStaticComponent::findOrFail($id);
-        return $component->content;
+        return ['content'=>$component->content??"Create content here"];
     }
 
      // get the html for a snippet

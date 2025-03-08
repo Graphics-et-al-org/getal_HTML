@@ -18,7 +18,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('clipart', function (Blueprint $table) {
-            $table->text(['description']);
+            $table->dropColumn(['description']);
         });
     }
 };
