@@ -63,4 +63,15 @@ Route::group(['namespace' => 'Backend', 'prefix' => 'admin', 'as' => 'admin.', '
     include_route_files(__DIR__ . '/backend/');
 });
 
+/*
+ * Public Routes
+ * Namespaces indicate folder structure
+ */
+Route::group(['namespace' => 'Public', 'prefix' => 'public', 'as' => 'public.'], function () {
+    /*
+     * These routes are open to the public
+     */
+    include_route_files(__DIR__ . '/public/');
+});
+
 require __DIR__.'/auth.php';

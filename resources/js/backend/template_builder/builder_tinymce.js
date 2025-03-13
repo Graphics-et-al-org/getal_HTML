@@ -12,6 +12,8 @@ import "tinymce/models/dom/model";
 import "tinymce/plugins/code";
 import "tinymce/plugins/image";
 import "tinymce/plugins/visualblocks";
+import "tinymce/plugins/preview";
+import "tinymce/plugins/media";
 
 var projectEndpoint;
 
@@ -29,8 +31,8 @@ tinymce.init({
     selector: "div#tinymce",
     license_key: 'gpl',
     skin: false,
-    plugins: ["code", "image", "visualblocks"],
-    toolbar: "code | image | visualblocks",
+    plugins: ["code", "image", "media", "visualblocks", 'preview'],
+    toolbar: "code | image | media| visualblocks|preview",
     content_css: tailwindcsspath,
     images_file_types: "svg,jpeg,jpg,png,gif",
     file_picker_types: "image",

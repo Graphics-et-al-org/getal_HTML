@@ -10,7 +10,7 @@
     <meta name="author" content="@yield('meta_author', 'Adam Landow')">
     @yield('meta')
     @stack('before-styles')
-    @vite('resources/css/app.css')
+    @vite('resources/css/public.css')
     @stack('before-scripts')
 </head>
 

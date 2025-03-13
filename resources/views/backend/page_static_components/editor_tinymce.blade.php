@@ -51,7 +51,7 @@
                         <label for="weight" class="block text-sm/6 font-medium text-gray-900">Weighting (order in
                             page)</label>
                         <div class="mt-2 flex items-center gap-x-3">
-                            <input type="number" name="weight" value="{{ $component->weight ?? '0' }}"
+                            <input type="number" name="weight" value="{{   isset($component)?$component->weight ?? '0':'0' }}"
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                         </div>
                     </div>
@@ -59,7 +59,7 @@
                 <div class="col-span-full flex">
                     <div class="flex-1">
                         <div class="pretty p-svg p-curve p-smooth p-bigger">
-                            <input type="checkbox" name="keypoint" value="true" {{  $component->keypoint?"checked":"" }}/>
+                            <input type="checkbox" name="keypoint" value="true" {{  isset($component)?$component->keypoint?"checked":"":"" }}/>
                             <div class="state p-info">
                                 <svg class="svg svg-icon" viewBox="0 0 20 20">
                                     <path
@@ -99,7 +99,6 @@
 @endsection
 
 @push('after-scripts')
-    <script src="{{ asset('js/tinymce/tinymce.min.js') }}"></script>
     <script>
         const component_id = {{ $component->id ?? -1 }}
         const baseurl = '{{ URL::to('/') }}';

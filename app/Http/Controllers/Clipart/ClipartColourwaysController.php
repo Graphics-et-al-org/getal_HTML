@@ -16,11 +16,11 @@ class ClipartColourwaysController extends Controller
      * @param $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($uuid)
     {
         // look for the colourway
         try {
-            $media = ClipartColourway::findOrFail($id);
+            $media = ClipartColourway::where('uuid', $uuid)->firstOrFail();
             $data = $media->data;
             // if we can't find it,
         } catch (ModelNotFoundException $e) {

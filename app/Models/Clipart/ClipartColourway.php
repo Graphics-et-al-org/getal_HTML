@@ -5,6 +5,8 @@ namespace App\Models\Clipart;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\URL;
+
 
 class ClipartColourway extends Model
 {
@@ -15,7 +17,8 @@ class ClipartColourway extends Model
     protected $fillable = [
         'clipart_id',
         'data',
-        'colour_id'
+        'colour_id',
+        'uuid',
     ];
 
     // one to many relationship with clipart
@@ -33,6 +36,8 @@ class ClipartColourway extends Model
     // path- used for direct link to colourway
     public function path()
     {
-        return \url('/colourway') . '/' . $this->id;
+        return URL::to('/colourway') . '/' . $this->uuid;
     }
+
+
 }

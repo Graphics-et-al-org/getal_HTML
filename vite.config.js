@@ -9,10 +9,13 @@ export default defineConfig({
         laravel({
             input: [
                 "resources/css/app.css",
+                "resources/css/backend/backend.css",
+                "resources/css/public.css",
+                "resources/css/backend/template_builder/builder.css",
                 "resources/js/app.js",
+                "resources/js/common/tailwind_classes.js",
                 "resources/js/frontend/frontend.js",
                 "resources/js/backend/backend.js",
-                "resources/js/backend/common/editor_tailwind_classes.js",
                 "resources/js/backend/template/index.js",
                 "resources/js/backend/template_builder/builder.js",
                 "resources/js/backend/template_builder/builder_tinymce.js",
@@ -26,8 +29,7 @@ export default defineConfig({
                 "resources/js/backend/user/create.js",
                 "resources/js/backend/user/edit.js",
                 "resources/js/backend/team/members.js",
-                "resources/css/backend/backend.css",
-                "resources/css/backend/template_builder/builder.css",
+                "resources/js/frontend/clinician_page/clinician_page.js",
             ],
             resolve: {
                 alias: {

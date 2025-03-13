@@ -12,6 +12,7 @@
         "azure-oss/storage-blob-laravel": "^1.3",
         "diglactic/laravel-breadcrumbs": "^9.0",
         "firebase/php-jwt": "^6.10",
+        "imangazaliev/didom": "^2.0",
         "intervention/image": "^3.10",
         "laravel/framework": "^11.31",
         "laravel/reverb": "^1.0",

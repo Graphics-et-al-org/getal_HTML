@@ -2,8 +2,12 @@
 
 namespace App\Jobs\AI;
 
+use App\Models\Clipart\Clipart;
+use App\Models\Page\Page;
+use App\Models\Page\PageStaticComponent;
 use Illuminate\Support\Str;
 use App\Traits\AblyFunctions;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -31,12 +35,12 @@ class SubmitTextForTranslation implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct($inputStr, $uuid, $user_id, $simulated)
+    public function __construct($inputStr, $template_id, $uuid, $user_id, $simulated = false)
     {
 
         $this->_inputStr = $inputStr;
         $this->_uuid = $uuid;
-        //$this->_template_id = $template_id;
+        $this->_template_id = $template_id;
         $this->_user_id = $user_id;
         $this->_simulated = $simulated;
     }
@@ -127,9 +131,65 @@ class SubmitTextForTranslation implements ShouldQueue
             }
         }
         // build an output
+        // get the template, the assumption is it has the required 'data-' fields
+        $templateHtml = Page::find($this->_template_id)->content;
 
+        // get the keypoint template
+        $keypointHTML = PageStaticComponent::where('keypoint', 1)->first()->content;
+
+        // build the output
+        $output = str_ireplace(["{{title}}","{{summary}}"], [ $response_content['title'], $response_content['summary']], $templateHtml);
+
+        // build and insert the keypoints
+        $keypointOutput = '';
+        foreach ($response_content['paired_images'] as $key => $value) {
+            // dd($response_content['paired_images'][$key]['best_image']);
+          //  dd($value['best_image']);
+            $img =  Clipart::find($value['best_image']);
+            if($img){
+                $img_path = Clipart::find($value['best_image'])->baseline()->path();
+            } else {
+                $img_path = 'https://picsum.photos/200';
+            }
+            $keypointOutput .= str_ireplace(["{{image_src}}","{{text}}"], [$img_path, $value['keypoint']], $keypointHTML);
+        }
+
+        $output = str_ireplace("{{keypoints_container}}", $keypointOutput, $output);
+        // build the new page
+        $outputPage = new Page();
+        $outputPage->uuid = $result_uuid;
+        $outputPage->label = 'Patient information generated '.Carbon::now()->toDateTimeString();
+        $outputPage->group_id = null;
+        $outputPage->data = json_encode($response_content);
+        $outputPage->content = $output;
+        $outputPage->user_id = $this->_user_id;
+        $outputPage->save();
+    //    dd($output);
+    //    Log::info('output: ' . $output);
 
         $this->sendMessage('translation-status.' . $this->_uuid, json_encode(['message' => 'success', 'uuid' => $result_uuid, 'content' => $response_content]));
         return;
+    }
+
+    private function replaceContentByAttribute($html, $attribute, $replacements)
+    {
+        $dom = new \DOMDocument();
+        libxml_use_internal_errors(true); // Suppress errors for invalid HTML
+        $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+
+        $xpath = new \DOMXPath($dom);
+
+        foreach ($replacements as $value => $newContent) {
+            $nodes = $xpath->query("//*[@$attribute='$value']");
+            foreach ($nodes as $node) {
+                $newFragment = $dom->createDocumentFragment();
+                $newFragment->appendXML($newContent);
+                $node->nodeValue = ''; // Clear existing content
+                $node->appendChild($newFragment);
+            }
+        }
+
+        return $dom->saveHTML();
     }
 }

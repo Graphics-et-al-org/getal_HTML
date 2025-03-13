@@ -35,6 +35,12 @@ class Clipart extends Model
         return $this->hasMany('App\Models\Clipart\ClipartColourway', 'clipart_id', 'id');
     }
 
+    public function baseline()
+    {
+        $baseline_colour_id = ClipartColourwayColour::where('name', '=', 'baseline')->first()->id;
+        return $this->colourways->where('colour_id', '=', $baseline_colour_id)->first();
+    }
+
     // clipart tags
     public function tags()
     {

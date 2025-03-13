@@ -34,7 +34,8 @@ class Page extends Model
         'description',
         'content',
         'html',
-        'css'
+        'css',
+        'data'
     ];
 
     // // relationship between pages and page_pages
@@ -47,6 +48,8 @@ class Page extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    
 
 
     // clipart tags

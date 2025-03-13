@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
@@ -16,9 +17,9 @@ class PageStaticComponentsController extends Controller
     public function index(Request $request)
     {
         // get components
-         // get templates
-    //dd($request->has('tags'));
-         if ($request->has('tags')) {
+        // get templates
+        //dd($request->has('tags'));
+        if ($request->has('tags')) {
             if (!$request->has('search')) {
                 Session::forget('admin_static_component_search');
             }
@@ -53,10 +54,10 @@ class PageStaticComponentsController extends Controller
         }
 
         $components = PageStaticComponent::when($request->has('tags'), function ($query) use ($request) {
-                $query->whereHas('tags', function ($q) use ($request) {
-                    $q->whereIn('tags.id', $request['tags']);
-                });
-            })
+            $query->whereHas('tags', function ($q) use ($request) {
+                $q->whereIn('tags.id', $request['tags']);
+            });
+        })
             ->when($request->has('search'), function ($query) use ($request) {
                 $query->where(function ($q) use ($request) {
                     $q->where('label', 'like', "%{$request['search']}%")
@@ -91,15 +92,15 @@ class PageStaticComponentsController extends Controller
     public function store(Request $request)
     {
         $component = new PageStaticComponent();
-        $component->uuid =(string) Str::uuid();
+        $component->uuid = (string) Str::uuid();
         $component->user_id = Auth::user()->id;
         $component->label = $request->label;
         $component->description = $request->description ?? '';
         $component->content = $request->content ?? '';
         $component->html = $request->html ?? '';
         $component->css = $request->css ?? '';
-        $component->weight = $request->weight??0;
-        $component->keypoint = $request->keypoint??null;
+        $component->weight = $request->weight ?? 0;
+        $component->keypoint = $request->keypoint ?? null;
         $component->save();
 
         // add tags, making if necessary
@@ -113,8 +114,8 @@ class PageStaticComponentsController extends Controller
             }
         }
 
-         session()->flash('flash_success', 'Created Successfully');
-         return redirect()->route('admin.page_static_components.editor_tinymce');;
+        session()->flash('flash_success', 'Created Successfully');
+        return redirect()->route('backend.page_static_components.index');
     }
 
     // store the thing
@@ -127,8 +128,8 @@ class PageStaticComponentsController extends Controller
         $component->content = $request->content ?? '';
         $component->html = $request->html ?? '';
         $component->css = $request->css ?? '';
-        $component->weight = $request->weight??0;
-        $component->keypoint = $request->keypoint=='true'??null;
+        $component->weight = $request->weight ?? 0;
+        $component->keypoint = $request->keypoint == 'true' ?? null;
         $component->save();
 
         $tags = [];
@@ -170,20 +171,51 @@ class PageStaticComponentsController extends Controller
     public function data($id)
     {
         $component = PageStaticComponent::findOrFail($id);
-        return ['content'=>$component->content??"Create content here"];
+        return ['content' => $component->content ?? "Create content here"];
     }
 
-     // get the html for a snippet
-     public function html($id)
-     {
-         $component = PageStaticComponent::findOrFail($id);
-         return $component->html;
-     }
+    // get the html for a snippet
+    public function html($id)
+    {
+        $component = PageStaticComponent::findOrFail($id);
+        return $component->html;
+    }
 
-      // get the css for a snippet
-      public function css($id)
-      {
-          $component = PageStaticComponent::findOrFail($id);
-          return $component->css;
-      }
+    // get the css for a snippet
+    public function css($id)
+    {
+        $component = PageStaticComponent::findOrFail($id);
+        return $component->css;
+    }
+
+    // search by tags and text
+    public function searchByTagsAndText(Request $request)
+    {
+
+        $components = PageStaticComponent::where('keypoint', null)
+            ->when($request->has('tags'), function ($query) use ($request) {
+                $query->whereHas('tags', function ($q) use ($request) {
+                    $q->whereIn('tags.text', $request['tags']);
+                });
+            })->when($request->has('search'), function ($query) use ($request) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('label', 'like', "%{$request['search']}%")
+                        ->orWhere('description', 'LIKE', "%{$request['search']}%");
+                });
+            })->get();
+        //     dd($components->toBase());
+        $components->each(function ($item, $key) use (&$output) {
+            // @TODO make baseline path
+            $appendobj = array(
+                'uuid' => $item->uuid,
+                'label' => $item->label,
+                'description' => $item->preferred ? 'true' : '',
+                'tags' => $item->tags->pluck('text')->join(','),
+
+            );
+
+            $output[] = $appendobj;
+        });
+        return $output;
+    }
 }

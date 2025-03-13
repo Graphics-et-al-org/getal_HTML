@@ -10,6 +10,7 @@ use App\Helpers\GPT\GPTHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Messaging\AblyController;
 use App\Jobs\AI\SubmitTextForTranslation;
+use App\Models\Page\Page;
 use App\Models\Tag;
 use App\Traits\AblyFunctions;
 use Illuminate\Http\Request;
@@ -77,6 +78,40 @@ class ApiController extends Controller
         ];
 
         SubmitTextForTranslation::dispatch($job_params, $uuid, Auth::user()->id)->onConnection('database')->onQueue('textprocess');
+
+         //dd($job);
+        // send the job now. Later we'll use a queueing system
+        //$exitCode = Artisan::call('queue:work', []);
+
+        return response()->json(['success' => true, 'uuid' => $uuid]);
+    }
+
+    /**
+     *Handle an upload from an extension
+     * @return
+     *     */
+    public function testuploadFromExtension($id)
+    {
+        //Jay's magic happens here
+        // Pass some .env secret, get a connection to the thing
+       // dd($request->text);
+
+        // a unique identifier
+        $uuid = Str::uuid()->toString();
+
+        // strip PII
+        //$redacted = GPTHelper::anonymize($request->text);
+
+        // find the first template
+     //   $template_id = Page::where('is_template', '1')->first()->id;
+     //   dd($template_id);
+
+        // these wil be extracted from the template.
+        $job_params = [
+            "doctor_text" => 'demo test',
+        ];
+
+        SubmitTextForTranslation::dispatch($job_params, $id, $uuid, 1, true)->onConnection('database')->onQueue('textprocess');
 
          //dd($job);
         // send the job now. Later we'll use a queueing system
