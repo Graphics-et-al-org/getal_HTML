@@ -191,7 +191,7 @@ class PageStaticComponentsController extends Controller
     // search by tags and text
     public function searchByTagsAndText(Request $request)
     {
-
+       // dd($request->all());
         $components = PageStaticComponent::where('keypoint', null)
             ->when($request->has('tags'), function ($query) use ($request) {
                 $query->whereHas('tags', function ($q) use ($request) {
@@ -211,9 +211,7 @@ class PageStaticComponentsController extends Controller
                 'label' => $item->label,
                 'description' => $item->preferred ? 'true' : '',
                 'tags' => $item->tags->pluck('text')->join(','),
-
             );
-
             $output[] = $appendobj;
         });
         return $output;

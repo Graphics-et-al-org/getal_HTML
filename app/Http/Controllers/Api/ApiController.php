@@ -123,7 +123,7 @@ class ApiController extends Controller
     // expose tags search
     public function tags(Request $request)
     {
-        $tags = Tag::where('text', 'like', '%' . $request->q . '%')->get();
+        $tags = Tag::where('text', 'like', '%' . $request->q . '%')->take(20)->get();
         $tags->transform(function ($item, $key) {
             return ['value' => $item->id, 'text' => $item->text];
         });

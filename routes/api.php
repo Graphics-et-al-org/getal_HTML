@@ -58,7 +58,8 @@ Route::get(
 Route::get('tags', [ApiController::class, 'tags'])->middleware('guest');
 
 // Search
-Route::get('static-components/searchbytagsandtext', [PageStaticComponentsController::class, 'searchByTagsAndText']);
+Route::get('static-components/searchbytagsandtext', [PageStaticComponentsController::class, 'searchByTagsAndText'])->middleware('guest');
+
 
 // open clipart search (for now)
 Route::get('clipart/searchbytagsandtext', [ClipartController::class, 'searchByTagsAndText']);
