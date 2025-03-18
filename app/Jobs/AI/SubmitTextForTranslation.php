@@ -20,7 +20,7 @@ use function Illuminate\Log\log;
 
 class SubmitTextForTranslation implements ShouldQueue
 {
-    use Queueable, InteractsWithQueue, Queueable, SerializesModels, AblyFunctions, IsMonitored;
+    use Queueable, InteractsWithQueue, SerializesModels, AblyFunctions, IsMonitored;
 
     protected $_params;
     protected $_uuid;
@@ -28,20 +28,24 @@ class SubmitTextForTranslation implements ShouldQueue
     protected $_inputStr;
     protected $_simulated;
     protected $_template_id;
+    protected $_static_components;
+
 
     //👇 Making the timeout larger
     public $timeout = 300;
 
+    public $job_uuid;
+
     /**
      * Create a new job instance.
      */
-    public function __construct($inputStr, $template_id, $uuid, $user_id, $simulated = false)
+    public function __construct($inputStr, $template_id, $uuid, $user_id, $static_components = [], $simulated = false)
     {
-
         $this->_inputStr = $inputStr;
         $this->_uuid = $uuid;
         $this->_template_id = $template_id;
         $this->_user_id = $user_id;
+        $this->_static_components = $static_components;
         $this->_simulated = $simulated;
     }
 
@@ -53,6 +57,8 @@ class SubmitTextForTranslation implements ShouldQueue
         //
         // dd('handling');
         $result_uuid = Str::uuid()->toString();
+
+        $this->queueData(['uuid' =>  $this->_uuid]);
         //
         $payload = array("doctor_text" => $this->_inputStr);
         $apiURL = env('AI_MAIN_FUNC_URL');
@@ -132,40 +138,51 @@ class SubmitTextForTranslation implements ShouldQueue
         }
         // build an output
         // get the template, the assumption is it has the required 'data-' fields
+        Log::info('Using template:' . $this->_template_id);
         $templateHtml = Page::find($this->_template_id)->content;
 
         // get the keypoint template
         $keypointHTML = PageStaticComponent::where('keypoint', 1)->first()->content;
 
         // build the output
-        $output = str_ireplace(["{{title}}","{{summary}}"], [ $response_content['title'], $response_content['summary']], $templateHtml);
+        $output = str_ireplace(["{{title}}", "{{summary}}"], [$response_content['title'], $response_content['summary']], $templateHtml);
 
         // build and insert the keypoints
         $keypointOutput = '';
         foreach ($response_content['paired_images'] as $key => $value) {
             // dd($response_content['paired_images'][$key]['best_image']);
-          //  dd($value['best_image']);
+            //  dd($value['best_image']);
             $img =  Clipart::find($value['best_image']);
-            if($img){
+            if ($img) {
                 $img_path = Clipart::find($value['best_image'])->baseline()->path();
             } else {
                 $img_path = 'https://picsum.photos/200';
             }
-            $keypointOutput .= str_ireplace(["{{image_src}}","{{text}}"], [$img_path, $value['keypoint']], $keypointHTML);
+            $keypointOutput .= str_ireplace(["{{image_src}}", "{{text}}"], [$img_path, $value['keypoint']], $keypointHTML);
         }
 
         $output = str_ireplace("{{keypoints_container}}", $keypointOutput, $output);
+
+        // extras at teh end
+        // get the compoents and sort by weight
+        $components = PageStaticComponent::whereIn('uuid', $this->_static_components)->orderBy('weight', 'desc')->get();
+        // tack the content on to the end
+        foreach ($components as $component) {
+            $output .= $component->content;
+        }
+
         // build the new page
         $outputPage = new Page();
         $outputPage->uuid = $result_uuid;
-        $outputPage->label = 'Patient information generated '.Carbon::now()->toDateTimeString();
+        $outputPage->label = 'Patient information generated ' . Carbon::now()->toDateTimeString();
         $outputPage->group_id = null;
         $outputPage->data = json_encode($response_content);
         $outputPage->content = $output;
         $outputPage->user_id = $this->_user_id;
+        $outputPage->job_uuid = $this->_uuid;
         $outputPage->save();
-    //    dd($output);
-    //    Log::info('output: ' . $output);
+        //    dd($output);
+        //    Log::info('output: ' . $output);
 
         $this->sendMessage('translation-status.' . $this->_uuid, json_encode(['message' => 'success', 'uuid' => $result_uuid, 'content' => $response_content]));
         return;

@@ -192,18 +192,21 @@ class PageStaticComponentsController extends Controller
     public function searchByTagsAndText(Request $request)
     {
        // dd($request->all());
-        $components = PageStaticComponent::where('keypoint', null)
+        $components = PageStaticComponent::where('keypoint', false)
             ->when($request->has('tags'), function ($query) use ($request) {
                 $query->whereHas('tags', function ($q) use ($request) {
                     $q->whereIn('tags.text', $request['tags']);
                 });
             })->when($request->has('search'), function ($query) use ($request) {
+
                 $query->where(function ($q) use ($request) {
                     $q->where('label', 'like', "%{$request['search']}%")
                         ->orWhere('description', 'LIKE', "%{$request['search']}%");
                 });
+            //    dd($query);
             })->get();
         //     dd($components->toBase());
+        $output = [];
         $components->each(function ($item, $key) use (&$output) {
             // @TODO make baseline path
             $appendobj = array(

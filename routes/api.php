@@ -41,6 +41,10 @@ Route::post('/ablytoken', [ApiController::class, 'getAblyToken'])->middleware(En
 Route::post('/extension/upload', [ApiController::class, 'uploadFromExtension'])
     ->middleware(EnsureAuth0TokenIsValid::class);
 
+    // handle an upload from the extension and create a job
+Route::post('/extension/checkjob', [ApiController::class, 'checkJobStatus'])->middleware('guest');
+//->middleware(EnsureAuth0TokenIsValid::class);
+
 // trigger jobs
 Route::get(
     'triggerjobs',

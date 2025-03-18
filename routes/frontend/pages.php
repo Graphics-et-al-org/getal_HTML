@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\Route;
 Route::group([], function () {
     // Pages Management
     Route::group(['namespace' => 'Pages'], function () {
-
-
         // Specific page
         Route::group(['prefix' => 'page/{uuid}'], function () {
 
@@ -23,9 +21,7 @@ Route::group([], function () {
 
             Route::get('approve', [PagesController::class, 'clinician_approve'])->name('page.clinican_approve');
 
-
         });
-
 
     });
 });

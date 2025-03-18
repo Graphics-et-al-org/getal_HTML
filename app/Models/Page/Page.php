@@ -35,7 +35,8 @@ class Page extends Model
         'content',
         'html',
         'css',
-        'data'
+        'data',
+        'job_uuid'
     ];
 
     // // relationship between pages and page_pages
@@ -49,7 +50,7 @@ class Page extends Model
         return $this->belongsTo(User::class);
     }
 
-    
+
 
 
     // clipart tags

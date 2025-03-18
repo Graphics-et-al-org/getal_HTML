@@ -17,6 +17,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use romanzipp\QueueMonitor\Models\Monitor;
+use romanzipp\QueueMonitor\Enums\MonitorStatus;
 
 class ApiController extends Controller
 {
@@ -62,24 +64,26 @@ class ApiController extends Controller
      *     */
     public function uploadFromExtension(Request $request)
     {
-        //Jay's magic happens here
-        // Pass some .env secret, get a connection to the thing
-       // dd($request->text);
-
         // a unique identifier
         $uuid = Str::uuid()->toString();
+
+        // @TODO Extract string from file
+
 
         // strip PII
         $redacted = GPTHelper::anonymize($request->text);
 
+        // get template- probably based on the team?
+        $template_id = Page::where('is_template', '1')->get()->last()->id;
+
         // these wil be extracted from the template.
-        $job_params = [
-            "doctor_text" => $request->text,
-        ];
+        // $job_params = [
+        //     "doctor_text" => $request->text,
+        //     "static_components"=>$request->components
+        // ];
 
-        SubmitTextForTranslation::dispatch($job_params, $uuid, Auth::user()->id)->onConnection('database')->onQueue('textprocess');
+        SubmitTextForTranslation::dispatch($redacted, $template_id, $uuid, Auth::user()->id, $request->components ?? null)->onConnection('database')->onQueue('textprocess');
 
-         //dd($job);
         // send the job now. Later we'll use a queueing system
         //$exitCode = Artisan::call('queue:work', []);
 
@@ -94,7 +98,7 @@ class ApiController extends Controller
     {
         //Jay's magic happens here
         // Pass some .env secret, get a connection to the thing
-       // dd($request->text);
+        // dd($request->text);
 
         // a unique identifier
         $uuid = Str::uuid()->toString();
@@ -103,8 +107,8 @@ class ApiController extends Controller
         //$redacted = GPTHelper::anonymize($request->text);
 
         // find the first template
-     //   $template_id = Page::where('is_template', '1')->first()->id;
-     //   dd($template_id);
+        //   $template_id = Page::where('is_template', '1')->first()->id;
+        //   dd($template_id);
 
         // these wil be extracted from the template.
         $job_params = [
@@ -113,7 +117,7 @@ class ApiController extends Controller
 
         SubmitTextForTranslation::dispatch($job_params, $id, $uuid, 1, true)->onConnection('database')->onQueue('textprocess');
 
-         //dd($job);
+        //dd($job);
         // send the job now. Later we'll use a queueing system
         //$exitCode = Artisan::call('queue:work', []);
 
@@ -128,5 +132,16 @@ class ApiController extends Controller
             return ['value' => $item->id, 'text' => $item->text];
         });
         return response()->json($tags);
+    }
+
+    // check the job's status, based on a uuid
+    public function checkJobStatus(Request $request)
+    {
+        $job = Monitor::where('data', '{"uuid":"'.$request->uuid.'"}')->get()->first();
+        try {
+            return  response()->json(['status' => $job->status, 'uuid' => ($job->status == 1) ? Page::where('job_uuid', $request->uuid)->get()->first()->uuid : '']);
+        } catch (\Exception $e) {
+            return  response()->json(['status' => $e->getMessage()]);
+        }
     }
 }
