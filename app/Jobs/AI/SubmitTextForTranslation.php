@@ -2,19 +2,22 @@
 
 namespace App\Jobs\AI;
 
-use App\Models\Clipart\Clipart;
+use Carbon\Carbon;
+use DiDom\Element;
+use DiDom\Document;
 use App\Models\Page\Page;
-use App\Models\Page\PageStaticComponent;
 use Illuminate\Support\Str;
 use App\Traits\AblyFunctions;
-use Carbon\Carbon;
+use App\Models\Clipart\Clipart;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
+use App\Models\Page\PageStaticComponent;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
 use romanzipp\QueueMonitor\Traits\IsMonitored;
+
 
 use function Illuminate\Log\log;
 
@@ -165,10 +168,25 @@ class SubmitTextForTranslation implements ShouldQueue
 
         // extras at teh end
         // get the compoents and sort by weight
+
         $components = PageStaticComponent::whereIn('uuid', $this->_static_components)->orderBy('weight', 'desc')->get();
-        // tack the content on to the end
-        foreach ($components as $component) {
-            $output .= $component->content;
+        // only tack them on when there's something
+        if ($components->count() > 0) {
+            $componentsOutput = '';
+            // tack the content on to the end
+            foreach ($components as $component) {
+                $componentsOutput .= $component->content;
+            }
+
+            $output = str_ireplace("{{components_container}}", $componentsOutput, $output);
+        } else {
+            $document = new Document($output);
+            $nodes = $document->find('[data-field="components-container"]');
+            // Remove each node
+            foreach ($nodes as $node) {
+                $node->remove();
+            }
+            $output = $document->html();
         }
 
         // build the new page

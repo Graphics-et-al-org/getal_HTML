@@ -36,29 +36,22 @@ class Page extends Model
         'html',
         'css',
         'data',
-        'job_uuid'
+        'job_uuid',
+        'released_at'
     ];
 
     // // relationship between pages and page_pages
-    // public function PagePages() : HasMany {
-    //     return $this->hasMany(PagePage::class);
-    // }
+  // clipart tags
+  public function tags()
+  {
+      return $this->belongsToMany('App\Models\Tag', 'page_tags', 'tag_id', 'page_id')->withPivot('tag_id', 'page_id');
+  }
 
     // relationship between pages and page_pages
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
-
-
-
-
-    // clipart tags
-    public function tags()
-    {
-        return $this->belongsToMany('App\Models\Tag', 'static_component_tags', 'tag_id', 'static_component_id')->withPivot('tag_id', 'static_component_id');
-    }
-
     /**
      * Create a new factory instance for the model.
      *

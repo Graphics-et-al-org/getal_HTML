@@ -4,7 +4,6 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite"
-
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",
@@ -22,8 +21,13 @@
     },
     "dependencies": {
         "@alandow/grapesjs-ui-suggest-classes": "file:../grapesjs/grapesjs-ui-suggest-classes",
+        "@codemirror/lang-html": "^6.4.9",
+        "@codemirror/language": "^6.11.0",
+        "@codemirror/state": "^6.5.2",
+        "@codemirror/view": "^6.36.4",
         "@fortawesome/fontawesome-free": "^6.7.2",
         "@silexlabs/grapesjs-ui-suggest-classes": "file:../grapesjs/grapesjs-ui-suggest-classes",
+        "codemirror": "^6.0.1",
         "draggabilly": "^3.0.0",
         "dragula": "^3.7.3",
         "flowbite": "^2.5.2",
@@ -40,6 +44,7 @@
         "grapesjs-preset-webpage": "^1.0.3",
         "grapesjs-ui-suggest-classes": "file:../grapesjs/grapesjs-ui-suggest-classes",
         "jquery": "^3.7.1",
+        "js-beautify": "^1.15.4",
         "lit-html": "^3.2.1",
         "packery": "^3.0.0",
         "pretty-checkbox": "^3.0.3",

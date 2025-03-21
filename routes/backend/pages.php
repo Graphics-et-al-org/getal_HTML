@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\TemplatesController;
-use App\Http\Controllers\Frontend\Pages\PagesController;
+use App\Http\Controllers\Backend\PagesController;
 use App\Http\Controllers\Frontend\Pages\PagesPagesController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +45,8 @@ Route::group([], function () {
             Route::get('data', [PagesController::class, 'data'])->name('page.data');
 
             Route::patch('update', [PagesController::class, 'update'])->name('page.update');
+
+            Route::get('/', [PagesController::class, 'destroy'])->name('page.destroy');
             //  Route::delete('/', [BoardsBackendController::class, 'destroy'])->name('board.destroy');
         });
     });

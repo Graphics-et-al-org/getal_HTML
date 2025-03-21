@@ -2,6 +2,16 @@ import "tom-select/dist/css/tom-select.css";
 
 import TomSelect from "tom-select";
 import tinymce from "tinymce";
+import { EditorState } from "@codemirror/state";
+import { EditorView } from "@codemirror/view";
+import { basicSetup } from "codemirror";
+import {
+    indentOnInput,
+} from "@codemirror/language";
+import { html } from "@codemirror/lang-html";
+import { Modal } from "flowbite";
+import beautify from "js-beautify";
+
 import "tinymce/tinymce";
 import "tinymce/skins/ui/oxide/skin.min.css";
 import "tinymce/skins/content/default/content.min.css";
@@ -14,6 +24,51 @@ import "tinymce/plugins/image";
 import "tinymce/plugins/visualblocks";
 import "tinymce/plugins/preview";
 import "tinymce/plugins/media";
+import "tinymce/plugins/fullscreen";
+
+// setup the CodeMirror editor
+const cmEditor = new EditorView({
+    state: EditorState.create({
+        doc: "<h1>Hello, World!</h1>",
+        extensions: [
+            basicSetup,
+            indentOnInput(), // Enable auto indent on Enter
+
+            html(),
+        ],
+    }),
+    parent: document.getElementById("codemirror-container"),
+});
+
+// set the modal menu element
+const $targetEl = document.getElementById("html-editor-modal");
+
+// options with default values
+const options = {
+    placement: "center-center",
+    backdrop: "dynamic",
+    backdropClasses: "bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40",
+    closable: true,
+    onHide: () => {
+        console.log('hiding modal, saving content')
+        tinymce.get("tinymce").setContent(cmEditor.state.doc.toString());
+    },
+    onShow: () => {
+        console.log("modal is shown");
+    },
+    onToggle: () => {
+        console.log("modal has been toggled");
+    },
+};
+
+// instance options object
+const instanceOptions = {
+    id: "modalEl",
+    override: true,
+};
+
+const modal = new Modal($targetEl, options, instanceOptions);
+
 
 var projectEndpoint;
 
@@ -29,10 +84,17 @@ var projectEndpoint = `${baseurl}/admin/page/`;
 
 tinymce.init({
     selector: "div#tinymce",
-    license_key: 'gpl',
+    license_key: "gpl",
     skin: false,
-    plugins: ["code", "image", "media", "visualblocks", 'preview'],
-    toolbar: "code | image | media| visualblocks|preview",
+    plugins: [
+        "code",
+        "image",
+        "media",
+        "visualblocks",
+        "preview",
+        "fullscreen",
+    ],
+    toolbar: "codeeditor | image | media| visualblocks | preview | fullscreen",
     content_css: tailwindcsspath,
     images_file_types: "svg,jpeg,jpg,png,gif",
     file_picker_types: "image",
@@ -75,20 +137,38 @@ tinymce.init({
         input.click();
     },
     setup: (editor) => {
-        editor.on('init', (e) => {
-            // load content from the server
-            console.log(projectEndpoint+ `${page_id}/data`);
-            if(page_id > 0){
-                fetch(projectEndpoint + `${page_id}/data`)
-                .then((response) => response.json())
-                .then((data) => {
-                    editor.setContent(data.content);
-                });
-                }
-
+        editor.ui.registry.addButton("codeeditor", {
+            text: "Code Editor",
+            onAction: function () {
+                openCodeMirror(editor);
+            },
         });
-      }
+        editor.on("init", (e) => {
+            // load content from the server
+            console.log(projectEndpoint + `${page_id}/data`);
+            if (page_id > 0) {
+                fetch(projectEndpoint + `${page_id}/data`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        editor.setContent(data.content);
+                    });
+            }
+        });
+    },
 });
+
+const openCodeMirror = (editor) => {
+    // Create a modal with CodeMirror
+    modal.toggle();
+    // Initialize CodeMirror
+    setCMEditorContent(tinymce.get("tinymce").getContent(), cmEditor);
+    reIndentDocument(cmEditor);
+
+};
+
+window.closeModal = ()=>{
+    modal.toggle();
+}
 
 new TomSelect("#tags", {
     create: true,
@@ -119,15 +199,10 @@ new TomSelect("#tags", {
     },
 });
 
-
-
+// save to database
 window.save = () => {
     const form = document.getElementById("storeForm");
-    addHiddenField(
-        form,
-        "content",
-        tinymce.get("tinymce").getContent({ format: "raw" })
-    );
+    addHiddenField(form, "content", tinymce.get("tinymce").getContent());
     // addHiddenField(form, "html", editor.getHtml());
     // addHiddenField(form, "css", editor.getCss());
     form.submit();
@@ -141,3 +216,28 @@ const addHiddenField = (form, name, value) => {
     form.appendChild(input);
 };
 
+// set the CodeMirror content
+const setCMEditorContent = (newContent, editor) => {
+    editor.dispatch({
+        changes: { from: 0, to: editor.state.doc.length, insert: newContent },
+    });
+};
+
+// fix up indentations
+const reIndentDocument = (editor) => {
+    const original = editor.state.doc.toString();
+    const formatted = beautify.html(original, {
+        indent_size: 2,
+        wrap_line_length: 80,
+        preserve_newlines: true
+    });
+
+    editor.dispatch({
+        changes: {
+            from: 0,
+            to: editor.state.doc.length,
+            insert: formatted
+        }
+    });
+
+};

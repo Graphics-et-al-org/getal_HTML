@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Session;
 
 
 
-class TemplatesController extends Controller
+class PagesController extends Controller
 {
     //
     /**
@@ -25,44 +25,30 @@ class TemplatesController extends Controller
         // get templates
         if (isset($request['tags'])) {
             if (!$request->has('search')) {
-                Session::forget('admin_templates_search');
+                Session::forget('admin_pages_search');
             }
-            session(['admin_templates_page' => 1]);
-            session(['admin_templates_tags' => $request['tags']]);
+            session(['admin_pages_page' => 1]);
+            session(['admin_pages_tags' => $request['tags']]);
         }
 
 
-        if ($request->has('search')) {
-            if (!$request->has('tags')) {
-                Session::forget('admin_templates_tags');
-            }
-            session(['admin_templates_page' => 1]);
-            session(['admin_templates_search' => $request['search']]);
-        }
 
 
         if (isset($request['page'])) {
-            session(['admin_templates_page' => $request['page']]);
-            $currentPage = session('admin_templates_page');
+            session(['admin_pages_page' => $request['page']]);
+            $currentPage = session('admin_pages_page');
             Paginator::currentPageResolver(function () use ($currentPage) {
                 return $currentPage;
             });
         }
 
-        if (Session::has('admin_templates_search')) {
-            $request['search'] = session('admin_templates_search');
+        if (Session::has('admin_pages_search')) {
+            $request['search'] = session('admin_pages_search');
         }
 
-        if (Session::has('admin_templates_tags')) {
-            $request['tags'] = session('admin_templates_tags');
-        }
 
-        $templates = Page::where('is_template', '1')
-            ->when($request->has('tags'), function ($query) use ($request) {
-                $query->whereHas('tags', function ($q) use ($request) {
-                    $q->whereIn('tags.id', $request['tags']);
-                });
-            })
+        $pages = Page::whereNull('is_template')
+
             ->when($request->has('search'), function ($query) use ($request) {
                 $query->where(function ($q) use ($request) {
                     $q->where('label', 'like', "%{$request['search']}%")
@@ -72,8 +58,8 @@ class TemplatesController extends Controller
             ->paginate(10);
 
         //dd($templates);
-        return view('backend.pages_templates.index')
-            ->with('templates', $templates);
+        return view('backend.page.index')
+            ->with('pages', $pages);
     }
 
     // show the editor
@@ -86,37 +72,6 @@ class TemplatesController extends Controller
             ->with('page', $page);
     }
 
-    public function store(Request $request)
-    {
-        // dd($request);
-        $page = new Page();
-        $page->uuid = (string) Str::uuid();
-        $page->user_id = Auth::user()->id;
-        $page->is_template = 1;
-        $page->label = $request->label;
-        $page->description = $request->description ?? '';
-        $page->content = $request->content;
-       // $page->html = $request->html;
-       // $page->css = $request->css;
-        $page->save();
-
-        $tags = [];
-        // add tags, making if necessary
-        if (isset($request->tags)) {
-            foreach ($request->tags as $tag) {
-                if (!Tag::find($tag)) {
-                    $tagModel = \App\Models\Tag::firstOrCreate(['text' => $tag]);
-                    $tag = $tagModel->id;
-                }
-                $tags[] = $tag;
-            }
-        }
-        // sync
-        $page->tags()->sync($tags);
-
-        session()->flash('flash_success', 'Created Successfully');
-        return redirect()->route('admin.templates.index');;
-    }
 
     // store the page
     public function create(Request $request)
@@ -131,7 +86,6 @@ class TemplatesController extends Controller
     {
         $page = Page::find($id);
         $page->user_id = Auth::user()->id;
-        $page->is_template = 1;
         $page->label = $request->label;
         $page->description = $request->description ?? '';
         $page->content = $request->content ?? '';
@@ -156,7 +110,7 @@ class TemplatesController extends Controller
         $page->tags()->sync($tags);
 
         session()->flash('flash_success', 'Created Successfully');
-        return redirect()->route('admin.templates.index');;
+        return redirect()->route('admin.templates.index');
     }
 
 
@@ -164,9 +118,8 @@ class TemplatesController extends Controller
     public function data($id)
     {
         $page = Page::findOrFail($id);
-       // dd($page);
-
-        return ['content' => $page->content ?? "Create content here"];
+     //   dd(['content' => $page->content ?? "Create content here"]);
+        return response()->json(['content' => $page->content ?? "Create content here"]);
     }
 
 

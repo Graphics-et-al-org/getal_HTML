@@ -1,6 +1,6 @@
 import Sortable from "sortablejs";
 
-const grid = document.getElementsByClassName("grid").item(0);
+const keypointgrid = document.getElementsByClassName("grid").item(0);
 
 const deleteButtons = document.getElementsByClassName("deletebutton");
 document.querySelectorAll(".deletebutton").forEach(button => {
@@ -14,12 +14,15 @@ document.querySelectorAll(".deletebutton").forEach(button => {
 });
 
 // Enable Sorting
-Sortable.create(grid, {
+Sortable.create(keypointgrid, {
     animation: 150, // Smooth transition
     ghostClass: "bg-gray-300", // Class applied to the dragged item
     onEnd: function (evt) {
-        console.log("New Order:", Array.from(grid.children).map((el) => el.innerText));
+        console.log("New Order:", Array.from(keypointgrid.children).map((el) => el.innerText));
     },
     filter: "button", // Exclude buttons from being draggable
     preventOnFilter: false, // Ensure buttons remain clickable
 });
+
+// enable editing
+

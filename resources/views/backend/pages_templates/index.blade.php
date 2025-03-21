@@ -87,7 +87,7 @@
                     {{ $template->description }}
                 </td>
                 <td  class="px-6 py-4 ">
-                    {{ $template->tags->implode('text', ', ') }}
+                    {{ $template->tags?$template->tags->implode('text', ', '):"" }}
                 </td>
                 <td class="px-6 py-4">
                     {{ $template->user->name }}
