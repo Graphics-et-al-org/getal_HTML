@@ -115,7 +115,7 @@ class PageStaticComponentsController extends Controller
         }
 
         session()->flash('flash_success', 'Created Successfully');
-        return redirect()->route('backend.page_static_components.index');
+        return redirect()->route('admin.page_static_components.index');
     }
 
     // store the thing
