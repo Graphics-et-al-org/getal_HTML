@@ -22,7 +22,7 @@
         <form id="storeForm"
             action="{{ isset($component->id) ? route('admin.page_static_component.update', $component->id) : route('admin.page_static_component.store') }}"
             method="POST">
-            @if (isset($component))
+            @if (isset($component->id))
                 {{ method_field('PATCH') }}
             @endif
             @csrf

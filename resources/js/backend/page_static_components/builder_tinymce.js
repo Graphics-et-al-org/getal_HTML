@@ -6,9 +6,7 @@ import tinymce from "tinymce";
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { basicSetup } from "codemirror";
-import {
-    indentOnInput,
-} from "@codemirror/language";
+import { indentOnInput } from "@codemirror/language";
 import { html } from "@codemirror/lang-html";
 import { Modal } from "flowbite";
 import beautify from "js-beautify";
@@ -51,7 +49,7 @@ const options = {
     backdropClasses: "bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40",
     closable: true,
     onHide: () => {
-        console.log('hiding modal, saving content')
+        console.log("hiding modal, saving content");
         tinymce.get("tinymce").setContent(cmEditor.state.doc.toString());
     },
     onShow: () => {
@@ -70,8 +68,6 @@ const instanceOptions = {
 
 const modal = new Modal($targetEl, options, instanceOptions);
 
-
-
 var projectEndpoint;
 
 projectEndpoint = `${baseurl}/admin/page_static_component`;
@@ -82,29 +78,29 @@ const csrfToken = document
     .querySelector('meta[name="csrf-token"]')
     .getAttribute("content");
 
-    tinymce.init({
-        selector: "div#tinymce",
-        license_key: "gpl",
-        skin: false,
-        plugins: [
-            "code",
-            "image",
-            "media",
-            "visualblocks",
-            "preview",
-            "fullscreen",
-        ],
-        toolbar: "codeeditor | image | media| visualblocks | preview | fullscreen",
-        content_css: tailwindcsspath,
-        images_file_types: "svg,jpeg,jpg,png,gif",
-        file_picker_types: "image",
-        /* and here's our custom image picker*/
-        file_picker_callback: function (cb, value, meta) {
-            var input = document.createElement("input");
-            input.setAttribute("type", "file");
-            input.setAttribute("accept", "image/*");
+tinymce.init({
+    selector: "div#tinymce",
+    license_key: "gpl",
+    skin: false,
+    plugins: [
+        "code",
+        "image",
+        "media",
+        "visualblocks",
+        "preview",
+        "fullscreen",
+    ],
+    toolbar: "codeeditor | image | media| visualblocks | preview | fullscreen",
+    content_css: tailwindcsspath,
+    images_file_types: "svg,jpeg,jpg,png,gif",
+    file_picker_types: "image",
+    /* and here's our custom image picker*/
+    file_picker_callback: function (cb, value, meta) {
+        var input = document.createElement("input");
+        input.setAttribute("type", "file");
+        input.setAttribute("accept", "image/*");
 
-            /*
+        /*
             Note: In modern browsers input[type="file"] is functional without
             even adding it to the DOM, but that might not be the case in some older
             or quirky browsers like IE, so you might want to add it to the DOM
@@ -112,112 +108,50 @@ const csrfToken = document
             once you do not need it anymore.
           */
 
-            input.onchange = function () {
-                var file = this.files[0];
+        input.onchange = function () {
+            var file = this.files[0];
 
-                var reader = new FileReader();
-                reader.onload = function () {
-                    /*
+            var reader = new FileReader();
+            reader.onload = function () {
+                /*
                 Note: Now we need to register the blob in TinyMCEs image blob
                 registry. In the next release this part hopefully won't be
                 necessary, as we are looking to handle it internally.
               */
-                    var id = "blobid" + new Date().getTime();
-                    var blobCache = tinymce.activeEditor.editorUpload.blobCache;
-                    var base64 = reader.result.split(",")[1];
-                    var blobInfo = blobCache.create(id, file, base64);
-                    blobCache.add(blobInfo);
+                var id = "blobid" + new Date().getTime();
+                var blobCache = tinymce.activeEditor.editorUpload.blobCache;
+                var base64 = reader.result.split(",")[1];
+                var blobInfo = blobCache.create(id, file, base64);
+                blobCache.add(blobInfo);
 
-                    /* call the callback and populate the Title field with the file name */
-                    cb(blobInfo.blobUri(), { title: file.name });
-                };
-                reader.readAsDataURL(file);
+                /* call the callback and populate the Title field with the file name */
+                cb(blobInfo.blobUri(), { title: file.name });
             };
+            reader.readAsDataURL(file);
+        };
 
-            input.click();
-        },
-        setup: (editor) => {
-            editor.ui.registry.addButton("codeeditor", {
-                text: "Code Editor",
-                onAction: function () {
-                    openCodeMirror(editor);
-                },
-            });
-            editor.on('init', (e) => {
-                // load content from the server
-                console.log(projectEndpoint+ `/${component_id}/data`);
-                if(component_id > 0){
-                    fetch(projectEndpoint + `/${component_id}/data`)
+        input.click();
+    },
+    setup: (editor) => {
+        editor.ui.registry.addButton("codeeditor", {
+            text: "Code Editor",
+            onAction: function () {
+                openCodeMirror(editor);
+            },
+        });
+        editor.on("init", (e) => {
+            // load content from the server
+            console.log(projectEndpoint + `/${component_id}/data`);
+            if (component_id > 0) {
+                fetch(projectEndpoint + `/${component_id}/data`)
                     .then((response) => response.json())
                     .then((data) => {
                         editor.setContent(data.content);
                     });
-                    }
-
-            });
-        },
-    });
-
-
-// tinymce.init({
-//     selector: "div#tinymce",
-//     license_key: 'gpl',
-//     skin: false,
-//     plugins: ["code", "image", "media", "visualblocks", 'preview'],
-//     toolbar: "codeeditor | image | media| visualblocks | preview | fullscreen",
-//     images_file_types: "svg,jpeg,jpg,png,gif",
-//     file_picker_types: "image",
-//     /* and here's our custom image picker*/
-//     file_picker_callback: function (cb, value, meta) {
-//         var input = document.createElement("input");
-//         input.setAttribute("type", "file");
-//         input.setAttribute("accept", "image/*");
-
-//         input.onchange = function () {
-//             var file = this.files[0];
-
-//             var reader = new FileReader();
-//             reader.onload = function () {
-//                 /*
-//             Note: Now we need to register the blob in TinyMCEs image blob
-//             registry. In the next release this part hopefully won't be
-//             necessary, as we are looking to handle it internally.
-//           */
-//                 var id = "blobid" + new Date().getTime();
-//                 var blobCache = tinymce.activeEditor.editorUpload.blobCache;
-//                 var base64 = reader.result.split(",")[1];
-//                 var blobInfo = blobCache.create(id, file, base64);
-//                 blobCache.add(blobInfo);
-
-//                 /* call the callback and populate the Title field with the file name */
-//                 cb(blobInfo.blobUri(), { title: file.name });
-//             };
-//             reader.readAsDataURL(file);
-//         };
-
-//         input.click();
-//     },
-//     setup: (editor) => {
-//         editor.ui.registry.addButton("codeeditor", {
-//             text: "Code Editor",
-//             onAction: function () {
-//                 openCodeMirror(editor);
-//             },
-//         });
-//         editor.on('init', (e) => {
-//             // load content from the server
-//             console.log(projectEndpoint+ `/${component_id}/data`);
-//             if(component_id > 0){
-//                 fetch(projectEndpoint + `/${component_id}/data`)
-//                 .then((response) => response.json())
-//                 .then((data) => {
-//                     editor.setContent(data.content);
-//                 });
-//                 }
-
-//         });
-//       }
-// });
+            }
+        });
+    },
+});
 
 const openCodeMirror = (editor) => {
     // Create a modal with CodeMirror
@@ -225,12 +159,11 @@ const openCodeMirror = (editor) => {
     // Initialize CodeMirror
     setCMEditorContent(tinymce.get("tinymce").getContent(), cmEditor);
     reIndentDocument(cmEditor);
-
 };
 
-window.closeModal = ()=>{
+window.closeModal = () => {
     modal.toggle();
-}
+};
 
 // set the CodeMirror content
 const setCMEditorContent = (newContent, editor) => {
@@ -245,18 +178,17 @@ const reIndentDocument = (editor) => {
     const formatted = beautify.html(original, {
         indent_size: 2,
         wrap_line_length: 80,
-        preserve_newlines: true
+        preserve_newlines: true,
     });
 
     editor.dispatch({
         changes: {
             from: 0,
             to: editor.state.doc.length,
-            insert: formatted
-        }
+            insert: formatted,
+        },
     });
 };
-
 
 new TomSelect("#tags", {
     create: true,
@@ -287,8 +219,6 @@ new TomSelect("#tags", {
     },
 });
 
-
-
 window.save = () => {
     const form = document.getElementById("storeForm");
     addHiddenField(
@@ -308,4 +238,3 @@ const addHiddenField = (form, name, value) => {
     input.value = value;
     form.appendChild(input);
 };
-
