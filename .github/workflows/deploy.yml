@@ -70,6 +70,7 @@ jobs:
           cat <<EOF > appsettings.json
           {
             "ABLY_KEY": "${{ secrets.ABLY_KEY }}",
+            "AI_MAIN_FUNC_URL": "https://mediguides-dev-main-func.azurewebsites.net/api/function",
             "AUTH0_AUDIENCE": "https://dev.graphicsetal.com/api",
             "AUTH0_DOMAIN": "${{ secrets.AUTH0_DOMAIN }}",
             "AUTH0_CLIENT_ID": "${{ secrets.AUTH0_CLIENT_ID }}",
