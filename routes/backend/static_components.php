@@ -14,7 +14,7 @@ Route::group([], function () {
         Route::get('page_static_component/create', [PageStaticComponentsController::class, 'create'])->name('page_static_component.create');
 
         // store new
-        Route::post('page_static_component/store', [PageStaticComponentsController::class, 'store'])->name('page_static_component.store');
+        Route::post('page_static_component/save', [PageStaticComponentsController::class, 'store'])->name('page_static_component.store');
 
         // Specific page
         Route::group(['prefix' => 'page_static_component/{id}'], function () {

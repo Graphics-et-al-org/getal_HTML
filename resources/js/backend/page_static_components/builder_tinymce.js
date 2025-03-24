@@ -221,13 +221,7 @@ new TomSelect("#tags", {
 
 window.save = () => {
     const form = document.getElementById("storeForm");
-    addHiddenField(
-        form,
-        "content",
-        tinymce.get("tinymce").getContent({ format: "raw" })
-    );
-    // addHiddenField(form, "html", editor.getHtml());
-    // addHiddenField(form, "css", editor.getCss());
+    addHiddenField(form, "content", tinymce.get("tinymce").getContent());
     form.submit();
 };
 
