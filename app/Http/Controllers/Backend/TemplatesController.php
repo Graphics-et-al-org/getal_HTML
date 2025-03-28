@@ -129,12 +129,14 @@ class TemplatesController extends Controller
     // store the page
     public function update($id, Request $request)
     {
+        
         $page = Page::find($id);
         $page->user_id = Auth::user()->id;
         $page->is_template = 1;
         $page->label = $request->label;
         $page->description = $request->description ?? '';
         $page->content = $request->content ?? '';
+        $page->template_type = $request->template_type ?? 'summary';
        // $page->html = $request->html ?? '';
        // $page->css = $request->css ?? '';
         $page->save();
@@ -154,6 +156,10 @@ class TemplatesController extends Controller
         }
         // sync
         $page->tags()->sync($tags);
+        // sync users
+        $page->users()->sync($request->users??[]);
+        // sync teams
+        $page->teams()->sync($request->teams??[]);
 
         session()->flash('flash_success', 'Created Successfully');
         return redirect()->route('admin.templates.index');;
@@ -185,6 +191,6 @@ class TemplatesController extends Controller
         $page->delete();
 
         session()->flash('flash_success', 'Deleted Successfully');
-        return redirect()->route('admin.templates.index');
+        return ['status' => 'success'];
     }
 }

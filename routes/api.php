@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ApiController;
-use App\Http\Controllers\Backend\PageStaticComponentsController;
+use App\Http\Controllers\Backend\PageComponentsController;
 use App\Http\Controllers\Clipart\ClipartController;
 use App\Http\Controllers\CustomBroadcastAuthController;
 use App\Http\Middleware\EnsureAuth0TokenIsValid;
@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use App\Models\Clipart\ClipartColourway;
-use App\Models\Page\PageStaticComponent;
+use App\Models\Page\PageComponent;
 
 Route::post('/broadcasting/auth', [CustomBroadcastAuthController::class, 'authenticate'])->middleware(EnsureAuth0TokenIsValid::class);
 
@@ -62,7 +62,7 @@ Route::get(
 Route::get('tags', [ApiController::class, 'tags'])->middleware('guest');
 
 // Search
-Route::get('static-components/searchbytagsandtext', [PageStaticComponentsController::class, 'searchByTagsAndText'])->middleware('guest');
+Route::get('static-components/searchbytagsandtext', [PageComponentsController::class, 'searchByTagsAndText'])->middleware('guest');
 
 
 // open clipart search (for now)

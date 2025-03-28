@@ -37,7 +37,8 @@ class Page extends Model
         'css',
         'data',
         'job_uuid',
-        'released_at'
+        'released_at',
+        'template_type'
     ];
 
     // // relationship between pages and page_pages
@@ -47,10 +48,20 @@ class Page extends Model
       return $this->belongsToMany('App\Models\Tag', 'page_tags', 'tag_id', 'page_id')->withPivot('tag_id', 'page_id');
   }
 
-    // relationship between pages and page_pages
-    public function user(): BelongsTo
+    // Owner/creator of this page
+    public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany('App\Models\User', 'page_team_user', 'user_id', 'page_id')->withPivot('user_id', 'page_id');
+    }
+
+    public function teams()
+    {
+        return $this->belongsToMany('App\Models\Team', 'page_team_user', 'team_id', 'page_id')->withPivot('team_id', 'page_id');
     }
     /**
      * Create a new factory instance for the model.

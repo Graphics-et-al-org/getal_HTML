@@ -70,7 +70,7 @@ const modal = new Modal($targetEl, options, instanceOptions);
 
 var projectEndpoint;
 
-projectEndpoint = `${baseurl}/admin/page_static_component`;
+projectEndpoint = `${baseurl}/admin/page_component`;
 
 console.log(projectEndpoint);
 
@@ -190,6 +190,7 @@ const reIndentDocument = (editor) => {
     });
 };
 
+
 new TomSelect("#tags", {
     create: true,
     options: tags,
@@ -218,6 +219,102 @@ new TomSelect("#tags", {
         },
     },
 });
+
+
+new TomSelect("#teams", {
+    create: false,
+    options: teams,
+    preload:true,
+    valueField: "value",
+    items: teams.map((item) => {
+        return item.value;
+    }),
+    load: function (query, callback) {
+        var url = baseurl + "/admin/teams/search?q=" + query;
+        fetch(url)
+            .then((response) => response.json())
+            .then((json) => {
+                console.log('loading teams');
+                callback(json);
+            })
+            .catch(() => {
+                callback();
+            });
+    },
+    plugins: {
+        clear_button: {
+            title: "Remove all selected options",
+        },
+        remove_button: {
+            title: "Remove this item",
+        },
+    },
+});
+
+
+new TomSelect("#users", {
+    create: false,
+    preload:true,
+    options: users,
+    valueField: "value",
+    items: users.map((item) => {
+        return item.value;
+    }),
+    load: function (query, callback) {
+        var url = baseurl + "/admin/users/search?q=" + query;
+        fetch(url)
+            .then((response) => response.json())
+            .then((json) => {
+                console.log('loading users');
+                //console.log(callback);
+                callback(json);
+            })
+            .catch(() => {
+                callback();
+            });
+    },
+    plugins: {
+        clear_button: {
+            title: "Remove all selected options",
+        },
+        remove_button: {
+            title: "Remove this item",
+        },
+    },
+});
+
+
+
+new TomSelect("#projects", {
+    create: false,
+    preload:true,
+    options: users,
+    valueField: "value",
+    // items: projects.map((item) => {
+    //     return item.value;
+    // }),
+    load: function (query, callback) {
+        var url = baseurl + "/admin/projects/search?q=" + query;
+        fetch(url)
+            .then((response) => response.json())
+            .then((json) => {
+                //console.log(callback);
+                callback(json);
+            })
+            .catch(() => {
+                callback();
+            });
+    },
+    plugins: {
+        clear_button: {
+            title: "Remove all selected options",
+        },
+        remove_button: {
+            title: "Remove this item",
+        },
+    },
+});
+
 
 window.save = () => {
     const form = document.getElementById("storeForm");

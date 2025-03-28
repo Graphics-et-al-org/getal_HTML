@@ -113,8 +113,12 @@ class UserController extends Controller
      // Search for a user by name or email
     public function searchusers(Request $request)
     {
+        if ($request->q) {
         $users = User::where('name', 'like', '%' . $request->q . '%')
-        ->orWhere('email', 'like', '%' . $request->q . '%')->get();
+        ->orWhere('email', 'like', '%' . $request->q . '%')->take(20)->get();
+        }else{
+            $users = User::take(50)->get();
+        }
         $users->transform(function ($item, $key) {
             return ['value' => $item->id, 'text' => $item->name.':'.$item->email];
         });

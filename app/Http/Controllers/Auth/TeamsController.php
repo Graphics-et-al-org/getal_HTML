@@ -123,4 +123,19 @@ class TeamsController extends Controller
         $user->removeRoles($roles, $team);
         return redirect()->route('admin.teams.membership', $id);
     }
+
+    // search
+    public function search(Request $request)
+    {
+        // dd($request->all());
+        if ($request->q) {
+            $teams = Team::where('display_name', 'like', "%{$request->q}%")->orWhere('description', 'LIKE', "%{$request->q}%")->take(20)->get();
+        } else {
+            $teams = Team::take(50)->get();
+        }
+        $teams->transform(function ($item, $key) {
+            return ['value' => $item->id, 'text' => $item->display_name];
+        });
+        return response()->json($teams);
+    }
 }

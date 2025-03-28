@@ -10,9 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
-use App\Models\Page\PageStaticComponent;
+use App\Models\Page\PageComponent;
 
-class PageStaticComponentsController extends Controller
+class PageComponentsController extends Controller
 {
     public function index(Request $request)
     {
@@ -53,7 +53,7 @@ class PageStaticComponentsController extends Controller
             $request['tags'] = session('admin_static_component_tags');
         }
 
-        $components = PageStaticComponent::when($request->has('tags'), function ($query) use ($request) {
+        $components = PageComponent::when($request->has('tags'), function ($query) use ($request) {
             $query->whereHas('tags', function ($q) use ($request) {
                 $q->whereIn('tags.id', $request['tags']);
             });
@@ -67,7 +67,7 @@ class PageStaticComponentsController extends Controller
             ->paginate(10);
 
 
-        return view('backend.page_static_components.index')
+        return view('backend.page_components.index')
             ->with('components', $components);
     }
 
@@ -75,10 +75,10 @@ class PageStaticComponentsController extends Controller
     public function edit($id)
     {
 
-        $component = PageStaticComponent::findOr($id, function () {
-            return view('backend.page_static_components.index');
+        $component = PageComponent::findOr($id, function () {
+            return view('backend.page_components.index');
         });
-        return view('backend.page_static_components.editor_tinymce')
+        return view('backend.page_components.editor_tinymce')
             ->with('component', $component);
     }
 
@@ -86,12 +86,12 @@ class PageStaticComponentsController extends Controller
     // Show the creation page
     public function create(Request $request)
     {
-        return view('backend.page_static_components.editor_tinymce');
+        return view('backend.page_components.editor_tinymce');
     }
 
     public function store(Request $request)
     {
-        $component = new PageStaticComponent();
+        $component = new PageComponent();
         $component->uuid = (string) Str::uuid();
         $component->user_id = Auth::user()->id;
         $component->label = $request->label;
@@ -114,14 +114,19 @@ class PageStaticComponentsController extends Controller
             }
         }
 
+        // sync users
+        $component->users()->sync($request->users ?? []);
+        // sync teams
+        $component->teams()->sync($request->teams ?? []);
+        
         session()->flash('flash_success', 'Created Successfully');
-        return redirect()->route('admin.page_static_components.index');
+        return redirect()->route('admin.page_components.index');
     }
 
     // store the thing
     public function update($id, Request $request)
     {
-        $component = PageStaticComponent::find($id);
+        $component = PageComponent::find($id);
         $component->user_id = Auth::user()->id;
         $component->label = $request->label;
         $component->description = $request->description ?? '';
@@ -148,14 +153,19 @@ class PageStaticComponentsController extends Controller
         // sync
         $component->tags()->sync($tags);
 
+        // sync users
+        $component->users()->sync($request->users ?? []);
+        // sync teams
+        $component->teams()->sync($request->teams ?? []);
+
         session()->flash('flash_success', 'Updated Successfully');
-        return redirect()->route('admin.page_static_components.index');;
+        return redirect()->route('admin.page_components.index');;
     }
 
     // destroy the thing
     public function destroy($id, Request $request)
     {
-        $component = PageStaticComponent::findOrFail($id);
+        $component = PageComponent::findOrFail($id);
 
         // Detach all tags
         $component->tags()->detach();
@@ -164,35 +174,42 @@ class PageStaticComponentsController extends Controller
         $component->delete();
 
         session()->flash('flash_success', 'Deleted Successfully');
-        return redirect()->route('admin.page_static_components.index');
+        return redirect()->route('admin.page_components.index');
     }
 
     // get the data for a snippet
     public function data($id)
     {
-        $component = PageStaticComponent::findOrFail($id);
+        $component = PageComponent::findOrFail($id);
         return ['content' => $component->content ?? "Create content here"];
+    }
+
+    // get some info for a snippet- for when we add it to a list
+    public function metadata($id)
+    {
+        $component = PageComponent::findOrFail($id);
+        return ['id' => $component->id, 'label' => $component->label, 'description' => $component->description];
     }
 
     // get the html for a snippet
     public function html($id)
     {
-        $component = PageStaticComponent::findOrFail($id);
+        $component = PageComponent::findOrFail($id);
         return $component->html;
     }
 
     // get the css for a snippet
     public function css($id)
     {
-        $component = PageStaticComponent::findOrFail($id);
+        $component = PageComponent::findOrFail($id);
         return $component->css;
     }
 
     // search by tags and text
     public function searchByTagsAndText(Request $request)
     {
-       // dd($request->all());
-        $components = PageStaticComponent::where('keypoint', false)
+        // dd($request->all());
+        $components = PageComponent::where('keypoint', false)
             ->when($request->has('tags'), function ($query) use ($request) {
                 $query->whereHas('tags', function ($q) use ($request) {
                     $q->whereIn('tags.text', $request['tags']);
@@ -203,7 +220,7 @@ class PageStaticComponentsController extends Controller
                     $q->where('label', 'like', "%{$request['search']}%")
                         ->orWhere('description', 'LIKE', "%{$request['search']}%");
                 });
-            //    dd($query);
+                //    dd($query);
             })->get();
         //     dd($components->toBase());
         $output = [];
@@ -212,11 +229,41 @@ class PageStaticComponentsController extends Controller
             $appendobj = array(
                 'uuid' => $item->uuid,
                 'label' => $item->label,
-                'description' => $item->preferred ? 'true' : '',
+                'description' => $item->description,
                 'tags' => $item->tags->pluck('text')->join(','),
             );
             $output[] = $appendobj;
         });
         return $output;
+    }
+
+    // search
+    public function reorder(Request $request)
+    {
+        // dd($request->all());
+        if ($request->q) {
+            $components =  PageComponent::where('keypoint', false)->where('label', 'like', "%{$request->q}%")->orWhere('description', 'LIKE', "%{$request->q}%")->take(20)->get();
+        } else {
+            $components = PageComponent::take(50)->get();
+        }
+        $components->transform(function ($item, $key) {
+            return ['value' => $item->id, 'text' => $item->label];
+        });
+        return response()->json($components);
+    }
+
+    // search
+    public function search(Request $request)
+    {
+        // dd($request->all());
+        if ($request->q) {
+            $components =  PageComponent::where('keypoint', false)->where('label', 'like', "%{$request->q}%")->orWhere('description', 'LIKE', "%{$request->q}%")->take(20)->get();
+        } else {
+            $components = PageComponent::take(50)->get();
+        }
+        $components->transform(function ($item, $key) {
+            return ['value' => $item->id, 'text' => $item->label];
+        });
+        return response()->json($components);
     }
 }

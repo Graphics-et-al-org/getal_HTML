@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('page_static_components', function (Blueprint $table) {
+        Schema::create('page_components', function (Blueprint $table) {
             $table->id();
             $table->uuid();
             $table->bigInteger('user_id');
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('page_static_components');
+        Schema::dropIfExists('page_components');
     }
 };

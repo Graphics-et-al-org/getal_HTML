@@ -61,14 +61,21 @@
                     Description
                  </th>
                  <th scope="col" class="px-6 py-3">
+                    Type
+                 </th>
+                 <th scope="col" class="px-6 py-3">
                     Tags
                  </th>
+
                 <th scope="col" class="px-6 py-3">
+                    Team(s)
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    User(s)
+                </th>
+                {{-- <th scope="col" class="px-6 py-3">
                     Owner
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    Team
-                </th>
+                </th> --}}
                 <th scope="col" class="px-6 py-3">
                     Created at
                 </th>
@@ -87,13 +94,19 @@
                     {{ $template->description }}
                 </td>
                 <td  class="px-6 py-4 ">
+                    {{ $template->template_type }}
+                </td>
+                <td  class="px-6 py-4 ">
                     {{ $template->tags?$template->tags->implode('text', ', '):"" }}
                 </td>
-                <td class="px-6 py-4">
+                {{-- <td class="px-6 py-4">
                     {{ $template->user->name }}
+                </td> --}}
+                <td  class="px-6 py-4 ">
+                    {{ $template->teams?$template->teams->implode('display_name', ', '):"" }}
                 </td>
-                <td class="px-6 py-4">
-                    {{ $template->group }}
+                <td  class="px-6 py-4 ">
+                    {{ $template->users?$template->users->implode('name', ', '):"" }}
                 </td>
                 <td class="px-6 py-4">
                     {{ $template->created_at }}
@@ -101,7 +114,7 @@
                 <td class="px-6 py-4">
                     <a href="{{ route('admin.template.edit', $template->id) }}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
                     <br/>
-                    <a href="{{ route('admin.template.destroy', $template->id) }}"
+                    <a onclick="window.confirmDelete({{ $template->id }})"
                         class="font-medium text-red-600 dark:text-blue-500 hover:underline">Delete</a>
                 </td>
             </tr>
@@ -131,5 +144,5 @@
         ]
     </script>
     {{-- @vite('resources/js/backend/template_builder/blocks.js') --}}
-    @vite('resources/js/backend/clipart/index.js')
+    @vite('resources/js/backend/template/index.js')
 @endpush

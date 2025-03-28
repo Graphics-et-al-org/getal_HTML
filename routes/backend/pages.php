@@ -27,7 +27,7 @@ Route::group([], function () {
 
             Route::patch('/', [TemplatesController::class, 'update'])->name('template.update');
 
-            Route::get('/', [TemplatesController::class, 'destroy'])->name('template.destroy');
+            Route::delete('/', [TemplatesController::class, 'destroy'])->name('template.destroy');
         });
 
 

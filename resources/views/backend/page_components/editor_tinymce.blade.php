@@ -20,7 +20,7 @@
     </div>
     <div class="w-100">
         <form id="storeForm"
-            action="{{ isset($component->id) ? route('admin.page_static_component.update', $component->id) : route('admin.page_static_component.store') }}"
+            action="{{ isset($component->id) ? route('admin.page_component.update', $component->id) : route('admin.page_component.store') }}"
             method="POST">
             @if (isset($component->id))
                 {{ method_field('PATCH') }}
@@ -52,17 +52,7 @@
                     </div>
 
                 </div>
-                <div class="col-span-full flex">
-                    <div class="flex-1">
-                        <label for="weight" class="block text-sm/6 font-medium text-gray-900">Weighting (order in
-                            page)</label>
-                        <div class="mt-2 flex items-center gap-x-3">
-                            <input type="number" name="weight"
-                                value="{{ isset($component) ? $component->weight ?? '0' : '0' }}"
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-                        </div>
-                    </div>
-                </div>
+
                 <div class="col-span-full flex">
                     <div class="flex-1">
                         <div class="pretty p-svg p-curve p-smooth p-bigger">
@@ -77,7 +67,35 @@
                                 <label>Keypoint?</label>
                             </div>
                         </div>
-
+                    </div>
+                </div>
+                <div class="col-span-full block  font-medium text-gray-900">
+                    Restrictions
+                </div>
+                <div class="col-span-full flex">
+                    <div class="mr-2 min-w-80">
+                        <label for="teams" class="block text-sm/6 font-medium text-gray-900">Restrict to team(s)</label>
+                        <div class="mt-2 items-center gap-x-3  w-full ">
+                            <select id="teams" name="teams[]" data-placeholder="Teams" autocomplete="off" multiple>
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mr-2 min-w-80">
+                        <label for="users" class="block text-sm/6 font-medium text-gray-900">Restrict to user(s)</label>
+                        <div class="mt-2 items-center gap-x-3 w-full ">
+                            <select id="users" name="users[]" data-placeholder="Users" autocomplete="off" multiple>
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="min-w-80">
+                        <label for="projects" class="block text-sm/6 font-medium text-gray-900">Restrict to project(s)</label>
+                        <div class="mt-2 items-center gap-x-3 w-full ">
+                            <select id="projects" name="projects[]" data-placeholder="projects" autocomplete="off" multiple>
+                                <option value="">None</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
         </form>
@@ -91,7 +109,7 @@
         </div>
     </div>
     <footer class="fixed bottom-0 left-0 z-20 w-full bg-gray-200">
-        <a href="{{ route('admin.page_static_components.index') }}" type="button"
+        <a href="{{ route('admin.page_components.index') }}" type="button"
             class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"><-
                 Back</a>
                 <button type="button" onclick="window.save()"
@@ -162,10 +180,35 @@
             @endif
         ]
 
+        var users = [
+            @if (isset($component))
+                @if (isset($component->users))
+                    @foreach ($component->users as $user)
+                        {
+                            value: "{{ $user->id }}",
+                            text: "{{ $user->name }}"
+                        },
+                    @endforeach
+                @endif
+            @endif
+        ]
+
+        var teams = [
+            @if (isset($component))
+                @if (isset($component->teams))
+                    @foreach ($component->teams as $team)
+                        {
+                            value: "{{ $team->id }}",
+                            text: "{{ $team->display_name }}"
+                        },
+                    @endforeach
+                @endif
+            @endif
+        ]
         var editor;
     </script>
 
-    @vite('resources/js/backend/page_static_components/builder_tinymce.js')
+    @vite('resources/js/backend/page_components/builder_tinymce.js')
 
     {{-- CSS goes *after* js --}}
     @vite('resources/css/backend/template_builder/builder.css')

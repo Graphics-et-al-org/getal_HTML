@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('page_static_components', function (Blueprint $table) {
+        Schema::table('page_components', function (Blueprint $table) {
             $table->boolean('keypoint')->nullable();
 
         });
@@ -19,7 +19,7 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::table('page_static_components', function (Blueprint $table) {
+        Schema::table('page_components', function (Blueprint $table) {
             $table->dropColumn(['keypoint']);
         });
     }

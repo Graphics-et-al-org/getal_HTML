@@ -12,7 +12,7 @@ use App\Models\Clipart\Clipart;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
-use App\Models\Page\PageStaticComponent;
+use App\Models\Page\PageComponent;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
@@ -145,7 +145,7 @@ class SubmitTextForTranslation implements ShouldQueue
         $templateHtml = Page::find($this->_template_id)->content;
 
         // get the keypoint template
-        $keypointHTML = PageStaticComponent::where('keypoint', 1)->first()->content;
+        $keypointHTML = PageComponent::where('keypoint', 1)->first()->content;
 
         // build the output
         $output = str_ireplace(["{{title}}", "{{summary}}"], [$response_content['title'], $response_content['summary']], $templateHtml);
@@ -169,7 +169,7 @@ class SubmitTextForTranslation implements ShouldQueue
         // extras at teh end
         // get the compoents and sort by weight
 
-        $components = PageStaticComponent::whereIn('uuid', $this->_static_components)->orderBy('weight', 'desc')->get();
+        $components = PageComponent::whereIn('uuid', $this->_static_components)->orderBy('weight', 'desc')->get();
         // only tack them on when there's something
         if ($components->count() > 0) {
             $componentsOutput = '';

@@ -44,7 +44,7 @@
                             <a href="{{ route('frontend.page.clinician_view', $item->uuid) }}">{{ $item->label }}</a>
                         </td>
                         <td class="px-6 py-4">
-                            {{ $item->user->name }}
+                            {{ $item->owner->name??'' }}
                         </td>
                         <td class="px-6 py-4">
                             {{ $item->created_at }}

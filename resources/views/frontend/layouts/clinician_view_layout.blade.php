@@ -12,9 +12,12 @@
     @stack('before-styles')
     @vite('resources/css/app.css')
     @stack('before-scripts')
+
 </head>
 
 <body class="bg-gray-200">
+
+
     <div class="antialiased bg-gray-50 dark:bg-gray-900">
         <header class="antialiased">
             <nav class="bg-green-200 border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800 h-16 fixed w-full">

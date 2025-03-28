@@ -42,11 +42,7 @@ window.confirmRefreshMetadata = () => {
         title: "Refresh all AI metadata? This will take a long time",
         showCancelButton: true,
         confirmButtonText: "Yes",
-        customClass: {
-            actions: "my-actions",
-            cancelButton: "order-1 right-gap",
-            confirmButton: "order-2",
-        },
+        icon: "warning",
     }).then((result) => {
         if (result.isConfirmed) {
             var url = baseurl + "/admin/clipart/refreshallaimetadata"

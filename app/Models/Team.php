@@ -12,5 +12,7 @@ class Team extends LaratrustTeam
 
     public $guarded = [];
 
-    
+    // associate static components 
+
+
 }

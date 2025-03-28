@@ -1,4 +1,5 @@
 import "tom-select/dist/css/tom-select.css";
+import "pretty-checkbox/dist/pretty-checkbox.min.css";
 
 import TomSelect from "tom-select";
 import tinymce from "tinymce";
@@ -170,35 +171,6 @@ window.closeModal = ()=>{
     modal.toggle();
 }
 
-new TomSelect("#tags", {
-    create: true,
-    options: tags,
-    valueField: "value",
-    items: tags.map((item) => {
-        return item.value;
-    }),
-    load: function (query, callback) {
-        var url = baseurl + "/api/tags?q=" + query;
-        fetch(url)
-            .then((response) => response.json())
-            .then((json) => {
-                //console.log(callback);
-                callback(json);
-            })
-            .catch(() => {
-                callback();
-            });
-    },
-    plugins: {
-        clear_button: {
-            title: "Remove all selected options",
-        },
-        remove_button: {
-            title: "Remove this item",
-        },
-    },
-});
-
 // save to database
 window.save = () => {
     const form = document.getElementById("storeForm");
@@ -241,3 +213,103 @@ const reIndentDocument = (editor) => {
     });
 
 };
+
+/**
+ * Set up fancy select controls
+ */
+new TomSelect("#tags", {
+    create: true,
+    options: tags,
+    valueField: "value",
+    items: tags.map((item) => {
+        return item.value;
+    }),
+    load: function (query, callback) {
+        var url = baseurl + "/api/tags?q=" + query;
+        fetch(url, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRF-Token": csrfToken,
+            },
+        })
+            .then((response) => response.json())
+            .then((json) => {
+                //console.log(callback);
+                callback(json);
+            })
+            .catch(() => {
+                callback();
+            });
+    },
+    plugins: {
+        clear_button: {
+            title: "Remove all selected options",
+        },
+        remove_button: {
+            title: "Remove this item",
+        },
+    },
+});
+
+new TomSelect("#teams", {
+    create: false,
+    options: teams,
+    preload:true,
+    valueField: "value",
+    items: teams.map((item) => {
+        return item.value;
+    }),
+    load: function (query, callback) {
+        var url = baseurl + "/admin/teams/search?q=" + query;
+        fetch(url)
+            .then((response) => response.json())
+            .then((json) => {
+                console.log('loading teams');
+                callback(json);
+            })
+            .catch(() => {
+                callback();
+            });
+    },
+    plugins: {
+        clear_button: {
+            title: "Remove all selected options",
+        },
+        remove_button: {
+            title: "Remove this item",
+        },
+    },
+});
+
+
+new TomSelect("#users", {
+    create: false,
+    preload:true,
+    options: users,
+    valueField: "value",
+    items: users.map((item) => {
+        return item.value;
+    }),
+    load: function (query, callback) {
+        var url = baseurl + "/admin/users/search?q=" + query;
+        fetch(url)
+            .then((response) => response.json())
+            .then((json) => {
+                console.log('loading users');
+                //console.log(callback);
+                callback(json);
+            })
+            .catch(() => {
+                callback();
+            });
+    },
+    plugins: {
+        clear_button: {
+            title: "Remove all selected options",
+        },
+        remove_button: {
+            title: "Remove this item",
+        },
+    },
+});
