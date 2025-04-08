@@ -21,12 +21,12 @@ export default defineConfig({
                 "resources/js/backend/template_builder/builder_tinymce.js",
                 "resources/js/backend/template_builder/blocks.js",
                 "resources/js/backend/page_components/index.js",
-               
+
                 "resources/js/backend/page_components/builder_tinymce.js",
                 'resources/js/backend/page_component_category/index.js',
                 'resources/js/backend/page_component_category/edit.js',
-                'resources/js/backend/projects/index.js',
-                'resources/js/backend/projects/edit.js',
+                'resources/js/backend/project/create.js',
+                'resources/js/backend/project/edit.js',
                 "resources/js/backend/clipart/index.js",
                 "resources/js/backend/clipart/create.js",
                 "resources/js/backend/clipart/edit.js",
