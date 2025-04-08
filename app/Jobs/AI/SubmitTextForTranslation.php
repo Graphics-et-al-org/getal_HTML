@@ -179,7 +179,13 @@ class SubmitTextForTranslation implements ShouldQueue
             // tack the content on to the end
             foreach ($categories as $category) {
                 foreach ($category->components as $component) {
-                    $componentsOutput .= $component->content;
+                    // add the uuid to the component
+                    $componentDocument = new Document($component->content);
+                    $componentEl = $componentDocument->find('.component');
+                    if ($componentEl) {
+                        $componentEl[0]->setAttribute('data-uuid', $component->uuid);
+                    }
+                    $componentsOutput .= $componentDocument->html();
                 }
             }
 
@@ -211,7 +217,7 @@ class SubmitTextForTranslation implements ShouldQueue
         return;
     }
 
-    
+
     private function replaceContentByAttribute($html, $attribute, $replacements)
     {
         $dom = new \DOMDocument();
