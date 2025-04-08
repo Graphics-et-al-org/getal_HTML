@@ -313,3 +313,34 @@ new TomSelect("#users", {
         },
     },
 });
+
+new TomSelect("#projects", {
+    create: false,
+    preload:true,
+    options: projects,
+    valueField: "value",
+    items: projects.map((item) => {
+        return item.value;
+    }),
+    load: function (query, callback) {
+        var url = baseurl + "/admin/projects/search?q=" + query;
+        fetch(url)
+            .then((response) => response.json())
+            .then((json) => {
+                console.log('loading projects');
+                //console.log(callback);
+                callback(json);
+            })
+            .catch(() => {
+                callback();
+            });
+    },
+    plugins: {
+        clear_button: {
+            title: "Remove all selected options",
+        },
+        remove_button: {
+            title: "Remove this item",
+        },
+    },
+});

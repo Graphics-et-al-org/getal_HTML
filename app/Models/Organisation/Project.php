@@ -11,7 +11,7 @@ class Project extends Model
     use SoftDeletes, HasFactory;
 
     // explicitly define tables
-    protected $table = 'page_components';
+    protected $table = 'projects';
 
     /**
      * The attributes that are mass assignable.
@@ -25,32 +25,43 @@ class Project extends Model
 
     ];
 
-
-    public function categories()
-    {
-        return $this->belongsToMany('App\Models\Page\PageComponentCategory', 'page_component_category_components', 'page_component_id', 'page_component_category_id')->withPivot('page_component_category_id', 'page_component_id', 'order');
-    }
-
     // user relationship
 
 
     public function users()
     {
-        return $this->belongsToMany('App\Models\User', 'page_component_team_user', 'user_id', 'page_component_id')->withPivot('user_id', 'page_component_id');
+        return $this->belongsToMany('App\Models\User', 'projects_team_user', 'user_id', 'project_id')->withPivot('user_id', 'project_id');
     }
 
     // team relationship
 
     public function teams()
     {
-        return $this->belongsToMany('App\Models\Team', 'page_component_team_user', 'team_id', 'page_component_id')->withPivot('team_id', 'page_component_id');
+        return $this->belongsToMany('App\Models\Team', 'projects_team_user', 'team_id', 'project_id')->withPivot('team_id', 'project_id');
+    }
+
+    // team relationship
+
+    public function pages()
+    {
+        return $this->belongsToMany('App\Models\Page\Page', 'projects_pages', 'page_id', 'project_id')->withPivot('page_id', 'project_id');
+    }
+
+    public function components()
+    {
+        return $this->belongsToMany('App\Models\Page\PageComponent', 'page_component_category_projects', 'page_component_category_id', 'project_id')->withPivot('page_component_category_id', 'project_id');
+    }
+
+    public function categories()
+    {
+        return $this->belongsToMany('App\Models\Page\PageComponentCategory', 'page_component_category_components', 'page_component_category_id', 'project_id')->withPivot('page_component_category_id', 'project_id');
     }
 
     // clipart tags
-    public function tags()
-    {
-        return $this->belongsToMany('App\Models\Tag', 'static_component_tags', 'tag_id', 'static_component_id')->withPivot('tag_id', 'static_component_id');
-    }
+    // public function tags()
+    // {
+    //     return $this->belongsToMany('App\Models\Tag', 'static_component_tags', 'tag_id', 'static_component_id')->withPivot('tag_id', 'static_component_id');
+    // }
 
 
     /**

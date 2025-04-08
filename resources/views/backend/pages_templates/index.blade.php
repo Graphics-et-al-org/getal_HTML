@@ -73,6 +73,9 @@
                 <th scope="col" class="px-6 py-3">
                     User(s)
                 </th>
+                <th scope="col" class="px-6 py-3">
+                    Project(s)
+                </th>
                 {{-- <th scope="col" class="px-6 py-3">
                     Owner
                 </th> --}}
@@ -107,6 +110,9 @@
                 </td>
                 <td  class="px-6 py-4 ">
                     {{ $template->users?$template->users->implode('name', ', '):"" }}
+                </td>
+                <td  class="px-6 py-4 ">
+                    {{ $template->projects?$template->projects->implode('label', ', '):"" }}
                 </td>
                 <td class="px-6 py-4">
                     {{ $template->created_at }}

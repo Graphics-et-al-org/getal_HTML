@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Models\Page\PageComponent;
+use App\Models\Page\PageComponentCategory;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
@@ -31,7 +32,7 @@ class SubmitTextForTranslation implements ShouldQueue
     protected $_inputStr;
     protected $_simulated;
     protected $_template_id;
-    protected $_static_components;
+    protected $_extras;
 
 
     //👇 Making the timeout larger
@@ -42,13 +43,13 @@ class SubmitTextForTranslation implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct($inputStr, $template_id, $uuid, $user_id, $static_components = [], $simulated = false)
+    public function __construct($inputStr, $template_id, $uuid, $user_id, $extras = [], $simulated = false)
     {
         $this->_inputStr = $inputStr;
         $this->_uuid = $uuid;
         $this->_template_id = $template_id;
         $this->_user_id = $user_id;
-        $this->_static_components = $static_components;
+        $this->_extras = $extras;
         $this->_simulated = $simulated;
     }
 
@@ -169,13 +170,17 @@ class SubmitTextForTranslation implements ShouldQueue
         // extras at teh end
         // get the compoents and sort by weight
 
-        $components = PageComponent::whereIn('uuid', $this->_static_components)->orderBy('weight', 'desc')->get();
+        $categories = PageComponentCategory::whereIn('uuid', $this->_extras)->get();
+        $response_content['categories'] = $this->_extras;
+       // Log::info('Categories:' . $categories);
         // only tack them on when there's something
-        if ($components->count() > 0) {
+        if ($categories->count() > 0) {
             $componentsOutput = '';
             // tack the content on to the end
-            foreach ($components as $component) {
-                $componentsOutput .= $component->content;
+            foreach ($categories as $category) {
+                foreach ($category->components as $component) {
+                    $componentsOutput .= $component->content;
+                }
             }
 
             $output = str_ireplace("{{components_container}}", $componentsOutput, $output);
@@ -206,6 +211,7 @@ class SubmitTextForTranslation implements ShouldQueue
         return;
     }
 
+    
     private function replaceContentByAttribute($html, $attribute, $replacements)
     {
         $dom = new \DOMDocument();

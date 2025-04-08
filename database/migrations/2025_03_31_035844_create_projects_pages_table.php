@@ -8,20 +8,15 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * Page component category
      */
     public function up(): void
     {
-        // create the table
-        Schema::create('page_component_category', function (Blueprint $table) {
+        Schema::create('projects_pages', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
-            $table->text('label');
-            $table->text('description')->nullable();
+            $table->bigInteger('project_id');
+            $table->bigInteger('page_id')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
-
     }
 
     /**
@@ -29,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('page_component_category');
+        Schema::dropIfExists('projects_pages');
     }
 };

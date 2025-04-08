@@ -62,6 +62,11 @@ class PageComponent extends Model
         return $this->belongsToMany('App\Models\Team', 'page_component_team_user', 'team_id', 'page_component_id')->withPivot('team_id', 'page_component_id');
     }
 
+    public function projects()
+    {
+        return $this->belongsToMany('App\Models\Organisation\Project', 'page_component_projects', 'project_id', 'page_id')->withPivot('project_id', 'page_id');
+    }
+
     // clipart tags
     public function tags()
     {

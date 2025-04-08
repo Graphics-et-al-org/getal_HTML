@@ -53,26 +53,98 @@ class PagesController extends Controller
         $html = $page->content;
         $document = new Document($html);
         $keypoints = $document->find('.keypoint');
+        $components = $document->find('.component');
+
+        //   dd($components);
         $deleteButtonAttributes = ['class' => 'absolute top-0 right-0 deletebutton', 'data-delete' => 'true', 'type' => 'button'];
-        $closeButton = new Element('button', '', $deleteButtonAttributes);
+        $deleteButton = new Element('button', '', $deleteButtonAttributes);
+
         $svgContent = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
-   <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
-   <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+   <path stroke="red" d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+   <path stroke="red" stroke-width="2"  d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
  </svg>';
 
         // Create a new Document instance to parse the SVG
         $svgDocument = new Document($svgContent);
-    //    dd($svgDocument->find('svg'));
+        //    dd($svgDocument->find('svg'));
         $svgElement = $svgDocument->find('svg');
 
         // Append the parsed SVG element to the div
-        $closeButton->appendChild($svgElement);
+        $deleteButton->appendChild($svgElement);
         foreach ($keypoints as $keypoint) {
-            $keypoint->appendChild($closeButton);
+            $keypoint->appendChild($deleteButton);
         }
-        //@TODO add controls to page
 
-        return view('frontend.page.clinician_view', ['page' => $page, 'html' => $document->html()]);
+        foreach ($components as $component) {
+            $component->appendChild($deleteButton);
+        }
+
+        $addKeypointButtonAttributes = ['style' => 'cursor:pointer', 'type' => 'button', 'id'=>'addKeypointButton'];
+
+        $addKeypointButton = new Element('button', '', $addKeypointButtonAttributes);
+
+        // add an add keypont control\
+        $keypointContent = '<div role="button" tabindex="0"
+  class="self-auto relative grid w-48 min-h-48 border border-solid border-2 border-gray-500 rounded-md addbutton "
+  onclick="openAddKeypointModal()">
+  <div class="col-span-full m-0 p-2">
+    <div
+      class="h-32 w-full border border-solid border-2 border-red-500 rounded-md mb-2 flex items-center justify-center">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 24 24" width="128"
+        height="128" fill="#b0bec5" class="bi bi-plus-lg">
+        <path fill-rule="evenodd"
+          d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2">
+        </path>
+      </svg>
+    </div>
+    <div
+      class="min-h-12 w-full border border-solid border-2 border-red-500 rounded-md text-center">
+      Add keypoint
+    </div>
+  </div>
+</div>';
+
+        // Create a new Document instance to parse the SVG
+        $addKeypointDocument = new Document($keypointContent);
+
+        $addKeypointElement = $addKeypointDocument->find('div')[0];
+
+        $addKeypointButton->appendChild($addKeypointElement);
+
+//dd($addKeypointButton->html());
+        $keypointContainer = $document->find('.keypoints')[0];
+
+        $keypointContainer->appendChild($addKeypointButton);
+
+        //@TODO add controls to page
+        $pageData = json_decode($page->data);
+
+        $used_icons = array_map(function ($item) {
+            return $item->best_image;
+        }, $pageData->paired_images);
+
+        return view('frontend.page.clinician_view', ['page' => $page, 'html' => $document->html(), 'used_icons' => $used_icons]);
+    }
+
+
+    // add a keypoint to the data from the clinician interface
+    public function add_keypoint_to_data(Request $request, $uuid)
+    {
+        $page = Page::where('uuid', $uuid)->first();
+        $pageData = json_decode($page->data);
+        $keypoint = new \stdClass();
+       // $keypoint->name = $request->name;
+       // $keypoint->description = $request->description;
+       // $keypoint->image = $request->image;
+       $keypoint->keypoint = $request->keypoint_text;
+        $keypoint->best_image = $request->best_image;
+        $pageData->paired_images[] = $keypoint;
+
+        // save the page
+        $page->data = json_encode($pageData);
+        $page->save();
+
+        return response()->json(['status' => '0']);
     }
 
     // update the model from the clinician view
@@ -92,7 +164,8 @@ class PagesController extends Controller
 
     public function public_view($uuid)
     {
+
         $page = Page::where('uuid', $uuid)->first();
-        return view('public.page.public_view', ['page' => $page]);
+        return view('public.page.public_view', ['html' => $page->content]);
     }
 }

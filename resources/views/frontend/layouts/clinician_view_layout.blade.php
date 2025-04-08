@@ -69,6 +69,9 @@
         @yield('content')
     </div>
 
+
+    @yield('modals')
+
 </body>
 @stack('after-styles')
 @stack('after-scripts')

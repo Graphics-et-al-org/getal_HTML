@@ -92,6 +92,9 @@ tinymce.init({
     ],
     toolbar: "codeeditor | image | media| visualblocks | preview | fullscreen",
     content_css: tailwindcsspath,
+    verify_html: false,
+    extended_valid_elements:
+        "svg[*],defs[*],pattern[*],desc[*],metadata[*],g[*],mask[*],path[*],line[*],marker[*],rect[*],circle[*],ellipse[*],polygon[*],polyline[*],linearGradient[*],radialGradient[*],stop[*],image[*],view[*],text[*],textPath[*],title[*],tspan[*],glyph[*],symbol[*],switch[*],use[*]",
     images_file_types: "svg,jpeg,jpg,png,gif",
     file_picker_types: "image",
     /* and here's our custom image picker*/
@@ -190,7 +193,6 @@ const reIndentDocument = (editor) => {
     });
 };
 
-
 new TomSelect("#tags", {
     create: true,
     options: tags,
@@ -220,11 +222,10 @@ new TomSelect("#tags", {
     },
 });
 
-
 new TomSelect("#teams", {
     create: false,
     options: teams,
-    preload:true,
+    preload: true,
     valueField: "value",
     items: teams.map((item) => {
         return item.value;
@@ -234,7 +235,7 @@ new TomSelect("#teams", {
         fetch(url)
             .then((response) => response.json())
             .then((json) => {
-                console.log('loading teams');
+                console.log("loading teams");
                 callback(json);
             })
             .catch(() => {
@@ -251,10 +252,9 @@ new TomSelect("#teams", {
     },
 });
 
-
 new TomSelect("#users", {
     create: false,
-    preload:true,
+    preload: true,
     options: users,
     valueField: "value",
     items: users.map((item) => {
@@ -265,7 +265,7 @@ new TomSelect("#users", {
         fetch(url)
             .then((response) => response.json())
             .then((json) => {
-                console.log('loading users');
+                console.log("loading users");
                 //console.log(callback);
                 callback(json);
             })
@@ -283,11 +283,9 @@ new TomSelect("#users", {
     },
 });
 
-
-
 new TomSelect("#projects", {
     create: false,
-    preload:true,
+    preload: true,
     options: users,
     valueField: "value",
     // items: projects.map((item) => {
@@ -314,7 +312,6 @@ new TomSelect("#projects", {
         },
     },
 });
-
 
 window.save = () => {
     const form = document.getElementById("storeForm");

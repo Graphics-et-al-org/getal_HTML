@@ -118,7 +118,9 @@ class PageComponentsController extends Controller
         $component->users()->sync($request->users ?? []);
         // sync teams
         $component->teams()->sync($request->teams ?? []);
-        
+
+        $component->projects()->sync($request->projects ?? []);
+
         session()->flash('flash_success', 'Created Successfully');
         return redirect()->route('admin.page_components.index');
     }
@@ -157,6 +159,8 @@ class PageComponentsController extends Controller
         $component->users()->sync($request->users ?? []);
         // sync teams
         $component->teams()->sync($request->teams ?? []);
+
+        $component->projects()->sync($request->projects ?? []);
 
         session()->flash('flash_success', 'Updated Successfully');
         return redirect()->route('admin.page_components.index');;

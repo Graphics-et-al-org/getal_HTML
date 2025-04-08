@@ -94,6 +94,7 @@ class PageComponentsCategoriesController extends Controller
         $category = new PageComponentCategory();
         $category->label = $request->label;
         $category->description = $request->description;
+        $category->uuid = (string) Str::uuid();
         $category->save();
 
         // add tags, making if necessary
@@ -109,10 +110,18 @@ class PageComponentsCategoriesController extends Controller
 
         $components = explode(',', $request->components);
         $syncArr = [];
-        foreach($components as $index=>$component){
-            $syncArr[$component]=['order'=>$index];
+        foreach ($components as $index => $component) {
+            $syncArr[$component] = ['order' => $index];
         }
         $category->components()->sync($syncArr);
+
+
+        // sync users
+        $category->users()->sync($request->users ?? []);
+        // sync teams
+        $category->teams()->sync($request->teams ?? []);
+        // sync projects
+        $category->projects()->sync($request->projects ?? []);
 
         session()->flash('flash_success', 'Created Successfully');
         return redirect()->route('admin.page_component_category.index');
@@ -121,7 +130,7 @@ class PageComponentsCategoriesController extends Controller
     // store the thing
     public function update($id, Request $request)
     {
-       // dd($request->components);
+        // dd($request->components);
         // $components = explode(',', $request->components);
         // $syncArr = [];
         // foreach($components as $index=>$component){
@@ -148,13 +157,20 @@ class PageComponentsCategoriesController extends Controller
         //     }
         // }
         // sync
-       // $category->tags()->sync($tags);
+        // $category->tags()->sync($tags);
         $components = explode(',', $request->components);
         $syncArr = [];
-        foreach($components as $index=>$component){
-            $syncArr[$component]=['order'=>$index];
+        foreach ($components as $index => $component) {
+            $syncArr[$component] = ['order' => $index];
         }
         $category->components()->sync($syncArr);
+
+        // sync users
+        $category->users()->sync($request->users ?? []);
+        // sync teams
+        $category->teams()->sync($request->teams ?? []);
+        // sync projects
+        $category->projects()->sync($request->projects ?? []);
 
         session()->flash('flash_success', 'Updated Successfully');
         return redirect()->route('admin.page_component_category.index');;
@@ -163,29 +179,53 @@ class PageComponentsCategoriesController extends Controller
     // destroy the thing
     public function destroy($id, Request $request)
     {
-        $component = PageComponent::findOrFail($id);
+        $category = PageComponentCategory::findOrFail($id);
 
         // Detach all tags
-        $component->tags()->detach();
+        //  $category->tags()->detach();
+        // sync users
+        $category->users()->detach();
+        // sync teams
+        $category->teams()->detach();
+        // sync projects
+        $category->projects()->detach();
 
         // Delete the page
-        $component->delete();
+        $category->delete();
 
         session()->flash('flash_success', 'Deleted Successfully');
         return redirect()->route('admin.page_component_category.index');
     }
 
+    public function addFromUuids(Request $request)
+    {
+        // dd($request->all());
+        $categories = PageComponentCategory::whereIn('uuid', explode(',',$request->uuids))->get();
+
+        $componentsOutput = '';
+        // tack the content on to the end
+        foreach ($categories as $category) {
+            foreach ($category->components as $component) {
+                $componentsOutput .= $component->content;
+            }
+        }
+
+        return response()->json(['status' => '0', 'html' => $componentsOutput], 200);
+
+    }
+
+
     // search
     public function search(Request $request)
     {
         // dd($request->all());
-        if ($request->q) {
-            $categories = PageComponentCategory::where('label', 'like', "%{$request->q}%")->orWhere('description', 'LIKE', "%{$request->q}%")->take(20)->get();
-        } else {
-            $categories = PageComponentCategory::take(50)->get();
-        }
+        //    if ($request->q) {
+        //       $categories = PageComponentCategory::where('label', 'like', "%{$request->q}%")->orWhere('description', 'LIKE', "%{$request->q}%")->take(20)->get();
+        // } else {
+        $categories = PageComponentCategory::take(50)->get();
+        //   }
         $categories->transform(function ($item, $key) {
-            return ['value' => $item->id, 'text' => $item->label];
+            return ['value' => $item->id, 'text' => $item->label, 'uuid' => $item->uuid];
         });
         return response()->json($categories);
     }

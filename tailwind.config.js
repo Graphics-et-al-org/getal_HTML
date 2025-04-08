@@ -9,6 +9,10 @@ export default {
         './resources/views/**/*.blade.php',
         './node_modules/flowbite/**/*.js',
     ],
+    safelist: [
+        'peer-checked:border-blue-600',
+        'peer-checked:text-gray-600',
+      ],
     theme: {
         extend: {
             fontFamily: {

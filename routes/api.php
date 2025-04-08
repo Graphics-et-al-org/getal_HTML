@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\Backend\PageComponentsCategoriesController;
 use App\Http\Controllers\Backend\PageComponentsController;
 use App\Http\Controllers\Clipart\ClipartController;
 use App\Http\Controllers\CustomBroadcastAuthController;
@@ -42,6 +43,10 @@ Route::post('/extension/upload', [ApiController::class, 'uploadFromExtension'])
     ->middleware(EnsureAuth0TokenIsValid::class);
 
     // handle an upload from the extension and create a job
+Route::post('/extension/info', [ApiController::class, 'createInfoDocument'])
+->middleware(EnsureAuth0TokenIsValid::class);
+
+    // handle an upload from the extension and create a job
 Route::post('/extension/checkjob', [ApiController::class, 'checkJobStatus'])->middleware('guest');
 //->middleware(EnsureAuth0TokenIsValid::class);
 
@@ -61,8 +66,8 @@ Route::get(
 // list tags
 Route::get('tags', [ApiController::class, 'tags'])->middleware('guest');
 
-// Search
-Route::get('static-components/searchbytagsandtext', [PageComponentsController::class, 'searchByTagsAndText'])->middleware('guest');
+// Search- later, use different middleware
+Route::get('categories/search', [PageComponentsCategoriesController::class, 'search'])->middleware('guest');
 
 
 // open clipart search (for now)
@@ -71,7 +76,9 @@ Route::get('clipart/cache', [ClipartController::class, 'uploadJsonToCache']);
 
 // Tests- remove before production
 // a test route to trigger a job
-Route::get('/extension/testjob/template/{id}', [ApiController::class, 'testuploadFromExtension']);
+Route::get('/extension/testjob/template/{id}', [ApiController::class, 'testuploadFromExtension'])->middleware('guest');
+// rebuild a page from a template
+Route::get('/rebuild/page/{uuid}', [ApiController::class, 'rebuildSummary'])->middleware('guest');
 
 // fix the uuids in the clipart colourways table
 Route::get('/clipart/fixuuid', function () {

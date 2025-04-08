@@ -12,11 +12,11 @@
     </style>
 @endpush
 
-@section('title', __('Page component category editor'))
+@section('title', __('Page component collection editor'))
 
 @section('content')
     <div class="w-100 mb-2">
-        {{ isset($category->id) ? 'Update' : 'New' }} page component category
+        {{ isset($category->id) ? 'Update' : 'New' }} page component collection
     </div>
     <div class=" pr-2">
         <form id="storeForm"

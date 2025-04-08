@@ -102,8 +102,16 @@
                     </div>
                     <div class="min-w-80">
                         <label for="users" class="block text-sm/6 font-medium text-gray-900">Restrict to user(s)</label>
-                        <div class="mt-2 items-center gap-x-3 w-full ">
+                        <div class="mt-2 mr-2  items-center gap-x-3 w-full ">
                             <select id="users" name="users[]" data-placeholder="Users" autocomplete="off" multiple>
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="min-w-80">
+                        <label for="projects" class="block text-sm/6 font-medium text-gray-900">Restrict to project(s)</label>
+                        <div class="mt-2 items-center gap-x-3 w-full ">
+                            <select id="projects" name="projects[]" data-placeholder="Projects" autocomplete="off" multiple>
                                 <option value="">None</option>
                             </select>
                         </div>
@@ -204,6 +212,19 @@
                         {
                             value: "{{ $team->id }}",
                             text: "{{ $team->display_name }}"
+                        },
+                    @endforeach
+                @endif
+            @endif
+        ]
+
+        var projects = [
+            @if (isset($page))
+                @if (isset($page->projects))
+                    @foreach ($page->projects as $project)
+                        {
+                            value: "{{ $project->id }}",
+                            text: "{{ $project->label }}"
                         },
                     @endforeach
                 @endif

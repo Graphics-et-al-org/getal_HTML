@@ -1,11 +1,11 @@
 @extends('backend.layouts.app')
 
-@section('title', __('Page components categories management'))
+@section('title', __('Page components collections management'))
 
 @section('content')
 
     <div>
-        <h5 class="text-xl dark:text-white">Page components categories admin</h5>
+        <h5 class="text-xl dark:text-white">Page components collections admin</h5>
     </div>
     <div class="inline-flex rounded-md shadow-sm m-2">
 

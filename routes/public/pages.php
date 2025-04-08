@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 Route::group([], function () {
         // Specific page
         Route::group(['prefix' => 'page/{uuid}'], function () {
-            Route::get("/", [PagesController::class, 'public'])->name('page.public.show');
+            Route::get("/", [PagesController::class, 'public_view'])->name('page.public.show');
         });
 
 });

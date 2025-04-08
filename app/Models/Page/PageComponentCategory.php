@@ -4,10 +4,11 @@ namespace App\Models\Page;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PageComponentCategory extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     // Category for static components
     // explicitly define tables
@@ -20,13 +21,34 @@ class PageComponentCategory extends Model
      */
     protected $fillable = [
         'label',
-        'description'
+        'description',
+        'uuid'
     ];
 
     public function components()
     {
         return $this->belongsToMany('App\Models\Page\PageComponent', 'page_component_category_components', 'page_component_category_id', 'page_component_id')->withPivot('page_component_category_id', 'page_component_id', 'order')->orderByPivot('order');
     }
+
+     // user relationship
+
+
+     public function users()
+     {
+         return $this->belongsToMany('App\Models\User', 'page_component_category_team_user', 'user_id', 'page_component_category_id')->withPivot('user_id', 'page_component_id');
+     }
+
+     // team relationship
+
+     public function teams()
+     {
+         return $this->belongsToMany('App\Models\Team', 'page_component_category_team_user', 'team_id', 'page_component_category_id')->withPivot('team_id', 'page_component_category_id');
+     }
+
+     public function projects()
+     {
+         return $this->belongsToMany('App\Models\Organisation\Project', 'page_component_category_projects', 'project_id', 'page_component_category_id')->withPivot('project_id', 'page_component_category_id');
+     }
 
 
     /**

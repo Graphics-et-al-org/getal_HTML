@@ -96,8 +96,9 @@ class TemplatesController extends Controller
         $page->label = $request->label;
         $page->description = $request->description ?? '';
         $page->content = $request->content;
-       // $page->html = $request->html;
-       // $page->css = $request->css;
+        $page->template_type = $request->template_type ?? 'summary';
+        // $page->html = $request->html;
+        // $page->css = $request->css;
         $page->save();
 
         $tags = [];
@@ -113,6 +114,12 @@ class TemplatesController extends Controller
         }
         // sync
         $page->tags()->sync($tags);
+        // sync users
+        $page->users()->sync($request->users ?? []);
+        // sync teams
+        $page->teams()->sync($request->teams ?? []);
+        // sync projects
+        $page->projects()->sync($request->projects ?? []);
 
         session()->flash('flash_success', 'Created Successfully');
         return redirect()->route('admin.templates.index');;
@@ -129,7 +136,7 @@ class TemplatesController extends Controller
     // store the page
     public function update($id, Request $request)
     {
-        
+
         $page = Page::find($id);
         $page->user_id = Auth::user()->id;
         $page->is_template = 1;
@@ -137,8 +144,8 @@ class TemplatesController extends Controller
         $page->description = $request->description ?? '';
         $page->content = $request->content ?? '';
         $page->template_type = $request->template_type ?? 'summary';
-       // $page->html = $request->html ?? '';
-       // $page->css = $request->css ?? '';
+        // $page->html = $request->html ?? '';
+        // $page->css = $request->css ?? '';
         $page->save();
 
         $tags = [];
@@ -157,9 +164,11 @@ class TemplatesController extends Controller
         // sync
         $page->tags()->sync($tags);
         // sync users
-        $page->users()->sync($request->users??[]);
+        $page->users()->sync($request->users ?? []);
         // sync teams
-        $page->teams()->sync($request->teams??[]);
+        $page->teams()->sync($request->teams ?? []);
+        // sync projects
+        $page->projects()->sync($request->projects ?? []);
 
         session()->flash('flash_success', 'Created Successfully');
         return redirect()->route('admin.templates.index');;
@@ -170,7 +179,7 @@ class TemplatesController extends Controller
     public function data($id)
     {
         $page = Page::findOrFail($id);
-       // dd($page);
+        // dd($page);
 
         return ['content' => $page->content ?? "Create content here"];
     }

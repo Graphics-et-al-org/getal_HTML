@@ -63,6 +63,11 @@ class Page extends Model
     {
         return $this->belongsToMany('App\Models\Team', 'page_team_user', 'team_id', 'page_id')->withPivot('team_id', 'page_id');
     }
+
+    public function projects()
+    {
+        return $this->belongsToMany('App\Models\Organisation\Project', 'projects_pages', 'project_id', 'page_id')->withPivot('project_id', 'page_id');
+    }
     /**
      * Create a new factory instance for the model.
      *

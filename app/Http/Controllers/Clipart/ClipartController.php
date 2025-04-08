@@ -29,6 +29,7 @@ class ClipartController extends Controller
      * Display a listing of the clipart
      * @return \Illuminate\Http\Response
      */
+
     public function index(Request $request, $id = null)
     {
 
@@ -91,6 +92,11 @@ class ClipartController extends Controller
             ->with('clipart', $clipart);
     }
 
+    public function baseline($id){
+        return response(Clipart::find($id)->baseline()->data, 200)
+        ->header('Content-Type', 'image/svg+xml');
+        
+    }
     /**
      * Show the form for creating a clipart
      */
