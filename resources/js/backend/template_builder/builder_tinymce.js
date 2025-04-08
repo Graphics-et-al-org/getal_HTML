@@ -99,6 +99,8 @@ tinymce.init({
     content_css: tailwindcsspath,
     images_file_types: "svg,jpeg,jpg,png,gif",
     file_picker_types: "image",
+    relative_urls: false,
+    remove_script_host: false,
     /* and here's our custom image picker*/
     file_picker_callback: function (cb, value, meta) {
         var input = document.createElement("input");

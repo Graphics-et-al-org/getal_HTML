@@ -97,6 +97,8 @@ tinymce.init({
         "svg[*],defs[*],pattern[*],desc[*],metadata[*],g[*],mask[*],path[*],line[*],marker[*],rect[*],circle[*],ellipse[*],polygon[*],polyline[*],linearGradient[*],radialGradient[*],stop[*],image[*],view[*],text[*],textPath[*],title[*],tspan[*],glyph[*],symbol[*],switch[*],use[*]",
     images_file_types: "svg,jpeg,jpg,png,gif",
     file_picker_types: "image",
+    relative_urls: false,
+    remove_script_host: false,
     /* and here's our custom image picker*/
     file_picker_callback: function (cb, value, meta) {
         var input = document.createElement("input");

@@ -138,6 +138,6 @@ class PagesController extends Controller
         $page->delete();
 
         session()->flash('flash_success', 'Deleted Successfully');
-        return redirect()->route('admin.templates.index');
+        return redirect()->route('admin.pages.index');
     }
 }
