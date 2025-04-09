@@ -12,6 +12,7 @@ export default {
     safelist: [
         'peer-checked:border-blue-600',
         'peer-checked:text-gray-600',
+        'bg-green-500'
       ],
     theme: {
         extend: {

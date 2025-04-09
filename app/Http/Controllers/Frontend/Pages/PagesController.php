@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Frontend\Pages;
 
 use App\Http\Controllers\Controller;
 use App\Models\Page\Page;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use DiDom\Document;
 use DiDom\Element;
@@ -150,22 +151,29 @@ class PagesController extends Controller
     // update the model from the clinician view
     public function clinican_update(Request $request)
     {
-
-
         return $request;
     }
 
     // approve the model from the clinician view
-    public function clinican_approve(Request $request)
+    public function clinician_approve($uuid)
     {
-        return $request;
+        $page = Page::where('uuid', $uuid)->first();
+     //   dd($page);
+        $page->released_at = Carbon::now();
+        $page->save();
+        return response()->json(['status' => '0']);
     }
 
 
+
+
+// a public view of the page
     public function public_view($uuid)
     {
-
         $page = Page::where('uuid', $uuid)->first();
-        return view('public.page.public_view', ['html' => $page->content]);
+        if(isset($page->released_at)){
+            return view('public.page.public_view', ['html' => $page->content]);
+        }
+       abort(404);
     }
 }

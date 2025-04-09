@@ -32,6 +32,7 @@ const classes = [
     "text-green-500",
     "text-red-500",
     "text-blue-500",
+    "bg-green-500",
     "uppercase",
     "lowercase",
     "capitalize",

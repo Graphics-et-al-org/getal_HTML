@@ -1,5 +1,6 @@
 import Sortable from "sortablejs";
 import { Modal } from "flowbite";
+import Swal from "sweetalert2";
 
 const csrfToken = document
     .querySelector('meta[name="csrf-token"]')
@@ -21,6 +22,7 @@ const deleteButtons = document.getElementsByClassName("deletebutton");
 document.addEventListener("DOMContentLoaded", function () {
     console.log("Document is ready");
     colourSnippetsBackground();
+   // openPublicDetailsModal()
 });
 
 document.querySelectorAll(".deletebutton").forEach((button) => {
@@ -339,6 +341,58 @@ window.addSelectedCollections = () => {
             }
         });
 };
+
+const $publicDetailsTargetEl = document.getElementById("publicDetailsModal");
+
+// instance options object
+const showPublicDetailsOptions = {
+    id: "addKeypointModal",
+    override: true,
+};
+
+const addPublicDetailsModal = new Modal(
+    $publicDetailsTargetEl,
+    options,
+    showPublicDetailsOptions
+);
+
+window.openPublicDetailsModal = () => {
+    addPublicDetailsModal.show();
+}
+
+window.closePublicDetailsModal = () => {
+    addPublicDetailsModal.hide();
+}
+
+// show a stern warning
+window.showWarning = ()=>{
+    Swal.fire({
+        title: 'Important notice',
+        text: 'This tool is designed to support, not substitute, professional judgement. By selecting "Confirm and continue", you affirm that you have verified the accuracy and appropriateness of the information and diagrams provided',
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: 'Confirm and continue',
+
+      }).then((result) => {
+        if (result.isConfirmed) {
+// send the signal to confirm
+            let url = baseurl + `/page/${uuid}/approve`;
+            fetch(url, {
+                method: "GET",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data);
+                    openPublicDetailsModal();
+
+                });
+
+        }
+      })
+}
 
 // background colour the snipptets
 const colourSnippetsBackground = () => {
