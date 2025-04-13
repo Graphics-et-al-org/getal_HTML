@@ -20,7 +20,7 @@
     </div>
     <div class="w-100">
         <form id="storeForm"
-            action="{{ isset($component->id) ? route('admin.page_component.update', $component->id) : route('admin.page_component.store') }}"
+            action="{{ isset($component->id) ? route('admin.snippet.update', $component->id) : route('admin.snippet.store') }}"
             method="POST">
             @if (isset($component->id))
                 {{ method_field('PATCH') }}
@@ -109,7 +109,7 @@
         </div>
     </div>
     <footer class="fixed bottom-0 left-0 z-20 w-full bg-gray-200">
-        <a href="{{ route('admin.page_components.index') }}" type="button"
+        <a href="{{ route('admin.snippets.index') }}" type="button"
             class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"><-
                 Back</a>
                 <button type="button" onclick="window.save()"
@@ -208,7 +208,7 @@
         var editor;
     </script>
 
-    @vite('resources/js/backend/page_components/builder_tinymce.js')
+    @vite('resources/js/backend/snippets/builder_tinymce.js')
 
     {{-- CSS goes *after* js --}}
     @vite('resources/css/backend/template_builder/builder.css')

@@ -10,9 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
-use App\Models\Page\PageComponent;
+use App\Models\Page\Snippet;
 
-class PageComponentsController extends Controller
+class SnippetsController extends Controller
 {
     public function index(Request $request)
     {
@@ -53,7 +53,7 @@ class PageComponentsController extends Controller
             $request['tags'] = session('admin_static_component_tags');
         }
 
-        $components = PageComponent::when($request->has('tags'), function ($query) use ($request) {
+        $components = Snippet::when($request->has('tags'), function ($query) use ($request) {
             $query->whereHas('tags', function ($q) use ($request) {
                 $q->whereIn('tags.id', $request['tags']);
             });
@@ -67,7 +67,7 @@ class PageComponentsController extends Controller
             ->paginate(10);
 
 
-        return view('backend.page_components.index')
+        return view('backend.snippets.index')
             ->with('components', $components);
     }
 
@@ -75,10 +75,10 @@ class PageComponentsController extends Controller
     public function edit($id)
     {
 
-        $component = PageComponent::findOr($id, function () {
-            return view('backend.page_components.index');
+        $component = Snippet::findOr($id, function () {
+            return view('backend.snippets.index');
         });
-        return view('backend.page_components.editor_tinymce')
+        return view('backend.snippets.editor_tinymce')
             ->with('component', $component);
     }
 
@@ -86,22 +86,22 @@ class PageComponentsController extends Controller
     // Show the creation page
     public function create(Request $request)
     {
-        return view('backend.page_components.editor_tinymce');
+        return view('backend.snippets.editor_tinymce');
     }
 
     public function store(Request $request)
     {
-        $component = new PageComponent();
-        $component->uuid = (string) Str::uuid();
-        $component->user_id = Auth::user()->id;
-        $component->label = $request->label;
-        $component->description = $request->description ?? '';
-        $component->content = $request->content ?? '';
-        $component->html = $request->html ?? '';
-        $component->css = $request->css ?? '';
-        $component->weight = $request->weight ?? 0;
-        $component->keypoint = $request->keypoint ?? null;
-        $component->save();
+        $snippet = new Snippet();
+        $snippet->uuid = (string) Str::uuid();
+        $snippet->user_id = Auth::user()->id;
+        $snippet->label = $request->label;
+        $snippet->description = $request->description ?? '';
+        $snippet->content = $request->content ?? '';
+        $snippet->html = $request->html ?? '';
+        $snippet->css = $request->css ?? '';
+        $snippet->weight = $request->weight ?? 0;
+        $snippet->keypoint = $request->keypoint ?? null;
+        $snippet->save();
 
         // add tags, making if necessary
         if (isset($request->tags)) {
@@ -110,25 +110,25 @@ class PageComponentsController extends Controller
                     $tagModel = \App\Models\Tag::firstOrCreate(['text' => $tag]);
                     $tag = $tagModel->id;
                 }
-                $component->tags()->attach($tag);
+                $snippet->tags()->attach($tag);
             }
         }
 
         // sync users
-        $component->users()->sync($request->users ?? []);
+        $snippet->users()->sync($request->users ?? []);
         // sync teams
-        $component->teams()->sync($request->teams ?? []);
+        $snippet->teams()->sync($request->teams ?? []);
 
-        $component->projects()->sync($request->projects ?? []);
+        $snippet->projects()->sync($request->projects ?? []);
 
         session()->flash('flash_success', 'Created Successfully');
-        return redirect()->route('admin.page_components.index');
+        return redirect()->route('admin.snippets.index');
     }
 
     // store the thing
     public function update($id, Request $request)
     {
-        $component = PageComponent::find($id);
+        $component = Snippet::find($id);
         $component->user_id = Auth::user()->id;
         $component->label = $request->label;
         $component->description = $request->description ?? '';
@@ -163,13 +163,13 @@ class PageComponentsController extends Controller
         $component->projects()->sync($request->projects ?? []);
 
         session()->flash('flash_success', 'Updated Successfully');
-        return redirect()->route('admin.page_components.index');;
+        return redirect()->route('admin.snippets.index');;
     }
 
     // destroy the thing
     public function destroy($id, Request $request)
     {
-        $component = PageComponent::findOrFail($id);
+        $component = Snippet::findOrFail($id);
 
         // Detach all tags
         $component->tags()->detach();
@@ -178,34 +178,34 @@ class PageComponentsController extends Controller
         $component->delete();
 
         session()->flash('flash_success', 'Deleted Successfully');
-        return redirect()->route('admin.page_components.index');
+        return redirect()->route('admin.snippets.index');
     }
 
     // get the data for a snippet
     public function data($id)
     {
-        $component = PageComponent::findOrFail($id);
+        $component = Snippet::findOrFail($id);
         return ['content' => $component->content ?? "Create content here"];
     }
 
     // get some info for a snippet- for when we add it to a list
     public function metadata($id)
     {
-        $component = PageComponent::findOrFail($id);
+        $component = Snippet::findOrFail($id);
         return ['id' => $component->id, 'label' => $component->label, 'description' => $component->description];
     }
 
     // get the html for a snippet
     public function html($id)
     {
-        $component = PageComponent::findOrFail($id);
+        $component = Snippet::findOrFail($id);
         return $component->html;
     }
 
     // get the css for a snippet
     public function css($id)
     {
-        $component = PageComponent::findOrFail($id);
+        $component = Snippet::findOrFail($id);
         return $component->css;
     }
 
@@ -213,7 +213,7 @@ class PageComponentsController extends Controller
     public function searchByTagsAndText(Request $request)
     {
         // dd($request->all());
-        $components = PageComponent::where('keypoint', false)
+        $components = Snippet::where('keypoint', false)
             ->when($request->has('tags'), function ($query) use ($request) {
                 $query->whereHas('tags', function ($q) use ($request) {
                     $q->whereIn('tags.text', $request['tags']);
@@ -246,9 +246,9 @@ class PageComponentsController extends Controller
     {
         // dd($request->all());
         if ($request->q) {
-            $components =  PageComponent::where('keypoint', false)->where('label', 'like', "%{$request->q}%")->orWhere('description', 'LIKE', "%{$request->q}%")->take(20)->get();
+            $components =  Snippet::where('keypoint', false)->where('label', 'like', "%{$request->q}%")->orWhere('description', 'LIKE', "%{$request->q}%")->take(20)->get();
         } else {
-            $components = PageComponent::take(50)->get();
+            $components = Snippet::take(50)->get();
         }
         $components->transform(function ($item, $key) {
             return ['value' => $item->id, 'text' => $item->label];
@@ -261,9 +261,9 @@ class PageComponentsController extends Controller
     {
         // dd($request->all());
         if ($request->q) {
-            $components =  PageComponent::where('keypoint', false)->where('label', 'like', "%{$request->q}%")->orWhere('description', 'LIKE', "%{$request->q}%")->take(20)->get();
+            $components =  Snippet::where('keypoint', false)->where('label', 'like', "%{$request->q}%")->orWhere('description', 'LIKE', "%{$request->q}%")->take(20)->get();
         } else {
-            $components = PageComponent::take(50)->get();
+            $components = Snippet::take(50)->get();
         }
         $components->transform(function ($item, $key) {
             return ['value' => $item->id, 'text' => $item->label];

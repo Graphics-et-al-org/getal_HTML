@@ -10,12 +10,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class PageComponent extends Model
+// Page components, or 'snippets' of content to be included in a page
+
+class Snippet extends Model
 {
     use SoftDeletes, HasFactory;
 
     // explicitly define tables
-    protected $table = 'page_components';
+    protected $table = 'snippets';
 
     /**
      * The attributes that are mass assignable.
@@ -26,13 +28,17 @@ class PageComponent extends Model
         'uuid',
         'user_id',
         'team_id',
-        'category_id',
-        'weight',
         'keypoint',
         'label',
         'description',
         'content',
-        'thumb',
+        'html',
+        'css',
+        'data',
+        'approved_by',
+        'approved_status',
+        'approved_at',
+        'approved_notes'
     ];
 
     // User relationship
@@ -44,7 +50,7 @@ class PageComponent extends Model
 
     public function categories()
     {
-        return $this->belongsToMany('App\Models\Page\PageComponentCategory', 'page_component_category_components', 'page_component_id', 'page_component_category_id')->withPivot('page_component_category_id', 'page_component_id', 'order');
+        return $this->belongsToMany('App\Models\Page\SnippetsCategory', 'snippets_category_snippets', 'snippet_id', 'snippet_category_id')->withPivot('snippet_category_id', 'snippet_id', 'order');
     }
 
     // user relationship
@@ -52,25 +58,25 @@ class PageComponent extends Model
 
     public function users()
     {
-        return $this->belongsToMany('App\Models\User', 'page_component_team_user', 'user_id', 'page_component_id')->withPivot('user_id', 'page_component_id');
+        return $this->belongsToMany('App\Models\User', 'snippets_team_user', 'user_id', 'snippet_id')->withPivot('user_id', 'snippet_id');
     }
 
     // team relationship
 
     public function teams()
     {
-        return $this->belongsToMany('App\Models\Team', 'page_component_team_user', 'team_id', 'page_component_id')->withPivot('team_id', 'page_component_id');
+        return $this->belongsToMany('App\Models\Team', 'snippets_team_user', 'snippet_id', 'team_id')->withPivot('team_id', 'snippet_id');
     }
 
     public function projects()
     {
-        return $this->belongsToMany('App\Models\Organisation\Project', 'page_component_projects', 'project_id', 'page_id')->withPivot('project_id', 'page_id');
+        return $this->belongsToMany('App\Models\Organisation\Project', 'snippets_projects', 'snippet_id', 'project_id')->withPivot('project_id', 'snippet_id');
     }
 
     // clipart tags
     public function tags()
     {
-        return $this->belongsToMany('App\Models\Tag', 'static_component_tags', 'tag_id', 'static_component_id')->withPivot('tag_id', 'static_component_id');
+        return $this->belongsToMany('App\Models\Tag', 'snippets_tags', 'snippet_id', 'tag_id')->withPivot('tag_id', 'snippet_id');
     }
 
 

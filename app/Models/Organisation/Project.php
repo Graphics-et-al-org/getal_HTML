@@ -49,7 +49,7 @@ class Project extends Model
 
     public function components()
     {
-        return $this->belongsToMany('App\Models\Page\PageComponent', 'page_component_category_projects', 'page_component_category_id', 'project_id')->withPivot('page_component_category_id', 'project_id');
+        return $this->belongsToMany('App\Models\Page\PageComponent', 'snippets_category_projects', 'snippets_component_category_id', 'project_id')->withPivot('page_component_category_id', 'project_id');
     }
 
     public function categories()
@@ -69,8 +69,8 @@ class Project extends Model
      *
      * @return \Illuminate\Database\Eloquent\Factories\Factory
      */
-    protected static function newFactory()
-    {
-        return PageComponentFactory::new();
-    }
+    // protected static function newFactory()
+    // {
+    //     return PageComponentFactory::new();
+    // }
 }

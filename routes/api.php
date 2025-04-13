@@ -1,8 +1,9 @@
 <?php
 
 use App\Http\Controllers\Api\ApiController;
-use App\Http\Controllers\Backend\PageComponentsCategoriesController;
+
 use App\Http\Controllers\Backend\PageComponentsController;
+use App\Http\Controllers\Backend\SnippetsCategoriesController;
 use App\Http\Controllers\Clipart\ClipartController;
 use App\Http\Controllers\CustomBroadcastAuthController;
 use App\Http\Middleware\EnsureAuth0TokenIsValid;
@@ -67,7 +68,7 @@ Route::get(
 Route::get('tags', [ApiController::class, 'tags'])->middleware('guest');
 
 // Search- later, use different middleware
-Route::get('categories/search', [PageComponentsCategoriesController::class, 'search'])->middleware('guest');
+Route::get('categories/search', [SnippetsCategoriesController::class, 'search'])->middleware('guest');
 
 
 // open clipart search (for now)

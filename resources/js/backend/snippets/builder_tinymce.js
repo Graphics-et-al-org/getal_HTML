@@ -70,7 +70,7 @@ const modal = new Modal($targetEl, options, instanceOptions);
 
 var projectEndpoint;
 
-projectEndpoint = `${baseurl}/admin/page_component`;
+projectEndpoint = `${baseurl}/admin/snippet`;
 
 console.log(projectEndpoint);
 

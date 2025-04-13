@@ -11,9 +11,10 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Models\Page\PageComponent;
-use App\Models\Page\PageComponentCategory;
 
-class PageComponentsCategoriesController extends Controller
+use App\Models\Page\SnippetsCategory;
+
+class SnippetsCategoriesController extends Controller
 {
     public function index(Request $request)
     {
@@ -54,7 +55,7 @@ class PageComponentsCategoriesController extends Controller
             $request['tags'] = session('admin_page_component_category_tags');
         }
 
-        $categories = PageComponentCategory::when($request->has('tags'), function ($query) use ($request) {
+        $categories = SnippetsCategory::when($request->has('tags'), function ($query) use ($request) {
             $query->whereHas('tags', function ($q) use ($request) {
                 $q->whereIn('tags.id', $request['tags']);
             });
@@ -67,7 +68,7 @@ class PageComponentsCategoriesController extends Controller
             ->paginate(10);
 
 
-        return view('backend.page_component_category.index')
+        return view('backend.snippets_category.index')
             ->with('categories', $categories);
     }
 
@@ -75,10 +76,10 @@ class PageComponentsCategoriesController extends Controller
     public function edit($id)
     {
 
-        $category = PageComponentCategory::findOr($id, function () {
-            return view('backend.page_component_category.index');
+        $category = SnippetsCategory::findOr($id, function () {
+            return view('backend.snippets_category.index');
         });
-        return view('backend.page_component_category.editor')
+        return view('backend.snippets_category.editor')
             ->with('category', $category);
     }
 
@@ -86,12 +87,12 @@ class PageComponentsCategoriesController extends Controller
     // Show the creation page
     public function create(Request $request)
     {
-        return view('backend.page_component_category.editor');
+        return view('backend.snippets_category.editor');
     }
 
     public function store(Request $request)
     {
-        $category = new PageComponentCategory();
+        $category = new SnippetsCategory();
         $category->label = $request->label;
         $category->description = $request->description;
         $category->uuid = (string) Str::uuid();
@@ -113,7 +114,7 @@ class PageComponentsCategoriesController extends Controller
         foreach ($components as $index => $component) {
             $syncArr[$component] = ['order' => $index];
         }
-        $category->components()->sync($syncArr);
+        $category->snippets()->sync($syncArr);
 
 
         // sync users
@@ -124,7 +125,7 @@ class PageComponentsCategoriesController extends Controller
         $category->projects()->sync($request->projects ?? []);
 
         session()->flash('flash_success', 'Created Successfully');
-        return redirect()->route('admin.page_component_category.index');
+        return redirect()->route('admin.snippets_category.index');
     }
 
     // store the thing
@@ -137,7 +138,7 @@ class PageComponentsCategoriesController extends Controller
         //     $syncArr[$component]=['order'=>$index];
         // }
         // dd($syncArr);
-        $category = PageComponentCategory::find($id);
+        $category = SnippetsCategory::find($id);
         $category->label = $request->label;
         $category->description = $request->description;
         $category->save();
@@ -163,7 +164,7 @@ class PageComponentsCategoriesController extends Controller
         foreach ($components as $index => $component) {
             $syncArr[$component] = ['order' => $index];
         }
-        $category->components()->sync($syncArr);
+        $category->snippets()->sync($syncArr);
 
         // sync users
         $category->users()->sync($request->users ?? []);
@@ -173,13 +174,13 @@ class PageComponentsCategoriesController extends Controller
         $category->projects()->sync($request->projects ?? []);
 
         session()->flash('flash_success', 'Updated Successfully');
-        return redirect()->route('admin.page_component_category.index');;
+        return redirect()->route('admin.snippet_category.index');;
     }
 
     // destroy the thing
     public function destroy($id, Request $request)
     {
-        $category = PageComponentCategory::findOrFail($id);
+        $category = SnippetsCategory::findOrFail($id);
 
         // Detach all tags
         //  $category->tags()->detach();
@@ -194,13 +195,13 @@ class PageComponentsCategoriesController extends Controller
         $category->delete();
 
         session()->flash('flash_success', 'Deleted Successfully');
-        return redirect()->route('admin.page_component_category.index');
+        return redirect()->route('admin.snippets_category.index');
     }
 
     public function addFromUuids(Request $request)
     {
         // dd($request->all());
-        $categories = PageComponentCategory::whereIn('uuid', explode(',',$request->uuids))->get();
+        $categories = SnippetsCategory::whereIn('uuid', explode(',',$request->uuids))->get();
 
         $componentsOutput = '';
         // tack the content on to the end
@@ -220,9 +221,9 @@ class PageComponentsCategoriesController extends Controller
     {
         // dd($request->all());
         //    if ($request->q) {
-        //       $categories = PageComponentCategory::where('label', 'like', "%{$request->q}%")->orWhere('description', 'LIKE', "%{$request->q}%")->take(20)->get();
+        //       $categories = SnippetsCategory::where('label', 'like', "%{$request->q}%")->orWhere('description', 'LIKE', "%{$request->q}%")->take(20)->get();
         // } else {
-        $categories = PageComponentCategory::take(50)->get();
+        $categories = SnippetsCategory::take(50)->get();
         //   }
         $categories->transform(function ($item, $key) {
             return ['value' => $item->id, 'text' => $item->label, 'uuid' => $item->uuid];

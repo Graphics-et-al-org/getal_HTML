@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Page\Compiled\Page;
 use App\Models\Tag;
-use App\Models\Page\Page;
+
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
@@ -23,15 +24,13 @@ class PagesController extends Controller
     public function index(Request $request)
     {
         // get templates
-        if (isset($request['tags'])) {
-            if (!$request->has('search')) {
-                Session::forget('admin_pages_search');
-            }
-            session(['admin_pages_page' => 1]);
-            session(['admin_pages_tags' => $request['tags']]);
-        }
-
-
+        // if (isset($request['tags'])) {
+        //     if (!$request->has('search')) {
+        //         Session::forget('admin_pages_search');
+        //     }
+        //     session(['admin_pages_page' => 1]);
+        //     session(['admin_pages_tags' => $request['tags']]);
+        // }
 
 
         if (isset($request['page'])) {
@@ -47,7 +46,7 @@ class PagesController extends Controller
         }
 
 
-        $pages = Page::whereNull('is_template')
+        $pages = Page::all()
 
             ->when($request->has('search'), function ($query) use ($request) {
                 $query->where(function ($q) use ($request) {
@@ -73,54 +72,50 @@ class PagesController extends Controller
     }
 
 
-    // store the page
-    public function create(Request $request)
-    {
-        return view('backend.pages_templates.editor_tinymce');
-    }
 
 
 
-    // store the page
-    public function update($id, Request $request)
-    {
-        $page = Page::find($id);
-        $page->user_id = Auth::user()->id;
-        $page->label = $request->label;
-        $page->description = $request->description ?? '';
-        $page->content = $request->content ?? '';
-       // $page->html = $request->html ?? '';
-       // $page->css = $request->css ?? '';
-        $page->save();
 
-        $tags = [];
-        // add tags, making if necessary
-        if (isset($request->tags)) {
-            foreach ($request->tags as $tag) {
-                if (!Tag::find($tag)) {
-                    if (strlen($tag) > 0) {
-                        $tagModel = \App\Models\Tag::firstOrCreate(['text' => $tag]);
-                        $tag = $tagModel->id;
-                    }
-                }
-                $tags[] = $tag;
-            }
-        }
-        // sync
-        $page->tags()->sync($tags);
+    // // store the page
+    // public function update($id, Request $request)
+    // {
+    //     $page = Page::find($id);
+    //     $page->user_id = Auth::user()->id;
+    //     $page->label = $request->label;
+    //     $page->description = $request->description ?? '';
+    //     $page->content = $request->content ?? '';
+    //    // $page->html = $request->html ?? '';
+    //    // $page->css = $request->css ?? '';
+    //     $page->save();
 
-        session()->flash('flash_success', 'Created Successfully');
-        return redirect()->route('admin.templates.index');
-    }
+    //     $tags = [];
+    //     // add tags, making if necessary
+    //     if (isset($request->tags)) {
+    //         foreach ($request->tags as $tag) {
+    //             if (!Tag::find($tag)) {
+    //                 if (strlen($tag) > 0) {
+    //                     $tagModel = \App\Models\Tag::firstOrCreate(['text' => $tag]);
+    //                     $tag = $tagModel->id;
+    //                 }
+    //             }
+    //             $tags[] = $tag;
+    //         }
+    //     }
+    //     // sync
+    //     $page->tags()->sync($tags);
+
+    //     session()->flash('flash_success', 'updated Successfully');
+    //     return redirect()->route('admin.page.index');
+    // }
 
 
     // get the data
-    public function data($id)
-    {
-        $page = Page::findOrFail($id);
-     //   dd(['content' => $page->content ?? "Create content here"]);
-        return response()->json(['content' => $page->content ?? "Create content here"]);
-    }
+    // public function data($id)
+    // {
+    //     $page = Page::findOrFail($id);
+    //  //   dd(['content' => $page->content ?? "Create content here"]);
+    //     return response()->json(['content' => $page->content ?? "Create content here"]);
+    // }
 
 
 

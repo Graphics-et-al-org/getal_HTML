@@ -1,21 +1,20 @@
 @extends('backend.layouts.app')
 
-@section('title', __('Template management'))
+@section('title', __('Template components management'))
 
 @section('content')
 
-<div><h5 class="text-xl dark:text-white">Templates admin</h5></div>
+<div><h5 class="text-xl dark:text-white">Template components admin</h5></div>
 <div class="inline-flex rounded-md shadow-sm m-2">
 
-    <a href="{{ route('admin.template.create') }}" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+    <a href="{{ route('admin.template.component.create') }}" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
       New
     </a>
 
   </div>
   <div class="col m-2">
 
-
-    <form action="{{ route('admin.templates.index') }}" class="m-0" method="GET">
+    <form action="{{ route('admin.template.components.index') }}" class="m-0" method="GET">
 
         <div class="flex">
             <div class="flex-initial min-w-80  mr-2">
@@ -35,7 +34,7 @@
                     <label for="search">Search label/description</label>
                 </div>
 
-                <input type="text" name="search" id="search" value = "{{ session('admin_templates_search') }}"
+                <input type="text" name="search" id="search" value = "{{ session('admin_template_components_search') }}"
                     class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                     placeholder="name">
 
@@ -88,39 +87,39 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($templates as $template )
+            @foreach ($components as $component )
             <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
                 <th  class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                    {{ $template->label }}
+                    {{ $component->label }}
                 </th>
                 <td  class="px-6 py-4 ">
-                    {{ $template->description }}
+                    {{ $component->description }}
                 </td>
                 <td  class="px-6 py-4 ">
-                    {{ $template->template_type }}
+                    {{ $component->type }}
                 </td>
                 <td  class="px-6 py-4 ">
-                    {{ $template->tags?$template->tags->implode('text', ', '):"" }}
+                    {{ $component->tags?$component->tags->implode('text', ', '):"" }}
                 </td>
                 {{-- <td class="px-6 py-4">
-                    {{ $template->user->name }}
+                    {{ $component->user->name }}
                 </td> --}}
                 <td  class="px-6 py-4 ">
-                    {{ $template->teams?$template->teams->implode('display_name', ', '):"" }}
+                    {{ $component->teams?$component->teams->implode('display_name', ', '):"" }}
                 </td>
                 <td  class="px-6 py-4 ">
-                    {{ $template->users?$template->users->implode('name', ', '):"" }}
+                    {{ $component->users?$component->users->implode('name', ', '):"" }}
                 </td>
                 <td  class="px-6 py-4 ">
-                    {{ $template->projects?$template->projects->implode('label', ', '):"" }}
+                    {{ $component->projects?$component->projects->implode('label', ', '):"" }}
                 </td>
                 <td class="px-6 py-4">
-                    {{ $template->created_at }}
+                    {{ $component->created_at }}
                 </td>
                 <td class="px-6 py-4">
-                    <a href="{{ route('admin.template.edit', $template->id) }}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+                    <a href="{{ route('admin.template.component.edit', $component->id) }}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
                     <br/>
-                    <a onclick="window.confirmDelete({{ $template->id }})"
+                    <a onclick="window.confirmDelete({{ $component->id }})"
                         class="font-medium text-red-600 dark:text-blue-500 hover:underline">Delete</a>
                 </td>
             </tr>
@@ -150,5 +149,5 @@
         ]
     </script>
     {{-- @vite('resources/js/backend/template_builder/blocks.js') --}}
-    @vite('resources/js/backend/pages_templates/index.js')
+    @vite('resources/js/backend/template_components/index.js')
 @endpush

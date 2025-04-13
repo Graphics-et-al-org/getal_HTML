@@ -9,11 +9,13 @@ use App\Models\Page\Page;
 use Illuminate\Support\Str;
 use App\Traits\AblyFunctions;
 use App\Models\Clipart\Clipart;
+use App\Models\Page\Compiled\CompiledPage;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Models\Page\PageComponent;
 use App\Models\Page\PageComponentCategory;
+use App\Models\Page\PageTemplate;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
@@ -127,6 +129,9 @@ class SubmitTextForTranslation implements ShouldQueue
                     ),
                 ),
             );
+            // some categories
+            $response_content['categories'] = ['86278671-67fe-4a4d-a214-2479c79fee4c', 'e6543121-d947-4b4e-8d3d-59e1607b80fd'];
+            //$this->_extras = [4, 5];
         } else {
             // or else some real data
             $response = Http::withHeaders([
@@ -143,10 +148,32 @@ class SubmitTextForTranslation implements ShouldQueue
         // build an output
         // get the template, the assumption is it has the required 'data-' fields
         Log::info('Using template:' . $this->_template_id);
-        $templateHtml = Page::find($this->_template_id)->content;
+        // make a page from a template
+        $template = PageTemplate::find($this->_template_id);
+        if (!$template) {
+            Log::error('Template not found:' . $this->_template_id);
+            $this->sendMessage('translation-status.' . $this->_uuid, json_encode(['message' => 'failure']));
+            return;
+        }
+
+        // build the compiled page
+        $outputPage = new CompiledPage();
+        $outputPage->uuid = $result_uuid;
+        $outputPage->label = 'Patient information generated ' . Carbon::now()->toDateTimeString();
+        $outputPage->user_id = $this->_user_id;
+        $outputPage->job_uuid = $this->_uuid;
+        $outputPage->from_template_id = $template->id;
+        $outputPage->header = $template->header;
+        $outputPage->footer = $template->footer;
+        $outputPage->css = $template->css;
+
+// populate the page with the components
+$templateComponents = $template->components;
+
+
 
         // get the keypoint template
-        $keypointHTML = PageComponent::where('keypoint', 1)->first()->content;
+        //$keypointHTML = PageComponent::where('keypoint', 1)->first()->content;
 
         // build the output
         $output = str_ireplace(["{{title}}", "{{summary}}"], [$response_content['title'], $response_content['summary']], $templateHtml);
@@ -172,7 +199,7 @@ class SubmitTextForTranslation implements ShouldQueue
 
         $categories = PageComponentCategory::whereIn('uuid', $this->_extras)->get();
         $response_content['categories'] = $this->_extras;
-       // Log::info('Categories:' . $categories);
+        // Log::info('Categories:' . $categories);
         // only tack them on when there's something
         if ($categories->count() > 0) {
             $componentsOutput = '';

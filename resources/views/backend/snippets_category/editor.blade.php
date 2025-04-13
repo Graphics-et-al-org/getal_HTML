@@ -20,7 +20,7 @@
     </div>
     <div class=" pr-2">
         <form id="storeForm"
-            action="{{ isset($category->id) ? route('admin.page_component_category.update', $category->id) : route('admin.page_component_category.store') }}"
+            action="{{ isset($category->id) ? route('admin.snippet_category.update', $category->id) : route('admin.snippet_category.store') }}"
             method="POST">
             @if (isset($category->id))
                 {{ method_field('PATCH') }}
@@ -112,20 +112,20 @@
                                 </tr>
                             </thead>
                             <tbody id="table_body">
-                                @if (isset($category->components))
-                                    @foreach ($category->components as $component)
-                                        <tr data-id="{{ $component->id }}"
+                                @if (isset($category->snippets))
+                                    @foreach ($category->snippets as $snippet)
+                                        <tr data-id="{{ $snippet->id }}"
                                             class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
                                             <th scope="row"
                                                 class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                {{ $component->label }}
+                                                {{ $snippet->label }}
                                             </th>
                                             <td class="px-6 py-4 ">
-                                                {{ $component->description }}
+                                                {{ $snippet->description }}
                                             </td>
 
                                             <td class="px-6 py-4">
-                                                <button type="button" onclick="window.deleteRow( {{ $component->id }})"
+                                                <button type="button" onclick="window.deleteRow( {{ $snippet->id }})"
                                                     class="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                         fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
@@ -149,7 +149,7 @@
     </div>
 
     <footer class="fixed bottom-0 left-0 z-20 w-full bg-gray-200">
-        <a href="{{ route('admin.page_components.index') }}" type="button"
+        <a href="{{ route('admin.snippets.index') }}" type="button"
             class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"><-
                 Back</a>
                 <button type="button" onclick="window.save()"
@@ -167,16 +167,16 @@
 
 @push('after-scripts')
     <script>
-        const component_id = {{ $category->id ?? -1 }}
+        const category_id = {{ $category->id ?? -1 }}
         const baseurl = '{{ URL::to('/') }}';
 
         const tailwindcsspath = "{{ Vite::asset('resources/css/app.css') }}";
 
 
         var users = [
-            @if (isset($component))
-                @if (isset($component->users))
-                    @foreach ($component->users as $user)
+            @if (isset($category))
+                @if (isset($category->users))
+                    @foreach ($category->users as $user)
                         {
                             value: "{{ $user->id }}",
                             text: "{{ $user->name }}"
@@ -187,9 +187,9 @@
         ]
 
         var teams = [
-            @if (isset($component))
-                @if (isset($component->teams))
-                    @foreach ($component->teams as $team)
+            @if (isset($category))
+                @if (isset($category->teams))
+                    @foreach ($category->teams as $team)
                         {
                             value: "{{ $team->id }}",
                             text: "{{ $team->display_name }}"
@@ -202,8 +202,8 @@
         var editor;
     </script>
 
-    @vite('resources/js/backend/page_component_category/edit.js')
+    @vite('resources/js/backend/snippets_category/edit.js')
 
     {{-- CSS goes *after* js --}}
-    @vite('resources/css/backend/template_builder/builder.css')
+    {{-- @vite('resources/css/backend/template_builder/builder.css') --}}
 @endpush

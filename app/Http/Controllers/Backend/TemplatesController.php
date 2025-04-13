@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Models\Tag;
 use App\Models\Page\Page;
+use App\Models\Page\PageTemplate;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
@@ -57,8 +58,8 @@ class TemplatesController extends Controller
             $request['tags'] = session('admin_templates_tags');
         }
 
-        $templates = Page::where('is_template', '1')
-            ->when($request->has('tags'), function ($query) use ($request) {
+        $templates = PageTemplate
+            ::when($request->has('tags'), function ($query) use ($request) {
                 $query->whereHas('tags', function ($q) use ($request) {
                     $q->whereIn('tags.id', $request['tags']);
                 });
@@ -79,27 +80,37 @@ class TemplatesController extends Controller
     // show the editor
     public function edit($id)
     {
-        $page = Page::findOr($id, function () {
+        $template = PageTemplate::findOr($id, function () {
             return view('backend.pages_templates.index');
         });
         return view('backend.pages_templates.editor_tinymce')
-            ->with('page', $page);
+            ->with('template', $template);
     }
 
     public function store(Request $request)
     {
         // dd($request);
-        $page = new Page();
-        $page->uuid = (string) Str::uuid();
-        $page->user_id = Auth::user()->id;
-        $page->is_template = 1;
-        $page->label = $request->label;
-        $page->description = $request->description ?? '';
-        $page->content = $request->content;
-        $page->template_type = $request->template_type ?? 'summary';
-        // $page->html = $request->html;
-        // $page->css = $request->css;
-        $page->save();
+        $template = new PageTemplate();
+        $template->uuid = (string) Str::uuid();
+        $template->user_id = Auth::user()->id;
+        //$template->is_template = 1;
+        $template->label = $request->label;
+        $template->description = $request->description ?? '';
+        $template->header = $request->header ?? '';
+        $template->footer = $request->footer ?? '';
+        $template->css = $request->css ?? '';
+       // $template->content = $request->content;
+        $template->template_type = $request->template_type ?? 'summary';
+        // $template->html = $request->html;
+        // $template->css = $request->css;
+        $template->save();
+
+        $components = explode(',', $request->components);
+        $syncArr = [];
+        foreach ($components as $index => $component) {
+            $syncArr[$component] = ['order' => $index];
+        }
+        $template->page_templates_components()->sync($syncArr);
 
         $tags = [];
         // add tags, making if necessary
@@ -113,19 +124,19 @@ class TemplatesController extends Controller
             }
         }
         // sync
-        $page->tags()->sync($tags);
+        $template->tags()->sync($tags);
         // sync users
-        $page->users()->sync($request->users ?? []);
+        $template->users()->sync($request->users ?? []);
         // sync teams
-        $page->teams()->sync($request->teams ?? []);
+        $template->teams()->sync($request->teams ?? []);
         // sync projects
-        $page->projects()->sync($request->projects ?? []);
+        $template->projects()->sync($request->projects ?? []);
 
         session()->flash('flash_success', 'Created Successfully');
         return redirect()->route('admin.templates.index');;
     }
 
-    // store the page
+    // create the page
     public function create(Request $request)
     {
         return view('backend.pages_templates.editor_tinymce');
@@ -137,16 +148,26 @@ class TemplatesController extends Controller
     public function update($id, Request $request)
     {
 
-        $page = Page::find($id);
-        $page->user_id = Auth::user()->id;
-        $page->is_template = 1;
-        $page->label = $request->label;
-        $page->description = $request->description ?? '';
-        $page->content = $request->content ?? '';
-        $page->template_type = $request->template_type ?? 'summary';
-        // $page->html = $request->html ?? '';
-        // $page->css = $request->css ?? '';
-        $page->save();
+        $template = PageTemplate::find($id);
+        $template->user_id = Auth::user()->id;
+
+        $template->label = $request->label;
+        $template->description = $request->description ?? '';
+        $template->header = $request->header ?? '';
+        $template->footer = $request->footer ?? '';
+        $template->css = $request->css ?? '';
+       // $template->content = $request->content;
+        $template->template_type = $request->template_type ?? 'summary';
+        // $template->html = $request->html ?? '';
+        // $template->css = $request->css ?? '';
+        $template->save();
+
+        $components = explode(',', $request->components);
+        $syncArr = [];
+        foreach ($components as $index => $component) {
+            $syncArr[$component] = ['order' => $index];
+        }
+        $template->page_templates_components()->sync($syncArr);
 
         $tags = [];
         // add tags, making if necessary
@@ -162,13 +183,13 @@ class TemplatesController extends Controller
             }
         }
         // sync
-        $page->tags()->sync($tags);
+        $template->tags()->sync($tags);
         // sync users
-        $page->users()->sync($request->users ?? []);
+        $template->users()->sync($request->users ?? []);
         // sync teams
-        $page->teams()->sync($request->teams ?? []);
+        $template->teams()->sync($request->teams ?? []);
         // sync projects
-        $page->projects()->sync($request->projects ?? []);
+        $template->projects()->sync($request->projects ?? []);
 
         session()->flash('flash_success', 'Created Successfully');
         return redirect()->route('admin.templates.index');;
@@ -178,26 +199,26 @@ class TemplatesController extends Controller
     // get the data
     public function data($id)
     {
-        $page = Page::findOrFail($id);
-        // dd($page);
+        $template = PageTemplate::findOrFail($id);
+        // dd($template);
 
-        return ['content' => $page->content ?? "Create content here"];
+        return ['header' => $template->header ?? "Create header here",
+        'footer'=> $template->footer ?? "Create footer here",
+     ];
     }
-
-
 
 
 
     // destroy the page
     public function destroy($id, Request $request)
     {
-        $page = Page::findOrFail($id);
+        $template = PageTemplate::findOrFail($id);
 
         // Detach all tags
-        $page->tags()->detach();
+        $template->tags()->detach();
 
         // Delete the page
-        $page->delete();
+        $template->delete();
 
         session()->flash('flash_success', 'Deleted Successfully');
         return ['status' => 'success'];

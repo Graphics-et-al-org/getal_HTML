@@ -79,14 +79,19 @@
                             class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Templates</a>
                     </li>
                     <li>
-                        <a href="{{ route('admin.page_components.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Page
-                            components</a>
+                        <a href="{{ route('admin.template.components.index') }}"
+                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                            Template Components</a>
                     </li>
                     <li>
-                        <a href="{{ route('admin.page_component_category.index') }}"
-                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Page
-                            components collections</a>
+                        <a href="{{ route('admin.snippets.index') }}"
+                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                            Snippets</a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.snippet_category.index') }}"
+                            class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                            Collections of snippets</a>
                     </li>
                 </ul>
             </li>
