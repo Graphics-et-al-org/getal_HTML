@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Clipart\ClipartController;
-use App\Http\Controllers\Frontend\Pages\PagesController;
+
 use Illuminate\Support\Facades\Route;
 
 //

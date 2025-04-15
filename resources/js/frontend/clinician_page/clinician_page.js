@@ -1,6 +1,19 @@
 import Sortable from "sortablejs";
 import { Modal } from "flowbite";
 import Swal from "sweetalert2";
+import "tinymce/tinymce";
+import "tinymce/skins/ui/oxide/skin.min.css";
+import "tinymce/skins/content/default/content.min.css";
+import "tinymce/skins/content/default/content.css";
+import "tinymce/icons/default/icons";
+import "tinymce/themes/silver/theme";
+import "tinymce/models/dom/model";
+import "tinymce/plugins/code";
+import "tinymce/plugins/image";
+import "tinymce/plugins/visualblocks";
+import "tinymce/plugins/preview";
+import "tinymce/plugins/media";
+import "tinymce/plugins/fullscreen";
 
 const csrfToken = document
     .querySelector('meta[name="csrf-token"]')
@@ -11,7 +24,7 @@ const snippets_bg_colours = ["#fde8d4", "#ffd2e8", "#d6ecfd"];
 var snippets_current_bg_colour = 0;
 
 const keypointgrid = document.getElementsByClassName("keypoints").item(0);
-const snippetsgrid = document.getElementsByClassName("components").item(0);
+const snippetsgrid = document.getElementsByClassName("snippets").item(0);
 
 // get the layout for a keypoint
 const keypointLayout = document.getElementsByClassName("keypoint").item(0);
@@ -19,28 +32,88 @@ const keypointLayoutClone = keypointLayout.cloneNode(true);
 
 const deleteButtons = document.getElementsByClassName("deletebutton");
 
+// title editing
+tinymce.init({
+    selector: '#title',
+    toolbar: false,
+    menubar: false,
+    inline: true,
+});
+// summary editing
+tinymce.init({
+    selector: '#summary',
+    toolbar: false,
+    menubar: false,
+    inline: true,
+});
+
+// keypoint editing
+tinymce.init({
+    selector: '[data-field="keypoint-text"]',
+    toolbar: false,
+    menubar: false,
+    inline: true,
+    setup: (editor) => {
+
+        // });
+        editor.on("focusin", (e) => {
+            console.log("Editor was focusin.");
+            const element = editor.getElement();
+
+            const containerId = element.parentElement.id;
+            console.log(
+                element.closest("[data-keypoint_id]").dataset.keypoint_id
+            );
+            console.log(editor.getContent());
+        });
+
+        editor.on("focusout", (e) => {
+            console.log("Editor was focusout.");
+            const element = editor.getElement();
+
+            // Or, if the element is inside a containing div and you want its id:
+            const containerId = element.parentElement.id;
+            console.log(
+                element.closest("[data-keypoint_id]").dataset.keypoint_id
+            );
+            console.log(editor.getContent());
+            updateKeypointText(
+                element.closest("[data-keypoint_id]").dataset.keypoint_id,
+                editor.getContent()
+            );
+        });
+    },
+});
+
 document.addEventListener("DOMContentLoaded", function () {
     console.log("Document is ready");
     colourSnippetsBackground();
-   // openPublicDetailsModal()
+    // openPublicDetailsModal()
 });
 
-document.querySelectorAll(".deletebutton").forEach((button) => {
-    button.addEventListener("click", function (event) {
-        event.stopPropagation(); // Prevent interfering with other events
-        const keypoint = this.closest(".keypoint"); // Find the closest .keypoint parent
-        const component = this.closest(".component"); // Find the closest .component parent
-        if (keypoint) {
-            //TODOL log this in the backend
-            keypoint.remove(); // Remove the element from the DOM
-        }
+// delete keypoint
+window.deleteKeypoint = (uuid) => {
+    // send the signal to remove keypoint
+    let url = baseurl + `/page/${uuid}/approve`;
+    fetch(url, {
+        method: "GET",
+        headers: {
+            "X-CSRF-Token": csrfToken,
+        },
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log(data);
+            if (data.status == 0) {
+                // remove the keypoint from the DOM
+                document.getElementById(`keypoint_${uuid}`).remove();
+            }
+        });
+    // remove the keypoint from the DOM
+};
 
-        if (component) {
-            //TODOL log this in the backend
-            component.remove(); // Remove the element from the DOM
-        }
-    });
-});
+// delete snippet
+window.deleteSnippet = (uuid) => {};
 
 // Enable Sorting
 Sortable.create(keypointgrid, {
@@ -205,6 +278,52 @@ window.addKeypoint = () => {
         });
 };
 
+const updateKeypointText = (id, content) => {
+    var url = baseurl + `/page/${uuid}/update_keypoint/${id}`;
+    let formData = new FormData();
+    formData.append("keypoint_id", id);
+    formData.append("content", content);
+    // little bit of feedback goes here
+    fetch(url, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-CSRF-Token": csrfToken,
+        },
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log(data);
+
+            if (data.status == 0) {
+                // Success feedback goes here
+                console.log(document.getElementById("keypoint_text").value);
+                keypointLayoutClone.querySelectorAll(
+                    "[data-field='keypoint-text']"
+                )[0].innerText = document.getElementById("keypoint_text").value;
+                keypointLayoutClone
+                    .querySelectorAll("[data-field='keypoint-image'] img")
+                    .forEach((img) => {
+                        const container = img.closest(
+                            '[data-field="keypoint-image"]'
+                        );
+                        img.src =
+                            baseurl +
+                            "/clipart/" +
+                            used_images[used_images.length - 1] +
+                            "/baseline";
+                    });
+                keypointgrid.insertBefore(
+                    keypointLayoutClone.cloneNode(true),
+                    document.getElementById("addKeypointButton")
+                );
+                window.closeAddKeypointModal();
+            }else{
+                // failurew goes here
+            }
+        });
+};
+
 // snippets modal
 // set the modal menu element
 const $addCollectionTargetEl = document.getElementById("addCollectionModal");
@@ -312,7 +431,6 @@ window.handleInfoCategoryChange = (e) => {
                 1
             );
     }
-
 };
 
 window.addSelectedCollections = () => {
@@ -358,24 +476,23 @@ const addPublicDetailsModal = new Modal(
 
 window.openPublicDetailsModal = () => {
     addPublicDetailsModal.show();
-}
+};
 
 window.closePublicDetailsModal = () => {
     addPublicDetailsModal.hide();
-}
+};
 
 // show a stern warning
-window.showWarning = ()=>{
+window.showWarning = () => {
     Swal.fire({
-        title: 'Important notice',
+        title: "Important notice",
         text: 'This tool is designed to support, not substitute, professional judgement. By selecting "Confirm and continue", you affirm that you have verified the accuracy and appropriateness of the information and diagrams provided',
         icon: "warning",
         showCancelButton: true,
-        confirmButtonText: 'Confirm and continue',
-
-      }).then((result) => {
+        confirmButtonText: "Confirm and continue",
+    }).then((result) => {
         if (result.isConfirmed) {
-// send the signal to confirm
+            // send the signal to confirm
             let url = baseurl + `/page/${uuid}/approve`;
             fetch(url, {
                 method: "GET",
@@ -387,12 +504,10 @@ window.showWarning = ()=>{
                 .then((data) => {
                     console.log(data);
                     openPublicDetailsModal();
-
                 });
-
         }
-      })
-}
+    });
+};
 
 // background colour the snipptets
 const colourSnippetsBackground = () => {

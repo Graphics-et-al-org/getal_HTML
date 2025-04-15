@@ -1,32 +1,122 @@
 @extends('frontend.layouts.clinician_view_layout')
 
-@section('title', 'Clinician View')
+@section('title')
+    Clinician view
+@endsection
+
+
+@section('header')
+    {!! $page->header !!}
+@endsection
 
 @section('content')
+    <main class="p-4 h-auto">
 
-
-
-
-
-    <main class="p-4 h-auto pt-20">
-        {{-- Widget wrapper --}}
         <div class="container mx-auto">
-            {{-- Render the HTML --}}
-            {!! $html !!}
-            <div class="flex justify-center mt-4 w-full">
+            {{-- Title --}}
+            <div class="text-center mb-6 border-b border-gray-300">
+                <h1 id="title"
+                    class="text-3xl font-semibold px-2 py-1 focus:rounded-md  focus:border-2 focus:outline-none focus:border-blue-500 focus:border">
+                    {{ $page->title }}
+                </h1>
+            </div>
+
+            {{-- summary --}}
+
+            <div class=" items-center mb-4 ">
+                <div id="summary"
+                    class="w-full p-4 text-xl border-2 border-gray-300 rounded-md focus:outline-none focus:border-blue-500 resize-none">
+                    {{ $page->summary }}</div>
+
+            </div>
+            {{-- Keypoints --}}
+            {{-- <h1 class="text-2xl font-bold text-gray-900 dark:text-white text-center">
+                Summary
+            </h1> --}}
+            @foreach ($page->components as $component)
+                @switch($component->type)
+                    @case('keypoints')
+                        {{-- <h1 class="text-2xl font-bold text-gray-900 dark:text-white text-center">
+                            Keypoints
+                        </h1> --}}
+                        <div
+                            class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 grid-flow-row auto-cols-auto gap-6 border border-2 border-red-500 rounded-md justify-center justify-items-center items-center  p-2 keypoints">
+                            @foreach ($component->snippets as $snippet)
+                                <div class="relative object-contain" data-keypoint_id="{{ $snippet->id }}">
+                                    {!! $snippet->content !!}
+                                    {{-- Add remove button --}}
+                                    <button type="button" class="removeKeypointButton absolute top-1 right-1"
+                                        data-id="{{ $snippet->id }}" onclick="">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ff0000"
+                                            class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                                            <path
+                                                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            @endforeach
+                            <div data-type="keypoints"
+                                class="self-auto relative grid w-48 min-h-48 border border-dashed border-2 border-gray-500 rounded-md addbutton cursor-pointer">
+                                <div class="col-span-full m-0 p-2">
+                                    <div
+                                        class="h-32 w-full border border-solid border-2 border-pink-200 rounded-md mb-2 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 24 24" width="128" height="128"
+                                            fill="#b0bec5" class="bi bi-plus-lg">
+                                            <path fill-rule="evenodd"
+                                                d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div
+                                        class="min-h-12 w-full border border-dashed border-2 border-red-200  rounded-md text-center">
+                                        &nbsp;</div>
+                                </div>
+                            </div>
+                        </div>
+                    @break
+
+                    @case('snippets')
+                        <div class="nonclinical-title text-xl font-semibold text-center mb-4 text-gray-700">Some extra Information
+                            for you</div>
+                        <div class="w-full border border-2 border-blue-500 rounded-md p-2 snippets">
+                            @foreach ($component->snippets as $snippet)
+                                {!! $snippet->content !!}
+                            @endforeach
+                        </div>
+                    @break
+
+                    @case('html')
+                        {{-- <h1 class="text-2xl font-bold text-gray-900 dark:text-white text-center">
+                            Arbitrary HTML
+                        </h1> --}}
+                        {!! $component->content !!}
+                    @break
+
+                    @default
+                @endswitch
+            @endforeach
+
+
+            {{-- <div class="flex justify-center mt-4 w-full">
                 <button id="addKeypointButton" type="button"
                     class="inline-flex w-full justify-center items-center px-4 py-2 text-sm font-medium text-white bg-blue-700 border border-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:border-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                     onclick="window.openAddCollectionModal()">
                     Add information from our database
                 </button>
-            </div>
-            <div class="flex justify-center mt-4 w-full">
-                <button id="addKeypointButton" type="button"
-                    class="inline-flex w-full justify-center items-center px-4 py-2 text-sm font-medium text-white bg-blue-700 border border-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:border-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                    onclick="window.showWarning()">
-                    Save and generate link
+            </div> --}}
+
+            <div class="text-center mt-8">
+                <button id="openSnippetLibraryBtn" onclick="window.openAddCollectionModal()"
+                    class="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    + Add Information from Our Database
                 </button>
             </div>
+
+            <button class="save-btn bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                onclick="window.showWarning()">
+                Save and Generate Link
+            </button>
+
         </div>
         {{-- Button to add snippets --}}
 
@@ -38,13 +128,15 @@
             const uuid = '{{ $page->uuid ?? -1 }}';
             const baseurl = '{{ URL::to('/') }}';
             var used_images = [
-                @foreach ($used_icons as $used_icon)
-                    {{ $used_icon }},
-                @endforeach
+
             ]
         </script>
         @vite('resources/js/frontend/clinician_page/clinician_page.js')
     @endpush
+@endsection
+
+@section('footer')
+    {!! $page->footer !!}
 @endsection
 @section('modals')
     <div id="addKeypointModal" role="dialog" tabindex="-1" aria-hidden="true"
@@ -58,7 +150,7 @@
     </div>
 
     <div id="publicDetailsModal" role="dialog" tabindex="-1" aria-hidden="true"
-    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    @include('frontend.page.form.public_info')
-</div>
+        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        @include('frontend.page.form.public_info')
+    </div>
 @endsection

@@ -60,21 +60,80 @@
         white-space: nowrap !important;
     }
 </style>
+{!! $page->header !!}
 <main class="p-4 h-auto pt-20">
+    
     {{-- Widget wrapper --}}
-    <div class="fixed top-4 right-4 z-50 bg-white border border-gray-300 shadow-lg rounded-lg flex items-center gap-3 p-3 "
+    <div class="fixed top-2 right-2 z-50 bg-white border border-gray-300 shadow-lg rounded-lg flex items-center gap-3 p-3 "
         id="google_translate_wrapper">
         <!-- Translate widget -->
         <div id="google_translate_element" class="inline-block"></div>
     </div>
 
-
     <div class="container mx-auto">
-        {{-- Render the HTML --}}
-        {!! $html !!}
+        {{-- Title --}}
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white text-center">
+            Title
+        </h1>
+        <div class=" items-center mb-4 border border-2 border-gray-500 rounded-md text-center">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white text-center">
+                {{ $page->title }}
+            </h1>
+        </div>
+        {{-- summary --}}
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white text-center">
+            Summary
+        </h1>
+        <div class=" items-center mb-4 border border-2 border-slate-300 rounded-md text-center ">
+            {{ $page->summary }}
+        </div>
+        {{-- Keypoints --}}
+        {{-- <h1 class="text-2xl font-bold text-gray-900 dark:text-white text-center">
+            Summary
+        </h1> --}}
+        @foreach ($page->components as $component)
+            @switch($component->type)
+                @case('keypoints')
+                    {{-- <h1 class="text-2xl font-bold text-gray-900 dark:text-white text-center">
+                        Keypoints
+                    </h1> --}}
+                    <div class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6 border border-2 border-red-500 rounded-md justify-center justify-items-center items-center  p-2 keypoints">
+                        @foreach ($component->snippets as $snippet)
+                            <div class="relative object-contain ">
+                                {!! $snippet->content !!}
+                            </div>
+                        @endforeach
+
+                    </div>
+                @break
+
+                @case('snippets')
+                    {{-- <h1 class="text-2xl font-bold text-gray-900 dark:text-white text-center ">
+                        Snippets
+                    </h1> --}}
+                    <div class="w-full border border-2 border-blue-500 rounded-md p-2 snippets">
+                        @foreach ($component->snippets as $snippet)
+                            {!! $snippet->content !!}
+                        @endforeach
+                    </div>
+                @break
+
+                @case('html')
+                    {{-- <h1 class="text-2xl font-bold text-gray-900 dark:text-white text-center">
+                        Arbitrary HTML
+                    </h1> --}}
+                    {!! $component->content !!}
+                @break
+
+                @default
+            @endswitch
+        @endforeach
+
+
     </div>
 
 </main>
+{!! $page->footer !!}
 </body>
 @stack('after-styles')
 @stack('after-scripts')

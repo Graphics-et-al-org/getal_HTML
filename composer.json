@@ -10,6 +10,7 @@
         "ably/ably-php": "^1.1",
         "ably/laravel-broadcaster": "^1.0",
         "azure-oss/storage-blob-laravel": "^1.3",
+        "chillerlan/php-qrcode": "^5.0",
         "diglactic/laravel-breadcrumbs": "^9.0",
         "firebase/php-jwt": "^6.10",
         "imangazaliev/didom": "^2.0",

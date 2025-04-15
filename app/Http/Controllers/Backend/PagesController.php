@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Page\Compiled\CompiledPage;
 use App\Models\Page\Compiled\Page;
 use App\Models\Tag;
 
@@ -46,9 +47,7 @@ class PagesController extends Controller
         }
 
 
-        $pages = Page::all()
-
-            ->when($request->has('search'), function ($query) use ($request) {
+        $pages = CompiledPage::when($request->has('search'), function ($query) use ($request) {
                 $query->where(function ($q) use ($request) {
                     $q->where('label', 'like', "%{$request['search']}%")
                         ->orWhere('description', 'LIKE', "%{$request['search']}%");
@@ -61,61 +60,8 @@ class PagesController extends Controller
             ->with('pages', $pages);
     }
 
-    // show the editor
-    public function edit($id)
-    {
-        $page = Page::findOr($id, function () {
-            return view('backend.pages_templates.index');
-        });
-        return view('backend.pages_templates.editor_tinymce')
-            ->with('page', $page);
-    }
 
 
-
-
-
-
-    // // store the page
-    // public function update($id, Request $request)
-    // {
-    //     $page = Page::find($id);
-    //     $page->user_id = Auth::user()->id;
-    //     $page->label = $request->label;
-    //     $page->description = $request->description ?? '';
-    //     $page->content = $request->content ?? '';
-    //    // $page->html = $request->html ?? '';
-    //    // $page->css = $request->css ?? '';
-    //     $page->save();
-
-    //     $tags = [];
-    //     // add tags, making if necessary
-    //     if (isset($request->tags)) {
-    //         foreach ($request->tags as $tag) {
-    //             if (!Tag::find($tag)) {
-    //                 if (strlen($tag) > 0) {
-    //                     $tagModel = \App\Models\Tag::firstOrCreate(['text' => $tag]);
-    //                     $tag = $tagModel->id;
-    //                 }
-    //             }
-    //             $tags[] = $tag;
-    //         }
-    //     }
-    //     // sync
-    //     $page->tags()->sync($tags);
-
-    //     session()->flash('flash_success', 'updated Successfully');
-    //     return redirect()->route('admin.page.index');
-    // }
-
-
-    // get the data
-    // public function data($id)
-    // {
-    //     $page = Page::findOrFail($id);
-    //  //   dd(['content' => $page->content ?? "Create content here"]);
-    //     return response()->json(['content' => $page->content ?? "Create content here"]);
-    // }
 
 
 
@@ -124,7 +70,7 @@ class PagesController extends Controller
     // destroy the page
     public function destroy($id, Request $request)
     {
-        $page = Page::findOrFail($id);
+        $page = CompiledPage::findOrFail($id);
 
         // Detach all tags
         $page->tags()->detach();

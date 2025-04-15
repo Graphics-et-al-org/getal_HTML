@@ -30,9 +30,7 @@ return new class extends Migration
             if (Schema::hasColumn('compiled_pages', 'template_id')) {
                 $table->dropColumn('template_id');
             }
-            if (Schema::hasColumn('compiled_pages', 'data')) {
-                $table->dropColumn('data');
-            }
+
             if (Schema::hasColumn('compiled_pages', 'template_type')) {
                 $table->dropColumn('template_type');
             }
@@ -53,6 +51,15 @@ return new class extends Migration
             if (!Schema::hasColumn('compiled_pages', 'team_id')) {
                 $table->bigInteger('team_id')->nullable();
             }
+            if (!Schema::hasColumn('compiled_pages', 'data')) {
+                $table->longText('data')->nullable();
+            }
+            if (!Schema::hasColumn('compiled_pages', 'title')) {
+                $table->longText('title')->nullable();
+            }
+            if (!Schema::hasColumn('compiled_pages', 'summary')) {
+                $table->longText('summary')->nullable();
+            }
         });
 
 
@@ -69,12 +76,21 @@ return new class extends Migration
                 $table->renameColumn('page_template_components_id', 'from_page_template_components_id');
             }
 
-            if (!Schema::hasColumn('compiled_page_components', 'page_id')) {
+            if (!Schema::hasColumn('compiled_page_components', 'compiled_page_id')) {
                 $table->bigInteger('compiled_page_id');
             }
 
             if (!Schema::hasColumn('compiled_page_components', 'content')) {
                 $table->bigInteger('content')->nullable();
+            }
+
+            if (!Schema::hasColumn('compiled_page_components', 'type')) {
+                $table->char('type', 45)->nullable();
+            }
+
+
+            if (!Schema::hasColumn('compiled_page_components', 'deleted_at')) {
+                $table->timestamp('deleted_at')->nullable();
             }
         });
 

@@ -2,7 +2,7 @@
 
 namespace App\Models\Page;
 
-use App\Models\Page\PagePage as PagePage;
+
 use App\Models\User as User;
 use Database\Factories\PageFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 // This is the page templates components. We use
-class PageTemplateComponent extends Model
+class PageTemplateComponentTemplate extends Model
 {
     use  SoftDeletes;
 
@@ -32,6 +32,8 @@ class PageTemplateComponent extends Model
         'page_template_component_id',
         'order'
     ];
+
+
 
 
 }

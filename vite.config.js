@@ -33,6 +33,7 @@ export default defineConfig({
                 "resources/js/backend/user/edit.js",
                 "resources/js/backend/team/members.js",
                 "resources/js/frontend/clinician_page/clinician_page.js",
+                "resources/js/frontend/share_view/share_view.js",
             ],
             resolve: {
                 alias: {

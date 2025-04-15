@@ -221,12 +221,9 @@ class ApiController extends Controller
         //   $template_id = Page::where('is_template', '1')->first()->id;
         //   dd($template_id);
 
-        // these wil be extracted from the template.
-        $job_params = [
-            "doctor_text" => 'demo test',
-        ];
 
-        SubmitTextForTranslation::dispatch($job_params, $id, $uuid, 1, true)->onConnection('database')->onQueue('textprocess');
+
+        SubmitTextForTranslation::dispatch('Simulation', $id, $uuid, 1, [], true)->onConnection('database')->onQueue('textprocess');
 
         //dd($job);
         // send the job now. Later we'll use a queueing system

@@ -1,10 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\UserController;
-use App\Http\Controllers\Backend\DashboardController;
-use App\Http\Controllers\Backend\TemplatesController;
-use App\Http\Controllers\Frontend\Pages\PagesController;
-use App\Http\Controllers\Frontend\Pages\PagesPagesController;
+use Illuminate\Support\Facades\Route;
 use Tabuna\Breadcrumbs\Trail;
 
 

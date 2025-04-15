@@ -36,17 +36,21 @@ class CompiledPage extends Model
         'user_id',
         'from_template_id',
         'team_id',
+        'project_id',
         'label',
         'header',
         'footer',
         'css',
         'job_uuid',
         'released_at',
+        'data',
+        'title',
+        'summary'
     ];
 
     public function components():HasMany
     {
-        return $this->hasMany(CompiledPageComponent::class, 'compiled_page_id', 'id');
+        return $this->hasMany(CompiledPageComponent::class, 'compiled_page_id', 'id')->orderBy('order', 'asc');
     }
 
     // // relationship between pages and page_pages

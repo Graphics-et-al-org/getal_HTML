@@ -23,7 +23,7 @@ class CompiledPageComponent extends Model
      */
     protected $fillable = [
         'compiled_page_id',
-        'from_page_template_component_id',
+        'from_page_template_components_id',
         'type',
         'order',
         'content',
@@ -38,7 +38,7 @@ class CompiledPageComponent extends Model
     // Page relationship
     public function snippets(): HasMany
     {
-        return $this->HasMany('App\Models\Page\Compiled\CompiledPageSnippet', 'compiled_page_components_id', 'id');
+        return $this->HasMany('App\Models\Page\Compiled\CompiledPageSnippet', 'compiled_page_components_id', 'id')->orderBy('order', 'asc');
     }
 
     public function from_template(): BelongsTo
