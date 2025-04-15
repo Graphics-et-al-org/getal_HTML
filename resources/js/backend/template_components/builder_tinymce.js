@@ -94,6 +94,7 @@ tinymce.init({
     content_css: tailwindcsspath,
     images_file_types: "svg,jpeg,jpg,png,gif",
     file_picker_types: "image",
+    extended_valid_elements : "a[class|name|href|target|title|onclick|rel],script[type|src],iframe[src|style|width|height|scrolling|marginwidth|marginheight|frameborder],img[class|src|border=0|alt|title|hspace|vspace|width|height|align|onmouseover|onmouseout|name]",
     relative_urls: false,
     remove_script_host: false,
     /* and here's our custom image picker*/
