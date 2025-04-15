@@ -40,7 +40,7 @@ return new class extends Migration
             if (!Schema::hasColumn('compiled_pages', 'header')) {
                 $table->longText('header')->nullable();
             }
-            if (!Schema::hasColumn('compiled_pages', 'css')) {
+            if (!Schema::hasColumn('compiled_pages', 'footer')) {
                 $table->longText('footer')->nullable();;
             }
 
