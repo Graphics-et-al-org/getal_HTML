@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Frontend\Pages;
 
 use App\Helpers\Global\QRImageWithLogo;
 use App\Http\Controllers\Controller;
+use App\Models\Analytics\CompiledSnippetEvent;
 use App\Models\Page\Compiled\CompiledPage;
 use App\Models\Page\Compiled\CompiledPageSnippet;
 
@@ -54,23 +55,69 @@ class CompiledPagesController extends Controller
 
 
     // add a keypoint to the data from the clinician interface
-    public function add_keypoint($uuid, $keypoint_id)
+    public function add_keypoint(Request $request, $uuid)
     {
         $page = CompiledPage::where('uuid', $uuid)->first();
-
+        $keypoint = CompiledPageSnippet::create([
+            'uuid' => $request['keypoint_uuid'],
+            'page_id' => $page->id,
+            'weight' => $request['weight'],
+            'content' => $request['content'],
+        ]);
+        CompiledSnippetEvent::create([
+            'page_id' => $page->id,
+            'action' => 'create',
+            'old_value' => '',
+            'new_value' => '',
+            'keypoint' => $keypoint->uuid,
+        ]);
         // add keypoint in teh background here, will be fakesied in the view
         return response()->json(['status' => '0']);
     }
 
     // add a keypoint to the data from the clinician interface
-    public function remove_keypoint(Request $request, $uuid, $keypoint_uuid)
+    public function remove_keypoint($uuid, $keypoint_uuid)
     {
         // remove the keypoint from the page
+        //dd($keypoint_uuid);
+        // @TODO does this page have a keypoint
         $page = CompiledPage::where('uuid', $uuid)->first();
         // remove the keypoint from the page
         $keypoint = CompiledPageSnippet::where('uuid', $keypoint_uuid)->first();
         if ($keypoint) {
             $keypoint->delete();
+            // log the action
+            CompiledSnippetEvent::create([
+                'page_id' => $page->id,
+                'action' => 'remove',
+                'old_value' => '',
+                'new_value' => '',
+                'keypoint' => $keypoint->uuid,
+            ]);
+            return response()->json(['status' => '0']);
+        }
+        return response()->json(['status' => '1']);
+    }
+
+    // update a keypoint to the data from the clinician interface
+    public function update_keypoint($uuid, $keypoint_uuid)
+    {
+        // remove the keypoint from the page
+        //dd($keypoint_uuid);
+        // @TODO does this page have a keypoint
+        $page = CompiledPage::where('uuid', $uuid)->first();
+        // remove the keypoint from the page
+        $keypoint = CompiledPageSnippet::where('uuid', $keypoint_uuid)->first();
+        if ($keypoint) {
+            $keypoint->update();
+            // log the action
+            CompiledSnippetEvent::create([
+                'page_id' => $page->id,
+                'action' => 'remove',
+                'old_value' => '',
+                'new_value' => '',
+                'keypoint' => $keypoint->uuid,
+            ]);
             return response()->json(['status' => '0']);
         }
         return response()->json(['status' => '1']);
@@ -130,7 +177,7 @@ class CompiledPagesController extends Controller
             // is the board allowed to be public?
             if (isset($page->released_at)) {
 
-               // dd(public_path ('/static/img/Graphics-et-al-transparent.png'));
+                // dd(public_path ('/static/img/Graphics-et-al-transparent.png'));
                 $image = $manager->read(public_path('/static/img/Graphics-et-al-transparent.png'))->contain(50, 50);
 
                 $options = new QROptions();

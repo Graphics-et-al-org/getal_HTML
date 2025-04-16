@@ -25,7 +25,7 @@ Route::group([], function () {
 
             Route::post('add_keypoint/{keypoint_id}',  [CompiledPagesController::class, 'add_keypoint'])->name('page.add_keypoint');
 
-            Route::post('keypoint/${keypoint_uuid}/remove',  [CompiledPagesController::class, 'remove_keypoint'])->name('page.remove_keypoint');
+            Route::get('keypoint/{keypoint_uuid}/remove',  [CompiledPagesController::class, 'remove_keypoint'])->name('page.remove_keypoint');
 
             Route::get('qrcode', [CompiledPagesController::class, 'getQRcode'])->name('page.qrcode');
 

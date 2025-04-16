@@ -27,7 +27,9 @@ const keypointgrid = document.getElementsByClassName("keypoints").item(0);
 const snippetsgrid = document.getElementsByClassName("snippets").item(0);
 
 // get the layout for a keypoint
-const keypointLayout = document.getElementsByClassName("keypoint").item(0);
+const keypointLayout = document
+    .getElementsByClassName("keypoint-container")
+    .item(0);
 const keypointLayoutClone = keypointLayout.cloneNode(true);
 
 const deleteButtons = document.getElementsByClassName("deletebutton");
@@ -66,6 +68,10 @@ tinymce.init({
             console.log(editor.getContent());
         });
 
+        editor.on("change", (e) => {
+            
+        });
+
         editor.on("focusout", (e) => {
             console.log("Editor was focusout.");
             const element = editor.getElement();
@@ -89,32 +95,6 @@ document.addEventListener("DOMContentLoaded", function () {
     colourSnippetsBackground();
     // openPublicDetailsModal()
 });
-
-// delete keypoint
-window.deleteKeypoint = (uuid) => {
-    // some ui feedback
-    showProcessFeedback();
-    // send the signal to remove keypoint
-    let url = baseurl + `/page/${uuid}/keypoint/${uuid}/remove`;
-    fetch(url, {
-        method: "GET",
-        headers: {
-            "X-CSRF-Token": csrfToken,
-        },
-    })
-        .then((response) => response.json())
-        .then((data) => {
-            console.log(data);
-            if (data.status == 0) {
-                // remove the keypoint from the DOM
-                showSuccessFeedback();
-                document.getElementById(`keypoint_${uuid}`).remove();
-            } else {
-                // show error feedback
-                showErrorFeedback();
-            }
-        });
-};
 
 // delete snippet
 window.deleteSnippet = (uuid) => {};
@@ -182,19 +162,26 @@ const addKeypointModal = new Modal(
     addKeypointInstanceOptions
 );
 
-window.openAddKeypointModal = () => {
-    addKeypointModal.show();
-    // modal.classList.remove("hidden");
-    // modal.classList.add("flex");
+window.addKeypoint = () => {
+    // get a keypoint template based on the keypoint layout
+    let keypointTemplate = keypointLayoutClone.cloneNode(true);
+
+    // Get the container to which you want to add the cloned node
+    // Append the cloned node to the container
+    keypointgrid.appendChild(keypointTemplate);
+    keypointTemplate
+        .querySelector("[data-field='keypoint-text']")
+        .item(0).innerText = "";
 };
-window.closeAddKeypointModal = () => {
-    // reset the form
-    document.getElementById("keypoint_image").classList.remove("hidden");
-    document.getElementById("keypoint_image_waiting").classList.add("hidden");
-    document.getElementById("keypoint_image").src =
-        baseurl + "static/img/questionmark.svg";
-    addKeypointModal.hide();
-};
+
+// window.closeAddKeypointModal = () => {
+//     // reset the form
+//     document.getElementById("keypoint_image").classList.remove("hidden");
+//     document.getElementById("keypoint_image_waiting").classList.add("hidden");
+//     document.getElementById("keypoint_image").src =
+//         baseurl + "static/img/questionmark.svg";
+//     addKeypointModal.hide();
+// };
 
 window.getKeypointIcon = () => {
     document.getElementById("keypoint_image").classList.add("hidden");
@@ -232,18 +219,66 @@ window.getKeypointIcon = () => {
         });
 };
 
-window.addKeypoint = () => {
-    // send the keypoint to the server
-    var url = baseurl + `/page/${uuid}/add_keypoint`;
-    let formData = new FormData();
-    formData.append(
-        "keypoint_text",
-        document.getElementById("keypoint_text").value
-    );
-    formData.append("best_image", used_images[used_images.length - 1]);
+//window.addKeypoint = () => {
+// send the keypoint to the server
+// var url = baseurl + `/page/${uuid}/add_keypoint`;
+// let formData = new FormData();
+// formData.append(
+//     "keypoint_text",
+//     document.getElementById("keypoint_text").value
+// );
+// formData.append("best_image", used_images[used_images.length - 1]);
+// fetch(url, {
+//     method: "POST",
+//     body: formData,
+//     headers: {
+//         "X-CSRF-Token": csrfToken,
+//     },
+// })
+//     .then((response) => response.json())
+//     .then((data) => {
+//         console.log(data);
+//         console.log(
+//             keypointLayoutClone.querySelectorAll(
+//                 "[data-field='keypoint-text']"
+//             )
+//         );
+//         if (data.status == 0) {
+//             console.log(document.getElementById("keypoint_text").value);
+//             keypointLayoutClone.querySelectorAll(
+//                 "[data-field='keypoint-text']"
+//             )[0].innerText = document.getElementById("keypoint_text").value;
+//             keypointLayoutClone
+//                 .querySelectorAll("[data-field='keypoint-image'] img")
+//                 .forEach((img) => {
+//                     const container = img.closest(
+//                         '[data-field="keypoint-image"]'
+//                     );
+//                     img.src =
+//                         baseurl +
+//                         "/clipart/" +
+//                         used_images[used_images.length - 1] +
+//                         "/baseline";
+//                 });
+//             keypointgrid.insertBefore(
+//                 keypointLayoutClone.cloneNode(true),
+//                 document.getElementById("addKeypointButton")
+//             );
+//             window.closeAddKeypointModal();
+//         }
+//     });
+//};
+
+// delete keypoint
+window.deleteKeypoint = (keypoint_uuid) => {
+    console.log("delete keypoint");
+    // some ui feedback
+    showProcessFeedback();
+
+    // send the signal to remove keypoint
+    let url = baseurl + `/page/${uuid}/keypoint/${keypoint_uuid}/remove`;
     fetch(url, {
-        method: "POST",
-        body: formData,
+        method: "GET",
         headers: {
             "X-CSRF-Token": csrfToken,
         },
@@ -251,33 +286,13 @@ window.addKeypoint = () => {
         .then((response) => response.json())
         .then((data) => {
             console.log(data);
-            console.log(
-                keypointLayoutClone.querySelectorAll(
-                    "[data-field='keypoint-text']"
-                )
-            );
             if (data.status == 0) {
-                console.log(document.getElementById("keypoint_text").value);
-                keypointLayoutClone.querySelectorAll(
-                    "[data-field='keypoint-text']"
-                )[0].innerText = document.getElementById("keypoint_text").value;
-                keypointLayoutClone
-                    .querySelectorAll("[data-field='keypoint-image'] img")
-                    .forEach((img) => {
-                        const container = img.closest(
-                            '[data-field="keypoint-image"]'
-                        );
-                        img.src =
-                            baseurl +
-                            "/clipart/" +
-                            used_images[used_images.length - 1] +
-                            "/baseline";
-                    });
-                keypointgrid.insertBefore(
-                    keypointLayoutClone.cloneNode(true),
-                    document.getElementById("addKeypointButton")
-                );
-                window.closeAddKeypointModal();
+                // remove the keypoint from the DOM
+                showSuccessFeedback();
+                document.getElementById(`keypoint_${keypoint_uuid}`).remove();
+            } else {
+                // show error feedback
+                showErrorFeedback();
             }
         });
 };

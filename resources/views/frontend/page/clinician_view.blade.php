@@ -42,11 +42,12 @@
                         <div
                             class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 grid-flow-row auto-cols-auto gap-6 border border-2 border-red-500 rounded-md justify-center justify-items-center items-center  p-2 keypoints">
                             @foreach ($component->snippets as $snippet)
-                                <div class="relative object-contain" data-keypoint_id="{{ $snippet->id }}">
+                                <div class="relative object-contain keypoint-container" data-keypoint_id="{{ $snippet->id }}"
+                                    id="keypoint_{{ $snippet->uuid }}">
                                     {!! $snippet->content !!}
                                     {{-- Add remove button --}}
                                     <button type="button" class="removeKeypointButton absolute top-1 right-1"
-                                        data-id="{{ $snippet->id }}" onclick="window.deleteKeypoint({{ $snippet->uuid }})">
+                                        data-id="{{ $snippet->id }}" onclick="window.deleteKeypoint('{{ $snippet->uuid }}')">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ff0000"
                                             class="bi bi-x-circle-fill" viewBox="0 0 16 16">
                                             <path
@@ -56,7 +57,47 @@
                                 </div>
                             @endforeach
                             <div data-type="keypoints"
-                                class="self-auto relative grid w-48 min-h-48 border border-dashed border-2 border-gray-500 rounded-md addbutton cursor-pointer">
+                                class="self-auto  relative grid w-48 min-h-48 border  border-2 border-blue-500 rounded-md ">
+                                <div class="col-span-full m-0 p-2">
+                                    <div
+                                        class="h-32 w-full border border-solid border-2 border-pink-200 rounded-md mb-2 flex items-center justify-center">
+                                        <img id="proposed_keypoint_image" class="object-contain w-full h-full "
+                                            src="{{ asset('static/img/questionmark.svg') }}" alt="">
+                                        <div id="keypoint_image_waiting" class="object-contain w-full h-full hidden" alt="">
+                                            <svg width="24" height="24" viewBox="0 0 24 24"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <style>
+                                                    .spinner_5nOS {
+                                                        transform-origin: center;
+                                                        animation: spinner_sEAn 1.5s infinite linear;
+                                                    }
+
+                                                    @keyframes spinner_sEAn {
+                                                        100% {
+                                                            transform: rotate(360deg);
+                                                        }
+                                                    }
+                                                </style>
+                                                <path
+                                                    d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+                                                    opacity=".25" />
+                                                <path
+                                                    d="M10.72,19.9a8,8,0,0,1-6.5-9.79A7.77,7.77,0,0,1,10.4,4.16a8,8,0,0,1,9.49,6.52A1.54,1.54,0,0,0,21.38,12h.13a1.37,1.37,0,0,0,1.38-1.54,11,11,0,1,0-12.7,12.39A1.54,1.54,0,0,0,12,21.34h0A1.47,1.47,0,0,0,10.72,19.9Z"
+                                                    class="spinner_5nOS" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="window.getKeypointIcon()"
+                                        class="hidden w-full mb-2 x-3 py-2 text-xs font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                        Generate image</button>
+                                    <div
+                                        class="min-h-16 w-full border border-dashed border-2 border-red-200  rounded-md text-center " data-field="keypoint-text">
+                                        &nbsp;</div>
+                                </div>
+                            </div>
+                            <div data-type="keypoints"
+                                class="self-auto relative grid w-48 min-h-48 border border-dashed border-2 border-gray-500 rounded-md addbutton cursor-pointer"
+                                onclick="window.addKeypoint()">
                                 <div class="col-span-full m-0 p-2">
                                     <div
                                         class="h-32 w-full border border-solid border-2 border-pink-200 rounded-md mb-2 flex items-center justify-center">
