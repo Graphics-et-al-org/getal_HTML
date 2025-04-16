@@ -63,15 +63,19 @@ class CompiledPagesController extends Controller
     }
 
     // add a keypoint to the data from the clinician interface
-    public function remove_keypoint(Request $request, $uuid)
+    public function remove_keypoint(Request $request, $uuid, $keypoint_uuid)
     {
-        $keypoint = CompiledPageSnippet::where('uuid', $uuid)->first();
+        // remove the keypoint from the page
+        $page = CompiledPage::where('uuid', $uuid)->first();
+        // remove the keypoint from the page
+        $keypoint = CompiledPageSnippet::where('uuid', $keypoint_uuid)->first();
         if ($keypoint) {
             $keypoint->delete();
             return response()->json(['status' => '0']);
         }
         return response()->json(['status' => '1']);
     }
+
 
     // reorder the keypoints
     public function reorder_keypoints(Request $request, $uuid)

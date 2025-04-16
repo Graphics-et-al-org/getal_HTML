@@ -210,6 +210,4 @@
 
     @vite('resources/js/backend/snippets/builder_tinymce.js')
 
-    {{-- CSS goes *after* js --}}
-    @vite('resources/css/backend/template_builder/builder.css')
 @endpush

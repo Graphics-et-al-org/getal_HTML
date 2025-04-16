@@ -34,14 +34,14 @@ const deleteButtons = document.getElementsByClassName("deletebutton");
 
 // title editing
 tinymce.init({
-    selector: '#title',
+    selector: "#title",
     toolbar: false,
     menubar: false,
     inline: true,
 });
 // summary editing
 tinymce.init({
-    selector: '#summary',
+    selector: "#summary",
     toolbar: false,
     menubar: false,
     inline: true,
@@ -54,7 +54,6 @@ tinymce.init({
     menubar: false,
     inline: true,
     setup: (editor) => {
-
         // });
         editor.on("focusin", (e) => {
             console.log("Editor was focusin.");
@@ -93,8 +92,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // delete keypoint
 window.deleteKeypoint = (uuid) => {
+    // some ui feedback
+    showProcessFeedback();
     // send the signal to remove keypoint
-    let url = baseurl + `/page/${uuid}/approve`;
+    let url = baseurl + `/page/${uuid}/keypoint/${uuid}/remove`;
     fetch(url, {
         method: "GET",
         headers: {
@@ -106,10 +107,13 @@ window.deleteKeypoint = (uuid) => {
             console.log(data);
             if (data.status == 0) {
                 // remove the keypoint from the DOM
+                showSuccessFeedback();
                 document.getElementById(`keypoint_${uuid}`).remove();
+            } else {
+                // show error feedback
+                showErrorFeedback();
             }
         });
-    // remove the keypoint from the DOM
 };
 
 // delete snippet
@@ -318,7 +322,7 @@ const updateKeypointText = (id, content) => {
                     document.getElementById("addKeypointButton")
                 );
                 window.closeAddKeypointModal();
-            }else{
+            } else {
                 // failurew goes here
             }
         });
@@ -519,4 +523,55 @@ const colourSnippetsBackground = () => {
             snippets_current_bg_colour =
                 (snippets_current_bg_colour + 1) % snippets_bg_colours.length;
         });
+};
+
+const showProcessFeedback = () => {
+    Swal.fire({
+        showClass: {
+            popup: "animate__animated animate__backInDown",
+        },
+        hideClass: {
+            popup: "animate__animated animate__backInUp",
+        },
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        icon: "info",
+        title: "Processing...",
+    });
+};
+
+const showSuccessFeedback = () => {
+    Swal.fire({
+        showClass: {
+            popup: "animate__animated animate__backInDown",
+        },
+        hideClass: {
+            popup: "animate__animated animate__backInUp",
+        },
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        icon: "success",
+        title: "Success!",
+    });
+};
+
+const showErrorFeedback = () => {
+    Swal.fire({
+        showClass: {
+            popup: "animate__animated animate__backInDown",
+        },
+        hideClass: {
+            popup: "animate__animated animate__backInUp",
+        },
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        icon: "error",
+        title: "Error!",
+    });
 };

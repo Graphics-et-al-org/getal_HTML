@@ -46,7 +46,7 @@
                                     {!! $snippet->content !!}
                                     {{-- Add remove button --}}
                                     <button type="button" class="removeKeypointButton absolute top-1 right-1"
-                                        data-id="{{ $snippet->id }}" onclick="">
+                                        data-id="{{ $snippet->id }}" onclick="window.deleteKeypoint({{ $snippet->uuid }})">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ff0000"
                                             class="bi bi-x-circle-fill" viewBox="0 0 16 16">
                                             <path
