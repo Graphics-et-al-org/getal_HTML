@@ -21,19 +21,20 @@ class CompiledPageSnippet extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'page_id',
+        // 'page_id',
         'uuid',
         'type',
         'order',
         'content',
         'compiled_page_components_id',
-        'from_template_id'
+        'from_template_id',
+        'paired_image_id'
     ];
 
     // Page relationship
     public function component(): HasOne
     {
-        return $this->hasOne('App\Models\Page\Compiled\CompiledPageComponent', 'compiled_page_components_id', 'id');
+        return $this->hasOne('App\Models\Page\Compiled\CompiledPageComponent', 'id', 'compiled_page_components_id');
     }
 
     public function from_template(): HasOne
@@ -43,11 +44,11 @@ class CompiledPageSnippet extends Model
 
 
     public function scopeKeypoints($query){
-        return $query->where('keypoint', '=', '1');
+        return $query->where('type', '=', 'keypoint');
     }
 
     public function scopeSnippets($query){
-        return $query->where('keypoint', '!=', '1');
+        return $query->where('type', '=', 'snippet');
     }
 
 

@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Frontend\Pages;
 use App\Helpers\Global\QRImageWithLogo;
 use App\Http\Controllers\Controller;
 use App\Models\Analytics\CompiledSnippetEvent;
+use App\Models\Clipart\ClipartColourway;
 use App\Models\Page\Compiled\CompiledPage;
+use App\Models\Page\Compiled\CompiledPageComponent;
 use App\Models\Page\Compiled\CompiledPageSnippet;
-
+use App\Models\Page\Snippet;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 use chillerlan\QRCode\Common\EccLevel;
 use chillerlan\QRCode\QRCode;
@@ -15,6 +18,7 @@ use chillerlan\QRCode\QROptions;
 use Illuminate\Http\Request;
 use DiDom\Document;
 use DiDom\Element;
+use Firebase\JWT\JWT;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
 
@@ -57,85 +61,128 @@ class CompiledPagesController extends Controller
     // add a keypoint to the data from the clinician interface
     public function add_keypoint(Request $request, $uuid)
     {
-        $page = CompiledPage::where('uuid', $uuid)->first();
-        $keypoint = CompiledPageSnippet::create([
-            'uuid' => $request['keypoint_uuid'],
-            'page_id' => $page->id,
-            'weight' => $request['weight'],
-            'content' => $request['content'],
-        ]);
-        CompiledSnippetEvent::create([
-            'page_id' => $page->id,
-            'action' => 'create',
-            'old_value' => '',
-            'new_value' => '',
-            'keypoint' => $keypoint->uuid,
-        ]);
-        // add keypoint in teh background here, will be fakesied in the view
-        return response()->json(['status' => '0']);
+        // dd($request);
+        // find the page
+        // validate the data
+        $component = CompiledPageComponent::find($request['component']);
+
+        if ($component && ($component->page->uuid == $uuid)) {
+            $page = CompiledPage::where('uuid', $uuid)->first();
+            // Derive the template from the component
+            $template = Snippet::find(CompiledPageComponent::find($request['component'])->snippets->first()->from_template_id);
+            // get the paired image from the uuid (trying to hide the id from the public)
+            $paired_image = ClipartColourway::where('uuid', $request['image_uuid'])->first()->clipart;
+            // derive the order
+            $order = CompiledPageComponent::find($request['component'])->snippets->last()->order;
+            // dd($order);
+
+            //$paired_image = ClipartColourway::where('uuid', $request['image_uuid'])->first()->clipart->id;
+
+            $paired_image_id = -1;
+
+            if ($paired_image) {
+                $img_path = ClipartColourway::where('uuid', $request['image_uuid'])->first()->path();
+                $paired_image_id = $paired_image->id;
+            }
+            // Search and replace text
+            $content = str_ireplace(["{{image_src}}", "{{text}}"], [$img_path, $request['keypoint_text']], $template->content);
+
+            // create the new snippet
+            $keypoint = CompiledPageSnippet::create([
+                'uuid' => Str::uuid()->toString(),
+                'compiled_page_components_id' => $request['component'],
+                'paired_image_id' => $paired_image_id,
+                'from_template_id' => $template->id,
+                'type' => 'keypoint',
+                'content' => $content,
+                'order' => $order + 1,
+            ]);
+
+
+            // save
+            $keypoint->save();
+
+            // event
+            CompiledSnippetEvent::create([
+                'page_id' => $page->id,
+                'action' => 'create',
+                'old_value' => '',
+                'new_value' =>  $keypoint->content,
+                'snippet_id' => $keypoint->id,
+            ]);
+            // add keypoint in teh background here, will be fakesied in the view
+            return response()->json(['status' => '0', 'id' => $keypoint->id, 'uuid' => $keypoint->uuid]);
+        }
+
+        return response()->json(['status' => '1']);
     }
 
     // add a keypoint to the data from the clinician interface
-    public function remove_keypoint($uuid, $keypoint_uuid)
-    {
-        // remove the keypoint from the page
-        //dd($keypoint_uuid);
-        // @TODO does this page have a keypoint
-        $page = CompiledPage::where('uuid', $uuid)->first();
-        // remove the keypoint from the page
-        $keypoint = CompiledPageSnippet::where('uuid', $keypoint_uuid)->first();
-        if ($keypoint) {
-            $keypoint->delete();
-            // log the action
-            CompiledSnippetEvent::create([
-                'page_id' => $page->id,
-                'action' => 'remove',
-                'old_value' => '',
-                'new_value' => '',
-                'keypoint' => $keypoint->uuid,
-            ]);
-            return response()->json(['status' => '0']);
-        }
-        return response()->json(['status' => '1']);
-    }
+    // public function remove_keypoint($uuid, $keypoint_uuid)
+    // {
+    //     // remove the keypoint from the page
+    //     //dd($keypoint_uuid);
+    //     // @TODO does this page have a keypoint
+    //     $page = CompiledPage::where('uuid', $uuid)->first();
+    //     // remove the keypoint from the page
+    //     $keypoint = CompiledPageSnippet::where('uuid', $keypoint_uuid)->first();
+    //     if ($keypoint) {
+    //         $keypoint->delete();
+    //         // log the action
+    //         CompiledSnippetEvent::create([
+    //             'page_id' => $page->id,
+    //             'action' => 'remove',
+    //             'old_value' => '',
+    //             'new_value' => '',
+    //             'snippet_id' => $keypoint->id,
+    //         ]);
+    //         return response()->json(['status' => '0']);
+    //     }
+    //     return response()->json(['status' => '1']);
+    // }
 
     // update a keypoint to the data from the clinician interface
-    public function update_keypoint($uuid, $keypoint_uuid)
-    {
-        // remove the keypoint from the page
-        //dd($keypoint_uuid);
-        // @TODO does this page have a keypoint
-        $page = CompiledPage::where('uuid', $uuid)->first();
-        // remove the keypoint from the page
-        $keypoint = CompiledPageSnippet::where('uuid', $keypoint_uuid)->first();
-        if ($keypoint) {
-            $keypoint->update();
-            // log the action
-            CompiledSnippetEvent::create([
-                'page_id' => $page->id,
-                'action' => 'remove',
-                'old_value' => '',
-                'new_value' => '',
-                'keypoint' => $keypoint->uuid,
-            ]);
-            return response()->json(['status' => '0']);
-        }
-        return response()->json(['status' => '1']);
-    }
+    // public function update_keypoint(Request $request, $uuid, $keypoint_uuid)
+    // {
+    //     // remove the keypoint from the page
+    //     dd($keypoint_uuid);
+    //     // @TODO does this page have a keypoint
+    //     $page = CompiledPage::where('uuid', $uuid)->first();
+    //     // remove the keypoint from the page
+    //     $keypoint = CompiledPageSnippet::where('uuid', $keypoint_uuid)->first();
+    //     if ($keypoint) {
+    //         $keypoint->update();
+    //         // log the action
+    //         CompiledSnippetEvent::create([
+    //             'page_id' => $page->id,
+    //             'action' => 'remove',
+    //             'old_value' => '',
+    //             'new_value' => '',
+    //             'snippet_id' => $keypoint->id,
+    //         ]);
+    //         return response()->json(['status' => '0']);
+    //     }
+    //     return response()->json(['status' => '1']);
+    // }
 
 
     // reorder the keypoints
-    public function reorder_keypoints(Request $request, $uuid)
+    public function reorder_keypoints(Request $request, $uuid, $component_id)
     {
         $page = CompiledPage::where('uuid', $uuid)->first();
         // get keypoints for the page, record new order
         return response()->json(['status' => '1']);
     }
 
-    // update the model from the clinician view
-    public function clinican_update(Request $request)
+    // update the page from the clinician view
+    //@TODO authorisation, redirect
+    public function summary_update(Request $request, $uuid)
     {
-        return $request;
+        $page = CompiledPage::where('uuid', $uuid)->first();
+        //   dd($page);
+        $page->released_at = Carbon::now();
+        $page->save();
+        return response()->json(['status' => '0']);
     }
 
     // approve the model from the clinician view
@@ -162,8 +209,9 @@ class CompiledPagesController extends Controller
     public function public_view($uuid)
     {
         $page = CompiledPage::where('uuid', $uuid)->first();
+        $analyticsToken = $this->generateAnalyticsApiToken(route('public.page.public.show', $page->uuid));
         if (isset($page->released_at)) {
-            return view('public.page.public_view', ['page' => $page]);
+            return view('public.page.public_view', ['page' => $page, 'auth_token'=>$analyticsToken]);
         }
         abort(404);
     }
@@ -176,7 +224,6 @@ class CompiledPagesController extends Controller
         if ($page) {
             // is the board allowed to be public?
             if (isset($page->released_at)) {
-
                 // dd(public_path ('/static/img/Graphics-et-al-transparent.png'));
                 $image = $manager->read(public_path('/static/img/Graphics-et-al-transparent.png'))->contain(50, 50);
 
@@ -217,5 +264,28 @@ class CompiledPagesController extends Controller
                 abort(403, 'Page not released.');
             }
         }
+    }
+
+    // send a text/email/whatever
+    public function notify_public(Request $request, $uuid)
+    {
+        abort(501, 'Not implemented yet.');
+    }
+
+    // private function to generate an analytics token. An attempt at preventing tomfoolery with analytics events
+    private function generateAnalyticsApiToken($pageUrl)
+    {
+        $secret =  env('JWT_SECRET', null);
+        if ($secret) {
+            $issuedAt = time();
+            $expirationTime = $issuedAt + 86400; // 1 day
+            $payload = [
+                'url' => $pageUrl,
+                'iat' => $issuedAt,
+                'exp' => $expirationTime
+            ];
+            return JWT::encode($payload, $secret, 'HS256');
+        }
+        return false;
     }
 }

@@ -4,9 +4,11 @@ use App\Http\Controllers\Api\ApiController;
 
 use App\Http\Controllers\Backend\PageComponentsController;
 use App\Http\Controllers\Backend\SnippetsCategoriesController;
+use  App\Http\Controllers\Frontend\Pages\Analytics\CompiledPagesAnalyticsController;
 use App\Http\Controllers\Clipart\ClipartController;
 use App\Http\Controllers\CustomBroadcastAuthController;
 use App\Http\Middleware\EnsureAuth0TokenIsValid;
+use App\Http\Middleware\ValidateJWT;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
@@ -92,3 +94,6 @@ Route::get('/clipart/fixuuid', function () {
     }
     return response()->json(['status' => 'UUIDs fixed']);
 });
+
+// analytics capture- with JWT authentication to prevent some shenanigans
+Route::post('page/{uuid}/analytics/flush', [CompiledPagesAnalyticsController::class, 'get_flush'])->middleware(ValidateJWT::class);

@@ -2,6 +2,7 @@
 
 namespace App\Models\Page\Compiled;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -35,11 +36,29 @@ class CompiledPageComponent extends Model
         return $this->belongsTo('App\Models\Page\Compiled\CompiledPage', 'compiled_page_id', 'id');
     }
 
-    // Page relationship
+    // snippets relationship
     public function snippets(): HasMany
     {
         return $this->HasMany('App\Models\Page\Compiled\CompiledPageSnippet', 'compiled_page_components_id', 'id')->orderBy('order', 'asc');
     }
+
+     /**
+     * Scope for only keypoints
+     */
+
+    protected function scopeKeypoints(Builder $query): void
+    {
+        $query->where('type', 'keypoint');
+    }
+
+      /**
+     * Scope for only keypoints
+     */
+
+     protected function scopeSnippets(Builder $query): void
+     {
+         $query->where('type', 'snippet');
+     }
 
     public function from_template(): BelongsTo
     {

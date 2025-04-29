@@ -220,7 +220,8 @@ class SubmitTextForTranslation implements ShouldQueue
                                 'order' => $templateKeypointSnippet->order ?? $key,
                                 'content' => $templateKeypointSnippet->content,
                                 'compiled_page_components_id' => $pageComponent->id,
-                                'from_template_id' => $templateKeypointSnippet->id,
+                                'from_template_id' => $templateKeypointSnippet->id
+
                             ]
                         );
 
@@ -230,8 +231,10 @@ class SubmitTextForTranslation implements ShouldQueue
                         $img = Clipart::find($value['best_image']);
                         if ($img) {
                             $img_path = Clipart::find($value['best_image'])->baseline()->path();
+                            $keypointSnippet->paired_image_id = $value['best_image'];
                         } else {
                             $img_path = 'https://picsum.photos/200';
+                            $keypointSnippet->paired_image_id = -1;
                         }
                         // replace the image src
                         $keypointSnippet->content = str_ireplace("{{image_src}}", $img_path, $keypointSnippet->content);
@@ -268,7 +271,7 @@ class SubmitTextForTranslation implements ShouldQueue
                     break;
             }
         }
-        
+
         $this->sendMessage('translation-status.' . $this->_uuid, json_encode(['message' => 'success', 'uuid' => $result_uuid, 'content' => $response_content]));
         return;
     }

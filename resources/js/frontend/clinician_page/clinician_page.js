@@ -1,6 +1,8 @@
 import Sortable from "sortablejs";
 import { Modal } from "flowbite";
 import Swal from "sweetalert2";
+import tippy from "tippy.js";
+import "tippy.js/dist/tippy.css";
 import "tinymce/tinymce";
 import "tinymce/skins/ui/oxide/skin.min.css";
 import "tinymce/skins/content/default/content.min.css";
@@ -15,6 +17,18 @@ import "tinymce/plugins/preview";
 import "tinymce/plugins/media";
 import "tinymce/plugins/fullscreen";
 
+// document initialisation
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("Document is ready");
+    activateKeypointTinyMCE();
+    // colour the snippets background
+    colourSnippetsBackground();
+    // implement tooltips
+    tippy("[data-tippy-content]");
+    // openPublicDetailsModal()
+});
+
+// Laravel security token for AJAX calls
 const csrfToken = document
     .querySelector('meta[name="csrf-token"]')
     .getAttribute("content");
@@ -40,6 +54,53 @@ tinymce.init({
     toolbar: false,
     menubar: false,
     inline: true,
+    setup:(editor)=>{
+         // handle change event
+    editor.on("change", (e) => {
+        let editorContent = editor.getContent();
+        if (editorContent.length > 0) {
+            var url = baseurl + `/page/${uuid}/summary_update`;
+            let formData = new FormData();
+            //formData.append("keypointid", id);
+            formData.append("keypoint_text", content);
+            //console.log(id, content);
+            //  return;
+            // little bit of feedback goes here
+            container
+                .querySelector(".keypoint_image_waiting")
+                .classList.remove("hidden");
+            fetch(url, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data);
+                    if (data.status == 0) {
+                        // Success feedback goes here
+                        container
+                            .querySelector(".keypoint_image_waiting")
+                            .classList.add("hidden");
+                    } else {
+                        container
+                            .querySelector(".keypoint_image_waiting")
+                            .classList.add("hidden");
+                        showErrorFeedback();
+                    }
+                })
+                .catch((error) => {
+                    showErrorFeedback();
+                    container
+                        .querySelector(".keypoint_image_waiting")
+                        .classList.add("hidden");
+                });
+
+        }
+    });
+    }
 });
 // summary editing
 tinymce.init({
@@ -50,66 +111,139 @@ tinymce.init({
 });
 
 // keypoint editing
-tinymce.init({
-    selector: '[data-field="keypoint-text"]',
-    toolbar: false,
-    menubar: false,
-    inline: true,
-    setup: (editor) => {
-        // });
-        editor.on("focusin", (e) => {
-            console.log("Editor was focusin.");
-            const element = editor.getElement();
+const activateKeypointTinyMCE = (element) => {
+    tinymce.init({
+        selector: '[data-field="keypoint-text"]',
+        toolbar: false,
+        menubar: false,
+        inline: true,
+        placeholder: "Type here...",
+        setup: (editor) => {
+            setupKeypointTinyMCE(editor);
+        },
+    });
+};
 
-            const containerId = element.parentElement.id;
-            console.log(
-                element.closest("[data-keypoint_id]").dataset.keypoint_id
-            );
-            console.log(editor.getContent());
-        });
+// setup tinymce inline editing
+const setupKeypointTinyMCE = (editor) => {
+    // });
+    editor.on("focusin", (e) => {
+        console.log("Editor was focusin.");
+        const element = editor.getElement();
 
-        editor.on("change", (e) => {
-            
-        });
+        const containerId = element.parentElement.id;
+        console.log(element.closest("[data-keypointid]").dataset.keypoint_id);
+        if (editor.getContent() == "<p>Click to edit</p>") {
+            editor.setContent("");
+        }
+        console.log(editor.getContent());
+    });
 
-        editor.on("focusout", (e) => {
-            console.log("Editor was focusout.");
-            const element = editor.getElement();
+    editor.on("input", (e) => {
+        //  console.log("Editor was input.");
+        let container = editor.getElement().closest(".keypoint-container");
+        // console.log(container.classList.contains("new"))
+        // console.log(editor.getContent().length > 10)
+        if (
+            editor.getContent().length > 10 &&
+            container.classList.contains("new")
+        ) {
+            // start feedbck
+            //console.log(e.target.dataset)
+            // console.log(Object.is(container, null))
+            container
+                .querySelector(".get-keypoint-image-btn")
+                .classList.remove("hidden");
+        } else {
+            container
+                .querySelector(".get-keypoint-image-btn")
+                .classList.add("hidden");
+        }
+    });
 
-            // Or, if the element is inside a containing div and you want its id:
-            const containerId = element.parentElement.id;
-            console.log(
-                element.closest("[data-keypoint_id]").dataset.keypoint_id
-            );
-            console.log(editor.getContent());
-            updateKeypointText(
-                element.closest("[data-keypoint_id]").dataset.keypoint_id,
-                editor.getContent()
-            );
-        });
-    },
-});
+    // handle change event
+    editor.on("change", (e) => {
+        console.log("Editor was change.");
+        console.log(e.target.composing);
+        console.log(editor.getElement().closest(".keypoint-container"));
 
-document.addEventListener("DOMContentLoaded", function () {
-    console.log("Document is ready");
-    colourSnippetsBackground();
-    // openPublicDetailsModal()
-});
+        let container = editor.getElement().closest(".keypoint-container");
+        console.log(container);
+        if (
+            editor.getContent().length > 10 &&
+            container.classList.contains("new")
+        ) {
+            // start feedbck
+            //console.log(e.target.dataset)
+            // console.log(Object.is(container, null))
+            container
+                .querySelector(".get-keypoint-image-btn")
+                .classList.add("hidden");
+        } else {
+            container
+                .querySelector(".get-keypoint-image-btn")
+                .classList.add("hidden");
+        }
 
-// delete snippet
-window.deleteSnippet = (uuid) => {};
+        let editorContent = editor.getContent();
+        if (editorContent.length > 0) {
+            // console.log(element.closest("[data-keypointid]"))
+            if (!container.classList.contains("new")) {
+                updateKeypointText(
+                    container.dataset.keypointuuid,
+                    editor.getContent(),
+                    container
+                );
+            }
+        }
+    });
+
+    editor.on("focusout", (e) => {
+        console.log("Editor was focusout.");
+        const element = editor.getElement();
+        // Or, if the element is inside a containing div and you want its id:
+        // const containerId = element.parentElement.id;
+        //console.log(element.closest("[data-keypointid]").dataset.keypointid);
+
+        var editorContent = editor.getContent();
+        if (editorContent == "") {
+            editor.setContent("<p>Click to edit</p>");
+        }
+    });
+    // },
+};
+
+// // delete snippet
+// window.deleteSnippet = (uuid) => {};
 
 // Enable Sorting
 Sortable.create(keypointgrid, {
     animation: 150, // Smooth transition
     ghostClass: "bg-gray-300", // Class applied to the dragged item
     onEnd: function (evt) {
-        console.log(
-            "New Order:",
-            Array.from(keypointgrid.children).map((el) => el.innerText)
-        );
+        let newOrder =    Array.from(keypointgrid.children).map((el) => el.dataset.keypointid)
+        showProcessFeedback();
+        // submit the changes
+        let url = baseurl + `/keypoint/reorder`;
+        let formData = new FormData();
+        formData.append("order", newOrder);
+        fetch(url, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRF-Token": csrfToken,
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data);
+                showSuccessFeedback()
+            })
+            .catch(()=>{
+                showErrorFeedback();
+            });
     },
-    filter: "button", // Exclude buttons from being draggable
+    filter: "button, div.addbutton", // Exclude buttons and the 'add keypoint from being draggable
     preventOnFilter: false, // Ensure buttons remain clickable
 });
 
@@ -117,12 +251,31 @@ Sortable.create(snippetsgrid, {
     animation: 150, // Smooth transition
     ghostClass: "bg-gray-300", // Class applied to the dragged item
     onEnd: function (evt) {
-        console.log(
-            "New Order:",
-            Array.from(snippetsgrid.children).map((el) => el.innerText)
-        );
+        // do not include
+        let newOrder =    Array.from(snippetsgrid.children).map((el) => el.dataset.snippetid)
+        showProcessFeedback();
+        // submit the changes
+        let url = baseurl + `/keypoint/reorder`;
+        let formData = new FormData();
+        formData.append("order", newOrder);
+        fetch(url, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRF-Token": csrfToken,
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data);
+                showSuccessFeedback()
+                colourSnippetsBackground();
+            })
+            .catch(()=>{
+                showErrorFeedback();
+            });
         // Update the background colour of the snippets
-        colourSnippetsBackground();
+
     },
     filter: "button", // Exclude buttons from being draggable
     preventOnFilter: false, // Ensure buttons remain clickable
@@ -132,7 +285,7 @@ Sortable.create(snippetsgrid, {
 // add a keypoint
 // setups
 // set the modal menu element
-const $addKeypointTargetEl = document.getElementById("addKeypointModal");
+//const $addKeypointTargetEl = document.getElementById("addKeypointModal");
 
 // options with default values
 const options = {
@@ -150,28 +303,53 @@ const options = {
     },
 };
 
-// instance options object
-const addKeypointInstanceOptions = {
-    id: "addKeypointModal",
-    override: true,
-};
-
-const addKeypointModal = new Modal(
-    $addKeypointTargetEl,
-    options,
-    addKeypointInstanceOptions
-);
-
+// Add a keypoint div
 window.addKeypoint = () => {
+    console.log("adding keypoint");
+    // make some random ID
+    let _id = `keypoint_${crypto.randomUUID()}`;
+
     // get a keypoint template based on the keypoint layout
     let keypointTemplate = keypointLayoutClone.cloneNode(true);
-
     // Get the container to which you want to add the cloned node
     // Append the cloned node to the container
-    keypointgrid.appendChild(keypointTemplate);
-    keypointTemplate
-        .querySelector("[data-field='keypoint-text']")
-        .item(0).innerText = "";
+    keypointgrid.insertBefore(keypointTemplate, keypointgrid.lastElementChild);
+    // clean up some parameters
+    // update the element.closest("[data-keypoint_id]").dataset.keypoint_id
+    keypointTemplate.closest("[data-keypointid]").dataset.keypointid = -1;
+    // set new temp id
+    keypointTemplate.setAttribute("id", _id);
+    // flag it as new
+    keypointTemplate.classList.add("new");
+    // reset the text
+    keypointTemplate.querySelector('[data-field="keypoint-text"]').innerText =
+        "Click to edit";
+    // add some identifier to the fields
+    keypointTemplate.querySelector(
+        '[data-field="keypoint-text"]'
+    ).dataset.keypointid = _id;
+
+    // reset the image
+    keypointTemplate.querySelector('[data-field="keypoint-image"] img').src =
+        baseurl + "/static/img/questionmark.svg";
+    // add some identifier to
+    // keypointTemplate
+    //     .querySelector('[data-field="keypoint-image"] img')
+    //     .setAttribute("data-keypointid", _id);
+    // show the new keypoint button
+    console.log(keypointTemplate.querySelector(".get-keypoint-image-btn"));
+    // keypointTemplate
+    //     .querySelector(".get-keypoint-image-btn")
+    //     .classList.remove("hidden");
+
+    keypointTemplate.querySelector(".get-keypoint-image-btn").dataset.target =
+        _id;
+    // kick tippy to enable the tooltips
+    tippy("[data-tippy-content]");
+    // activate the tinymce editor
+    activateKeypointTinyMCE(
+        keypointTemplate.querySelector('[data-field="keypoint-text"]')
+    );
 };
 
 // window.closeAddKeypointModal = () => {
@@ -183,18 +361,26 @@ window.addKeypoint = () => {
 //     addKeypointModal.hide();
 // };
 
-window.getKeypointIcon = () => {
-    document.getElementById("keypoint_image").classList.add("hidden");
-    document
-        .getElementById("keypoint_image_waiting")
+// get the keypoint icon
+window.getKeypointIcon = (e) => {
+    // get the text
+    let container = document.getElementById(e.target.dataset.target);
+    // start feedbck
+    container
+        .querySelector(".keypoint_image_waiting")
         .classList.remove("hidden");
+
+    container.querySelector(".get-keypoint-image-btn").classList.add("hidden");
+    // get the text
+    let text = container.querySelector(
+        '[data-field="keypoint-text"]'
+    ).innerText;
+    console.log(text);
+
     let url = baseurl + `/generate_keypoint_icon`;
     let formData = new FormData();
     formData.append("uuid", uuid);
-    formData.append(
-        "keypoint_text",
-        document.getElementById("keypoint_text").value
-    );
+    formData.append("keypoint_text", text);
     fetch(url, {
         method: "POST",
         body: formData,
@@ -205,104 +391,40 @@ window.getKeypointIcon = () => {
         .then((response) => response.json())
         .then((data) => {
             console.log(data);
-            if (data.best_image > 0) {
-                used_images.push(data.best_image);
-                document.getElementById("keypoint_image").src =
-                    baseurl + "/clipart/" + data.best_image + "/baseline";
+            if (data.colourway_uuid.length > 0) {
+                container.querySelector(
+                    '[data-field="keypoint-image"] img'
+                ).src = baseurl + "/colourway/" + data.colourway_uuid;
+                // make the keypoint a real thing
+                addKeypointToPage(text, data.colourway_uuid, container);
+            } else {
+                showIconNotFoundFeedback();
+                container
+                    .querySelector(".get-keypoint-image-btn")
+                    .classList.remove("hidden");
             }
-            document
-                .getElementById("keypoint_image")
+        })
+        .catch((error) => {
+            showErrorFeedback();
+            container
+                .querySelector(".get-keypoint-image-btn")
                 .classList.remove("hidden");
-            document
-                .getElementById("keypoint_image_waiting")
+        })
+        .finally(() => {
+            container
+                .querySelector(".keypoint_image_waiting")
                 .classList.add("hidden");
         });
 };
 
-//window.addKeypoint = () => {
-// send the keypoint to the server
-// var url = baseurl + `/page/${uuid}/add_keypoint`;
-// let formData = new FormData();
-// formData.append(
-//     "keypoint_text",
-//     document.getElementById("keypoint_text").value
-// );
-// formData.append("best_image", used_images[used_images.length - 1]);
-// fetch(url, {
-//     method: "POST",
-//     body: formData,
-//     headers: {
-//         "X-CSRF-Token": csrfToken,
-//     },
-// })
-//     .then((response) => response.json())
-//     .then((data) => {
-//         console.log(data);
-//         console.log(
-//             keypointLayoutClone.querySelectorAll(
-//                 "[data-field='keypoint-text']"
-//             )
-//         );
-//         if (data.status == 0) {
-//             console.log(document.getElementById("keypoint_text").value);
-//             keypointLayoutClone.querySelectorAll(
-//                 "[data-field='keypoint-text']"
-//             )[0].innerText = document.getElementById("keypoint_text").value;
-//             keypointLayoutClone
-//                 .querySelectorAll("[data-field='keypoint-image'] img")
-//                 .forEach((img) => {
-//                     const container = img.closest(
-//                         '[data-field="keypoint-image"]'
-//                     );
-//                     img.src =
-//                         baseurl +
-//                         "/clipart/" +
-//                         used_images[used_images.length - 1] +
-//                         "/baseline";
-//                 });
-//             keypointgrid.insertBefore(
-//                 keypointLayoutClone.cloneNode(true),
-//                 document.getElementById("addKeypointButton")
-//             );
-//             window.closeAddKeypointModal();
-//         }
-//     });
-//};
-
-// delete keypoint
-window.deleteKeypoint = (keypoint_uuid) => {
-    console.log("delete keypoint");
-    // some ui feedback
-    showProcessFeedback();
-
-    // send the signal to remove keypoint
-    let url = baseurl + `/page/${uuid}/keypoint/${keypoint_uuid}/remove`;
-    fetch(url, {
-        method: "GET",
-        headers: {
-            "X-CSRF-Token": csrfToken,
-        },
-    })
-        .then((response) => response.json())
-        .then((data) => {
-            console.log(data);
-            if (data.status == 0) {
-                // remove the keypoint from the DOM
-                showSuccessFeedback();
-                document.getElementById(`keypoint_${keypoint_uuid}`).remove();
-            } else {
-                // show error feedback
-                showErrorFeedback();
-            }
-        });
-};
-
-const updateKeypointText = (id, content) => {
-    var url = baseurl + `/page/${uuid}/update_keypoint/${id}`;
+const addKeypointToPage = (text, image_uuid, container) => {
+    console.log("addKeypointToPage happening");
+    //send the keypoint to the server
+    var url = baseurl + `/page/${uuid}/add_keypoint`;
     let formData = new FormData();
-    formData.append("keypoint_id", id);
-    formData.append("content", content);
-    // little bit of feedback goes here
+    formData.append("keypoint_text", text);
+    formData.append("image_uuid", image_uuid);
+    formData.append("component", container.dataset.componentid);
     fetch(url, {
         method: "POST",
         body: formData,
@@ -313,33 +435,106 @@ const updateKeypointText = (id, content) => {
         .then((response) => response.json())
         .then((data) => {
             console.log(data);
+            if (data.status == 0) {
+                // remove new
+                container.classList.remove("new");
+                // fix up the various parameters
+                container.dataset.keypointuuid = data.uuid;
+                //container.setAttribute("id", data.id);
+                // add some identifier to the fields
+                container.querySelector(
+                    '[data-field="keypoint-text"]'
+                ).dataset.keypointid = data.id;
+            }
+        })
+        .catch((error) => {
+            showErrorFeedback();
+            container
+                .querySelector(".get-keypoint-image-btn")
+                .classList.remove("hidden");
+        });
+};
 
+// delete keypoint
+window.deleteKeypoint = (e) => {
+    console.log("delete keypoint");
+    console.log(e);
+    console.log(e.currentTarget.closest(".keypoint-container"));
+    let container = e.currentTarget.closest(".keypoint-container");
+
+    console.log(container.classList.contains("new"));
+    //return;
+    if (container.dataset.keypointid > 0) {
+        // some ui feedback
+        showProcessFeedback();
+
+        // send the signal to remove keypoint
+        let url =
+            baseurl + `/keypoint/${container.dataset.keypointuuid}/remove`;
+        fetch(url, {
+            method: "GET",
+            headers: {
+                "X-CSRF-Token": csrfToken,
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data);
+                if (data.status == 0) {
+                    // remove the keypoint from the DOM
+                    showSuccessFeedback();
+                    container.remove();
+                } else {
+                    // show error feedback
+                    showErrorFeedback();
+                }
+            })
+            .catch((error) => {
+                showErrorFeedback();
+            });
+    } else {
+        container.remove();
+    }
+};
+
+const updateKeypointText = (keypointuuid, content, container) => {
+    var url = baseurl + `/keypoint/${keypointuuid}/update`;
+    let formData = new FormData();
+    //formData.append("keypointid", id);
+    formData.append("keypoint_text", content);
+    //console.log(id, content);
+    //  return;
+    // little bit of feedback goes here
+    container
+        .querySelector(".keypoint_image_waiting")
+        .classList.remove("hidden");
+    fetch(url, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-CSRF-Token": csrfToken,
+        },
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log(data);
             if (data.status == 0) {
                 // Success feedback goes here
-                console.log(document.getElementById("keypoint_text").value);
-                keypointLayoutClone.querySelectorAll(
-                    "[data-field='keypoint-text']"
-                )[0].innerText = document.getElementById("keypoint_text").value;
-                keypointLayoutClone
-                    .querySelectorAll("[data-field='keypoint-image'] img")
-                    .forEach((img) => {
-                        const container = img.closest(
-                            '[data-field="keypoint-image"]'
-                        );
-                        img.src =
-                            baseurl +
-                            "/clipart/" +
-                            used_images[used_images.length - 1] +
-                            "/baseline";
-                    });
-                keypointgrid.insertBefore(
-                    keypointLayoutClone.cloneNode(true),
-                    document.getElementById("addKeypointButton")
-                );
-                window.closeAddKeypointModal();
+                container
+                    .querySelector(".keypoint_image_waiting")
+                    .classList.add("hidden");
             } else {
-                // failurew goes here
+                container
+                    .querySelector(".keypoint_image_waiting")
+                    .classList.add("hidden");
+                showErrorFeedback();
             }
+        })
+        .catch((error) => {
+            showErrorFeedback();
+            container
+                .querySelector(".keypoint_image_waiting")
+                .classList.add("hidden");
         });
 };
 
@@ -458,25 +653,7 @@ window.addSelectedCollections = () => {
     // and the search input
     console.log("selected_info_categories");
     console.log(selected_info_categories);
-    let url = baseurl + `/categories/addfromuuids`;
-    let formData = new FormData();
-    formData.append("uuids", selected_info_categories);
-    fetch(url, {
-        method: "POST",
-        body: formData,
-        headers: {
-            "X-CSRF-Token": csrfToken,
-        },
-    })
-        .then((response) => response.json())
-        .then((data) => {
-            console.log(data);
-            if (data.status == 0) {
-                snippetsgrid.insertAdjacentHTML("beforeend", data.html);
-                colourSnippetsBackground();
-                addCollectionModal.hide();
-            }
-        });
+
 };
 
 const $publicDetailsTargetEl = document.getElementById("publicDetailsModal");
@@ -502,7 +679,7 @@ window.closePublicDetailsModal = () => {
 };
 
 // show a stern warning
-window.showWarning = () => {
+window.showSternWarning = () => {
     Swal.fire({
         title: "Important notice",
         text: 'This tool is designed to support, not substitute, professional judgement. By selecting "Confirm and continue", you affirm that you have verified the accuracy and appropriateness of the information and diagrams provided',
@@ -522,7 +699,8 @@ window.showWarning = () => {
                 .then((response) => response.json())
                 .then((data) => {
                     console.log(data);
-                    openPublicDetailsModal();
+                    window.location.href=`${baseurl}/page/${uuid}/share_view`
+                 //   openPublicDetailsModal();
                 });
         }
     });
@@ -588,5 +766,22 @@ const showErrorFeedback = () => {
         timer: 3000,
         icon: "error",
         title: "Error!",
+    });
+};
+
+const showIconNotFoundFeedback = () => {
+    Swal.fire({
+        showClass: {
+            popup: "animate__animated animate__backInDown",
+        },
+        hideClass: {
+            popup: "animate__animated animate__backInUp",
+        },
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        icon: "warning",
+        title: "Couldn't find a good icon :(",
     });
 };

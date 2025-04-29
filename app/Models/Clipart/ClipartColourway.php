@@ -36,7 +36,7 @@ class ClipartColourway extends Model
     // path- used for direct link to colourway
     public function path()
     {
-        return URL::to('/colourway') . '/' . $this->uuid;
+        return url("/colourway/{$this->uuid}");
     }
 
 
