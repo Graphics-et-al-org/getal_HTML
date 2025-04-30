@@ -24,24 +24,7 @@ console.log(browser.getPlatform())
 
 console.log(sessionid)
 
-//    /* ------------------------------------------------------------------
-//       2) FIREBASE CONFIG
-//       ------------------------------------------------------------------ */
-//    const firebaseConfig = {
-//      apiKey: "AIzaSyA1sazHTkMOEfqqwD-J6wz2KoU8PoGsDMo",
-//      authDomain: "graphics-et-al-demo.firebaseapp.com",
-//      projectId: "graphics-et-al-demo",
-//      storageBucket: "graphics-et-al-demo.firebasestorage.app",
-//      messagingSenderId: "730165788215",
-//      appId: "1:730165788215:web:24f3b5010114144bd849b2",
-//      measurementId: "G-EJQSVX1V2K"
-//    };
 
-//    if (!analyticsDisabled) {
-//      firebase.initializeApp(firebaseConfig);
-//      var db = firebase.firestore();
-//      console.log("patient_analytics1.js: Firebase initialized with project:", firebaseConfig.projectId);
-//    }
 
 /* ------------------------------------------------------------------
       3) CORE VARIABLES
