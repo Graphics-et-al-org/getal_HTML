@@ -11,9 +11,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Messaging\AblyController;
 use App\Jobs\AI\SubmitTextForTranslation;
 use App\Models\Clipart\Clipart;
+use App\Models\Page\Compiled\CompiledPage;
+use App\Models\Page\Compiled\CompiledPageComponent;
+use App\Models\Page\Compiled\CompiledPageSnippet;
 use App\Models\Page\Page;
 use App\Models\Page\PageComponent;
 use App\Models\Page\PageComponentCategory;
+use App\Models\Page\PageTemplate;
+use App\Models\Page\SnippetsCategory;
 use App\Models\Tag;
 use App\Traits\AblyFunctions;
 use DiDom\Document;
@@ -73,15 +78,14 @@ class ApiController extends Controller
         $uuid = Str::uuid()->toString();
 
         // @TODO Extract string from file
-
         // strip PII
         $redacted = GPTHelper::anonymize($request->text);
 
-       // dd($request->all());
+        // dd($request->all());
 
         // get template:
         //@TODO this will be dynamic based on template restriction- user, team, project
-        $template_id = Page::where('is_template', '1')
+        $template_id = PageTemplate::where('is_template', '1')
             ->where('template_type', 'summary')->get()->last()->id;
 
         // actually submit the job
@@ -92,114 +96,162 @@ class ApiController extends Controller
         return response()->json(['success' => true, 'uuid' => $uuid]);
     }
 
+
     // just an infographic built from categories available to the user
     public function createInfoDocument(Request $request)
     {
         // a unique identifier
         $uuid = Str::uuid()->toString();
+        $categories = $request->categories;
+        $snippets = $request->snippets;
 
         // get template:
         //@TODO this will be dynamic based on template restriction- user, team, project
-        $template_id = Page::where('is_template', '1')
-            ->where('template_type', 'info')->get()->last()->id;
+        $template = PageTemplate::where('is_template', '1')
+            ->where('template_type', 'info')->get()->last();
 
-        // get the template contents
-        $output = Page::find($template_id)->content;
 
-        $categories = PageComponentCategory::whereIn('uuid', $request->categories)->get();
+        // build the compiled page
+        $outputPage = new CompiledPage(
+            [
+                'uuid' => $uuid,
+                'label' => 'Patient information generated ' . Carbon::now()->toDateTimeString(),
+                'content' => $template->content,
+                //'user_id' => $this->_user_id,
+                'user_id' => -1,
+                'released_at' => null,
+                'from_template_id' => $template->id,
+                'header' => $template->header,
+                'footer' => $template->footer,
+                'title' => $request->title,
+                //'summary' => $response_content['summary'],
+                //'data' => json_encode($response_content),
+                'css' => $template->css,
+            ]
+        );
 
-        // only tack them on when there's something
-        if ($categories->count() > 0) {
-            $componentsOutput = '';
-            // tack the content on to the end
-            foreach ($categories as $category) {
-                foreach ($category->components as $component) {
-                    $componentsOutput .= $component->content;
+        $outputPage->save();
+
+// populate the page with the components
+
+foreach ($template->page_templates_components as $templateComponent) {
+
+    // add the component to the page
+    $pageComponent = new CompiledPageComponent(
+        [
+            'uuid' => Str::uuid()->toString(),
+            'type' => $templateComponent->type,
+            'order' => $templateComponent->pivot->order,
+            'content' => $templateComponent->content,
+            'compiled_page_id' => $outputPage->id,
+            'from_page_template_components_id' => $templateComponent->id,
+        ]
+    );
+
+    $pageComponent->save();
+
+    // get the keypoint component and populate
+    switch ($templateComponent->type) {
+        case 'snippets':
+            foreach ($categories as $category_uuid) {
+                // get the category
+                $category = SnippetsCategory::where('uuid', $category_uuid)->first();
+                if ($category) {
+                    // get the snippets in the category
+                    $snippets = $category->snippets;
+                    foreach ($snippets as $snippet) {
+                        // add the snippet to the page
+                        $pageSnippet = new CompiledPageSnippet(
+                            [
+                                'uuid' => Str::uuid()->toString(),
+                                'type' => 'snippet',
+                                'order' => $snippet->pivot->order,
+                                'content' => $snippet->content,
+                                'compiled_page_components_id' => $pageComponent->id,
+                                'from_template_id' => $snippet->id,
+                            ]
+                        );
+                        // replace the image src
+                        $pageSnippet->save();
+                    }
                 }
             }
-
-            $output = str_ireplace("{{components_container}}", $componentsOutput, $output);
-        }
-        // build the new page
-        $outputPage = new Page();
-        $outputPage->uuid = $uuid;
-        $outputPage->label = 'Helpful information generated ' . Carbon::now()->toDateTimeString();
-        $outputPage->group_id = null;
-        $outputPage->content = $output;
-        $outputPage->user_id = Auth::user()->id;
-        $outputPage->job_uuid = '';
-        $outputPage->save();
+            break;
+        default:
+            // handle other component types if needed
+            break;
+    }
+}
     }
 
-     // Rebuild a document summary page- useful for testing
-     public function rebuildSummary($uuid)
-     {
-        $page = Page::where('uuid', $uuid)->get()->first();
-         $response_content = json_decode($page->data);
-       //  dd($response_content->title);
-         $template_id = Page::where('is_template', '1')
-         ->where('template_type', 'summary')->get()->last()->id;
-         $templateHtml = Page::find($template_id)->content;
+    // Rebuild a document summary page- useful for testing
+    public function rebuildSummary($uuid)
+    {
+        $page = CompiledPage::where('uuid', $uuid)->get()->first();
+        //      $response_content = json_decode($page->data);
+        //    //  dd($response_content->title);
+        //      $template_id = Page::where('is_template', '1')
+        //      ->where('template_type', 'summary')->get()->last()->id;
+        //      $templateHtml = Page::find($template_id)->content;
 
-        // get the keypoint template
-        $keypointHTML = PageComponent::where('keypoint', 1)->first()->content;
+        //     // get the keypoint template
+        //     $keypointHTML = PageComponent::where('keypoint', 1)->first()->content;
 
-        // build the output
-        $output = str_ireplace(["{{title}}", "{{summary}}"], [$response_content->title, $response_content->summary], $templateHtml);
+        //     // build the output
+        //     $output = str_ireplace(["{{title}}", "{{summary}}"], [$response_content->title, $response_content->summary], $templateHtml);
 
-        // build and insert the keypoints
-        $keypointOutput = '';
-        foreach ($response_content->paired_images as $key => $value) {
-            // dd($response_content['paired_images'][$key]['best_image']);
-             // dd($value);
-            $img =  Clipart::find($value->best_image);
-            if ($img) {
-                $img_path = Clipart::find($value->best_image)->baseline()->path();
-            } else {
-                $img_path = 'https://picsum.photos/200';
-            }
-            $keypointOutput .= str_ireplace(["{{image_src}}", "{{text}}"], [$img_path, $value->keypoint], $keypointHTML);
-        }
+        //     // build and insert the keypoints
+        //     $keypointOutput = '';
+        //     foreach ($response_content->paired_images as $key => $value) {
+        //         // dd($response_content['paired_images'][$key]['best_image']);
+        //          // dd($value);
+        //         $img =  Clipart::find($value->best_image);
+        //         if ($img) {
+        //             $img_path = Clipart::find($value->best_image)->baseline()->path();
+        //         } else {
+        //             $img_path = 'https://picsum.photos/200';
+        //         }
+        //         $keypointOutput .= str_ireplace(["{{image_src}}", "{{text}}"], [$img_path, $value->keypoint], $keypointHTML);
+        //     }
 
-        $output = str_ireplace("{{keypoints_container}}", $keypointOutput, $output);
+        //     $output = str_ireplace("{{keypoints_container}}", $keypointOutput, $output);
 
-        // extras at teh end
-        // get the compoents and sort by weight
-        // $categories = PageComponentCategory::whereIn('uuid', $response_content['categories'])->get();
-        // $response_content['categories'] =
-         $categories = $response_content->categories;
+        //     // extras at teh end
+        //     // get the compoents and sort by weight
+        //     // $categories = PageComponentCategory::whereIn('uuid', $response_content['categories'])->get();
+        //     // $response_content['categories'] =
+        //      $categories = $response_content->categories;
 
-        // only tack them on when there's something
-        if (count($categories) > 0) {
-            $componentsOutput = '';
-            // tack the content on to the end
-            foreach ($categories as $category) {
-                foreach ($category->components as $component) {
-                    $componentsOutput .= PageComponent::find($component->id)->content;
-                }
-            }
+        //     // only tack them on when there's something
+        //     if (count($categories) > 0) {
+        //         $componentsOutput = '';
+        //         // tack the content on to the end
+        //         foreach ($categories as $category) {
+        //             foreach ($category->components as $component) {
+        //                 $componentsOutput .= PageComponent::find($component->id)->content;
+        //             }
+        //         }
 
-            $output = str_ireplace("{{components_container}}", $componentsOutput, $output);
-        } else {
-            $document = new Document($output);
-            $nodes = $document->find('[data-field="components-container"]');
-            // Remove each node
-            foreach ($nodes as $node) {
-                $node->remove();
-            }
-            $output = $document->html();
-        }
+        //         $output = str_ireplace("{{components_container}}", $componentsOutput, $output);
+        //     } else {
+        //         $document = new Document($output);
+        //         $nodes = $document->find('[data-field="components-container"]');
+        //         // Remove each node
+        //         foreach ($nodes as $node) {
+        //             $node->remove();
+        //         }
+        //         $output = $document->html();
+        //     }
 
-        // build the new page
+        //     // build the new page
 
-        $page->label = 'Patient information generated ' . Carbon::now()->toDateTimeString();
-        $page->group_id = null;
-       // $outputPage->data = json_encode($response_content);
-        $page->content = $output;
-        $page->save();
+        //     $page->label = 'Patient information generated ' . Carbon::now()->toDateTimeString();
+        //     $page->group_id = null;
+        //    // $outputPage->data = json_encode($response_content);
+        //     $page->content = $output;
+        //     $page->save();
         return response()->json(['success' => true, 'uuid' => $page->uuid]);
-
-     }
+    }
 
     /**
      *Handle an upload from an extension

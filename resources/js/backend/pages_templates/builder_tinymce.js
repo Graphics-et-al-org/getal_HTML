@@ -50,13 +50,13 @@ new Sortable(tbody, {
     handle: null, // or use a handle selector (e.g. ".drag-handle")
     ghostClass: "bg-yellow-100", // Tailwind class for visual feedback
     onEnd: function (evt) {
-      console.log("Reordered rows:");
-      const newOrder = [...tbody.querySelectorAll("tr")].map(row =>
-        row.getAttribute("data-id")
-      );
-      console.log(newOrder); // e.g. ["102", "101", "103"]
-    }
-  });
+        console.log("Reordered rows:");
+        const newOrder = [...tbody.querySelectorAll("tr")].map((row) =>
+            row.getAttribute("data-id")
+        );
+        console.log(newOrder); // e.g. ["102", "101", "103"]
+    },
+});
 
 var currentEditor = null;
 
@@ -108,11 +108,13 @@ tinymce.init({
         "preview",
         "fullscreen",
     ],
-    toolbar: "codeeditor | image | media| visualblocks | preview | fullscreen",
+    toolbar:
+        "codeeditor |audioButton| image | media| visualblocks | preview | fullscreen",
     content_css: tailwindcsspath,
     images_file_types: "svg,jpeg,jpg,png,gif",
-    file_picker_types: "image",
-    extended_valid_elements : "svg[*],defs[*],pattern[*],desc[*],metadata[*],g[*],mask[*],path[*],line[*],marker[*],rect[*],circle[*],ellipse[*],polygon[*],polyline[*],linearGradient[*],radialGradient[*],stop[*],image[*],view[*],text[*],textPath[*],title[*],tspan[*],glyph[*],symbol[*],switch[*],use[*],a[class|name|href|target|title|onclick|rel],script[type|src],iframe[src|style|width|height|scrolling|marginwidth|marginheight|frameborder],img[class|src|border=0|alt|title|hspace|vspace|width|height|align|onmouseover|onmouseout|name]",
+    file_picker_types: "image, media",
+    extended_valid_elements:
+        "svg[*],defs[*],pattern[*],desc[*],metadata[*],g[*],mask[*],path[*],line[*],marker[*],rect[*],circle[*],ellipse[*],polygon[*],polyline[*],linearGradient[*],radialGradient[*],stop[*],image[*],view[*],text[*],textPath[*],title[*],tspan[*],glyph[*],symbol[*],switch[*],use[*],a[class|name|href|target|title|onclick|rel],script[type|src],iframe[src|style|width|height|scrolling|marginwidth|marginheight|frameborder],img[class|src|border=0|alt|title|hspace|vspace|width|height|align|onmouseover|onmouseout|name]",
     relative_urls: false,
     remove_script_host: false,
     /* and here's our custom image picker*/
@@ -158,6 +160,56 @@ tinymce.init({
             text: "Code Editor",
             onAction: function () {
                 openCodeMirror(editor);
+            },
+        });
+        editor.ui.registry.addButton("audioButton", {
+            text: "Insert audio",
+            onAction: () => {
+                editor.windowManager.open({
+                    title: "Insert audio",
+                    body: {
+                        type: "panel",
+                        items: [
+                            {
+                                type: "urlinput", // ← built-in URL/file field
+                                name: "source",
+                                label: "Audio file",
+                                filetype: "media", // ← hooks into your file_picker_callback
+                            },
+                        ],
+                    },
+                    buttons: [
+                        { type: "cancel", text: "Cancel" },
+                        { type: "submit", text: "Insert", primary: true },
+                    ],
+                    onSubmit: (api) => {
+                        let uid = Date.now().toString(36);
+                        let data = api.getData();
+                        console.log(data);
+                        console.log(data.source.value);
+                        // insert audio content
+                        let content = // Custom audio controls
+                            `<div class="custom-audio-wrapper relative" data-audio-id="${uid}">
+    <audio class="custom-audio-element hidden"
+           src="${data.source.value}" type="${data.source.mime}"></audio>
+    <div class="custom-audio-button absolute top-2 right-2 w-8 h-8 cursor-pointer">
+      <svg class="audio-svg absolute inset-0" width="32" height="32">
+        <circle cx="16" cy="16" r="14" fill="none" stroke="#e3e3e3" stroke-width="4"/>
+        <circle class="audio-progress" cx="16" cy="16" r="14" fill="none"
+                stroke="#ff0066" stroke-width="4" stroke-linecap="round"
+                stroke-dasharray="88" stroke-dashoffset="88"/>
+      </svg>
+      <div class="custom-audio-button-text absolute inset-0 flex items-center
+                  justify-center text-base select-none">
+        ▶
+      </div>
+    </div>
+  </div>`.trim();
+                        editor.insertContent(content);
+                        api.close();
+                        initCustomAudioPlayers();
+                    },
+                });
             },
         });
         editor.on("init", (e) => {
@@ -254,7 +306,7 @@ tinymce.init({
 const openCodeMirror = (editor) => {
     // Create a modal with CodeMirror
     modal.toggle();
- currentEditor = editor;
+    currentEditor = editor;
 
     // Initialize CodeMirror
     setCMEditorContent(currentEditor.getContent(), cmEditor);
@@ -503,10 +555,10 @@ window.save = () => {
     const form = document.getElementById("storeForm");
     addHiddenField(form, "header", tinymce.get("tinymce_header").getContent());
     addHiddenField(form, "footer", tinymce.get("tinymce_footer").getContent());
-    const componentsInOrder = [...tbody.querySelectorAll("tr")].map(row =>
+    const componentsInOrder = [...tbody.querySelectorAll("tr")].map((row) =>
         row.getAttribute("data-id")
-      );
-      console.log(componentsInOrder);
+    );
+    console.log(componentsInOrder);
     addHiddenField(form, "components", componentsInOrder);
     // addHiddenField(form, "html", editor.getHtml());
     // addHiddenField(form, "css", editor.getCss());

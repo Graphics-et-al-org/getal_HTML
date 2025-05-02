@@ -110,6 +110,8 @@ class TemplatesController extends Controller
         foreach ($components as $index => $component) {
             $syncArr[$component] = ['order' => $index];
         }
+
+        //dd($syncArr);
         $template->page_templates_components()->sync($syncArr);
 
         $tags = [];

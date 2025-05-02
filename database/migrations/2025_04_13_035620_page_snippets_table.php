@@ -41,7 +41,7 @@ return new class extends Migration
                 $table->longText('header')->nullable();
             }
             if (!Schema::hasColumn('compiled_pages', 'footer')) {
-                $table->longText('footer')->nullable();;
+                $table->longText('footer')->nullable();
             }
 
             if (!Schema::hasColumn('compiled_pages', 'project_id')) {

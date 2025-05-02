@@ -121,7 +121,8 @@ jobs:
             "WEBJOBS_ENABLED":"1",
             "WEBSITE_SKIP_RUNNING_KUDUAGENT":"false",
             "WEBSITE_VNET_ROUTE_ALL":"1",
-            "VITE_APP_URL":"https://mediguides-dev.azurewebsites.net/"
+            "VITE_APP_URL":"https://mediguides-dev.azurewebsites.net/",
+            "JWT_SECRET":"${{ secrets.JWT_SECRET }}"
           }
           EOF
 

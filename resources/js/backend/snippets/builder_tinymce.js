@@ -78,34 +78,60 @@ const csrfToken = document
     .querySelector('meta[name="csrf-token"]')
     .getAttribute("content");
 
-tinymce.init({
-    selector: "div#tinymce",
-    license_key: "gpl",
-    skin: false,
-    plugins: [
-        "code",
-        "image",
-        "media",
-        "visualblocks",
-        "preview",
-        "fullscreen",
-    ],
-    toolbar: "codeeditor | image | media| visualblocks | preview | fullscreen",
-    content_css: tailwindcsspath,
-    verify_html: false,
-    extended_valid_elements:
-        "svg[*],defs[*],pattern[*],desc[*],metadata[*],g[*],mask[*],path[*],line[*],marker[*],rect[*],circle[*],ellipse[*],polygon[*],polyline[*],linearGradient[*],radialGradient[*],stop[*],image[*],view[*],text[*],textPath[*],title[*],tspan[*],glyph[*],symbol[*],switch[*],use[*],a[class|name|href|target|title|onclick|rel],script[type|src],iframe[src|style|width|height|scrolling|marginwidth|marginheight|frameborder],img[class|src|border=0|alt|title|hspace|vspace|width|height|align|onmouseover|onmouseout|name]",
-    images_file_types: "svg,jpeg,jpg,png,gif",
-    file_picker_types: "image",
-    //relative_urls: false,
-   // remove_script_host: false,
-    /* and here's our custom image picker*/
-    file_picker_callback: function (cb, value, meta) {
-        var input = document.createElement("input");
-        input.setAttribute("type", "file");
-        input.setAttribute("accept", "image/*");
+    tinymce.init({
+        selector: "div#tinymce_content",
+        license_key: "gpl",
+        skin: false,
+        plugins: [
+            "code",
+            "image",
+            "media",
+            "visualblocks",
+            "preview",
+            "fullscreen",
+        ],
+        toolbar:
+            "codeeditor |audioButton| image | media| visualblocks | preview | fullscreen",
+        content_css: tailwindcsspath,
+        images_file_types: "svg,jpeg,jpg,png,gif",
+        file_picker_types: "image, media",
+        extended_valid_elements:
+            "svg[*],defs[*],pattern[*],desc[*],metadata[*],g[*],mask[*],path[*],line[*],marker[*],rect[*],circle[*],ellipse[*],polygon[*],polyline[*],linearGradient[*],radialGradient[*],stop[*],image[*],view[*],text[*],textPath[*],title[*],tspan[*],glyph[*],symbol[*],switch[*],use[*],a[class|name|href|target|title|onclick|rel],script[type|src],iframe[src|style|width|height|scrolling|marginwidth|marginheight|frameborder],img[class|src|border=0|alt|title|hspace|vspace|width|height|align|onmouseover|onmouseout|name]",
+        relative_urls: false,
+        remove_script_host: false,
+        /* and here's our custom image picker*/
+        file_picker_callback: function (callback, value, meta) {
+            const editor = this;
+            if (meta.filetype === "media") {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "audio/*";
+                input.onchange = () => {
+                    const file = input.files[0];
+                    const fd = new FormData();
+                    fd.append("file", file);
+                    fetch(`${baseurl}/admin/media/tinymce_store`, {
+                        method: "POST",
+                        headers: { "X-CSRF-Token": csrfToken },
+                        body: fd,
+                    })
+                        .then((r) => r.json())
+                        .then((data) => {
+                            // give TinyMCE the URL + MIME so it knows this is audio
+                            callback(data.location, {
+                                source: data.location,
+                                sourcemime: data.mime || "audio/mpeg",
+                            });
+                        })
+                        .catch(console.error);
+                };
+                input.click();
+            } else {
+                var input = document.createElement("input");
+                input.setAttribute("type", "file");
+                input.setAttribute("accept", "image/*");
 
-        /*
+                /*
             Note: In modern browsers input[type="file"] is functional without
             even adding it to the DOM, but that might not be the case in some older
             or quirky browsers like IE, so you might want to add it to the DOM
@@ -113,51 +139,116 @@ tinymce.init({
             once you do not need it anymore.
           */
 
-        input.onchange = function () {
-            var file = this.files[0];
+                input.onchange = function () {
+                    var file = this.files[0];
 
-            var reader = new FileReader();
-            reader.onload = function () {
-                /*
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        /*
                 Note: Now we need to register the blob in TinyMCEs image blob
                 registry. In the next release this part hopefully won't be
                 necessary, as we are looking to handle it internally.
               */
-                var id = "blobid" + new Date().getTime();
-                var blobCache = tinymce.activeEditor.editorUpload.blobCache;
-                var base64 = reader.result.split(",")[1];
-                var blobInfo = blobCache.create(id, file, base64);
-                blobCache.add(blobInfo);
+                        var id = "blobid" + new Date().getTime();
+                        var blobCache = tinymce.activeEditor.editorUpload.blobCache;
+                        var base64 = reader.result.split(",")[1];
+                        var blobInfo = blobCache.create(id, file, base64);
+                        blobCache.add(blobInfo);
 
-                /* call the callback and populate the Title field with the file name */
-                cb(blobInfo.blobUri(), { title: file.name });
-            };
-            reader.readAsDataURL(file);
-        };
+                        /* call the callback and populate the Title field with the file name */
+                        cb(blobInfo.blobUri(), { title: file.name });
+                    };
+                    reader.readAsDataURL(file);
+                };
 
-        input.click();
-    },
-    setup: (editor) => {
-        editor.ui.registry.addButton("codeeditor", {
-            text: "Code Editor",
-            onAction: function () {
-                openCodeMirror(editor);
-            },
-        });
-        editor.on("init", (e) => {
-            // load content from the server
-            console.log(projectEndpoint + `/${component_id}/data`);
-            if (component_id > 0) {
-                fetch(projectEndpoint + `/${component_id}/data`)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        editor.setContent(data.content);
-                    });
+                input.click();
             }
-        });
-    },
-});
-
+        },
+        audio_template_callback: (data) => {
+            console.log("audio_template_callback");
+            return (
+                '<audio controls preload="metadata">\n' +
+                `  <source src="${data.source}"` +
+                (data.mime ? ` type="${data.mime}"` : "") +
+                " />\n" +
+                (data.altsource
+                    ? `  <source src="${data.altsource}"` +
+                      (data.altsourcemime ? ` type="${data.altsourcemime}"` : "") +
+                      " />\n"
+                    : "") +
+                "</audio>"
+            );
+        },
+        setup: (editor) => {
+            editor.ui.registry.addButton("codeeditor", {
+                text: "Code Editor",
+                onAction: function () {
+                    openCodeMirror(editor);
+                },
+            });
+            editor.ui.registry.addButton("audioButton", {
+                text: "Insert audio",
+                onAction: () => {
+                    editor.windowManager.open({
+                        title: "Insert audio",
+                        body: {
+                            type: "panel",
+                            items: [
+                                {
+                                    type: "urlinput", // ← built-in URL/file field
+                                    name: "source",
+                                    label: "Audio file",
+                                    filetype: "media", // ← hooks into your file_picker_callback
+                                },
+                            ],
+                        },
+                        buttons: [
+                            { type: "cancel", text: "Cancel" },
+                            { type: "submit", text: "Insert", primary: true },
+                        ],
+                        onSubmit: (api) => {
+                            let uid = Date.now().toString(36);
+                            let data = api.getData();
+                            console.log(data);
+                            console.log(data.source.value);
+                            // insert audio content
+                            let content = // Custom audio controls
+                                `<div class="custom-audio-wrapper relative" data-audio-id="${uid}">
+        <audio class="custom-audio-element hidden"
+               src="${data.source.value}" type="${data.source.mime}"></audio>
+        <div class="custom-audio-button absolute top-2 right-2 w-8 h-8 cursor-pointer">
+          <svg class="audio-svg absolute inset-0" width="32" height="32">
+            <circle cx="16" cy="16" r="14" fill="none" stroke="#e3e3e3" stroke-width="4"/>
+            <circle class="audio-progress" cx="16" cy="16" r="14" fill="none"
+                    stroke="#ff0066" stroke-width="4" stroke-linecap="round"
+                    stroke-dasharray="88" stroke-dashoffset="88"/>
+          </svg>
+          <div class="custom-audio-button-text absolute inset-0 flex items-center
+                      justify-center text-base select-none">
+            ▶
+          </div>
+        </div>
+      </div>`.trim();
+                            editor.insertContent(content);
+                            api.close();
+                            initCustomAudioPlayers();
+                        },
+                    });
+                },
+            });
+            editor.on("init", (e) => {
+                // load content from the server
+                console.log(projectEndpoint + `${component_id}/data`);
+                if (component_id > 0) {
+                    fetch(projectEndpoint + `${component_id}/data`)
+                        .then((response) => response.json())
+                        .then((data) => {
+                            editor.setContent(data.content);
+                        });
+                }
+            });
+        },
+    });
 const openCodeMirror = (editor) => {
     // Create a modal with CodeMirror
     modal.toggle();
