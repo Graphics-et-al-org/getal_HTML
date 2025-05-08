@@ -1,5 +1,6 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
+import tailwind_safelist from './resources/js/common/tailwind_safelist.js';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -9,11 +10,7 @@ export default {
         './resources/views/**/*.blade.php',
         './node_modules/flowbite/**/*.js',
     ],
-    safelist: [
-        'peer-checked:border-blue-600',
-        'peer-checked:text-gray-600',
-        'bg-green-500'
-      ],
+    safelist: tailwind_safelist,
     theme: {
         extend: {
             fontFamily: {

@@ -9,6 +9,7 @@ use App\Http\Controllers\Clipart\ClipartController;
 use App\Http\Controllers\CustomBroadcastAuthController;
 use App\Http\Middleware\EnsureAuth0TokenIsValid;
 use App\Http\Middleware\ValidateJWT;
+use App\Http\Middleware\VerifyAuth0Jwt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
@@ -21,22 +22,22 @@ Route::post('/broadcasting/auth', [CustomBroadcastAuthController::class, 'authen
 
 
 // validate a token
-Route::post('/extension/token', function (Request $request) {
-    //dd($request->header('Authorization'));
-    $token = Str::chopStart($request->header('Authorization'), 'Bearer ');
-    // decode the token
-    $apiURL = 'https://dev-ezz8szgu0u6skf0x.au.auth0.com/userinfo';
-    $response = Http::withToken($token)->get($apiURL);
-    if ($response->successful()) {
-        dd($response->json()); // Returns user info as an array
-    }
-    // Handle errors like 401 Unauthorized
-    if ($response->status() === 401) {
-        dd($response->json());
-        return false; // Token is invalid or expired
-    }
-    dd($response);
-})->middleware('guest');
+// Route::post('/extension/token', function (Request $request) {
+//     //dd($request->header('Authorization'));
+//     $token = Str::chopStart($request->header('Authorization'), 'Bearer ');
+//     // decode the token
+//     $apiURL = 'https://dev-ezz8szgu0u6skf0x.au.auth0.com/userinfo';
+//     $response = Http::withToken($token)->get($apiURL);
+//     if ($response->successful()) {
+//         dd($response->json()); // Returns user info as an array
+//     }
+//     // Handle errors like 401 Unauthorized
+//     if ($response->status() === 401) {
+//         dd($response->json());
+//         return false; // Token is invalid or expired
+//     }
+//     dd($response);
+// })->middleware('guest');
 
 // Get an Ably token for client communication. See https://ably.com/docs/auth/token#ably-token
 Route::post('/ablytoken', [ApiController::class, 'getAblyToken'])->middleware(EnsureAuth0TokenIsValid::class);
@@ -77,6 +78,8 @@ Route::get('categories/search', [SnippetsCategoriesController::class, 'search'])
 Route::get('clipart/searchbytagsandtext', [ClipartController::class, 'searchByTagsAndText']);
 Route::get('clipart/cache', [ClipartController::class, 'uploadJsonToCache']);
 
+
+
 // Tests- remove before production
 // a test route to trigger a job
 Route::get('/extension/testjob/template/{id}', [ApiController::class, 'testuploadFromExtension'])->middleware('guest');
@@ -97,3 +100,14 @@ Route::get('/clipart/fixuuid', function () {
 
 // analytics capture- with JWT authentication to prevent some shenanigans
 Route::post('page/{uuid}/analytics/flush', [CompiledPagesAnalyticsController::class, 'get_flush'])->middleware(ValidateJWT::class);
+
+// API for the generation of a page
+// handle an upload from the extension and create a job
+//@TODO - add a middleware to check the token
+Route::post('/createpage', [ApiController::class, 'createPageFromApi'])->middleware('guest');
+
+// experiment with Auth0 token validation
+Route::post('/experiment/checktoken', function (Request $request) {
+    dd('yay!');
+})->middleware(VerifyAuth0Jwt::class);
+

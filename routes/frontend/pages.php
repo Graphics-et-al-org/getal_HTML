@@ -1,6 +1,6 @@
 <?php
 
-
+use App\Http\Controllers\Api\ApiController;
 use App\Http\Controllers\Frontend\Pages\CompiledPagesController;
 
 use Illuminate\Support\Facades\Route;
@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Route;
 Route::group([], function () {
     // Pages Management
     Route::group(['namespace' => 'Pages'], function () {
+
+        // internal create page, using teh API controller
+        Route::post('/createpage', [ApiController::class, 'createPageFromApi']);
 
 
         // Specific page
@@ -24,7 +27,6 @@ Route::group([], function () {
             Route::get('share_view', [CompiledPagesController::class, 'share_view'])->name('page.share_view');
 
             Route::post('add_keypoint/',  [CompiledPagesController::class, 'add_keypoint'])->name('page.add_keypoint');
-
 
 
             Route::get('qrcode', [CompiledPagesController::class, 'getQRcode'])->name('page.qrcode');

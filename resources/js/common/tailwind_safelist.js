@@ -1,5 +1,5 @@
 // Referencing tailwind classes for dynamic editors
-const classes = [
+export default [
     "container",
     "text-xs",
     "text-sm",
@@ -519,4 +519,9 @@ const classes = [
     "object-fill",
     "object-none",
     "object-scale-down",
+    'peer-checked:border-blue-600',
+    'peer-checked:text-gray-600',
+    'peer-checked:bg-blue-600',
+    'peer-checked:text-white',
+    'bg-green-500'
 ];

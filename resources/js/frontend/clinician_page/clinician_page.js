@@ -54,53 +54,52 @@ tinymce.init({
     toolbar: false,
     menubar: false,
     inline: true,
-    setup:(editor)=>{
-         // handle change event
-    editor.on("change", (e) => {
-        let editorContent = editor.getContent();
-        if (editorContent.length > 0) {
-            var url = baseurl + `/page/${uuid}/summary_update`;
-            let formData = new FormData();
-            //formData.append("keypointid", id);
-            formData.append("keypoint_text", content);
-            //console.log(id, content);
-            //  return;
-            // little bit of feedback goes here
-            container
-                .querySelector(".keypoint_image_waiting")
-                .classList.remove("hidden");
-            fetch(url, {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-CSRF-Token": csrfToken,
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    console.log(data);
-                    if (data.status == 0) {
-                        // Success feedback goes here
-                        container
-                            .querySelector(".keypoint_image_waiting")
-                            .classList.add("hidden");
-                    } else {
-                        container
-                            .querySelector(".keypoint_image_waiting")
-                            .classList.add("hidden");
-                        showErrorFeedback();
-                    }
+    setup: (editor) => {
+        // handle change event
+        editor.on("change", (e) => {
+            let editorContent = editor.getContent();
+            if (editorContent.length > 0) {
+                var url = baseurl + `/page/${uuid}/summary_update`;
+                let formData = new FormData();
+                //formData.append("keypointid", id);
+                formData.append("keypoint_text", content);
+                //console.log(id, content);
+                //  return;
+                // little bit of feedback goes here
+                container
+                    .querySelector(".keypoint_image_waiting")
+                    .classList.remove("hidden");
+                fetch(url, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-CSRF-Token": csrfToken,
+                    },
                 })
-                .catch((error) => {
-                    showErrorFeedback();
-                    container
-                        .querySelector(".keypoint_image_waiting")
-                        .classList.add("hidden");
-                });
-
-        }
-    });
-    }
+                    .then((response) => response.json())
+                    .then((data) => {
+                        console.log(data);
+                        if (data.status == 0) {
+                            // Success feedback goes here
+                            container
+                                .querySelector(".keypoint_image_waiting")
+                                .classList.add("hidden");
+                        } else {
+                            container
+                                .querySelector(".keypoint_image_waiting")
+                                .classList.add("hidden");
+                            showErrorFeedback();
+                        }
+                    })
+                    .catch((error) => {
+                        showErrorFeedback();
+                        container
+                            .querySelector(".keypoint_image_waiting")
+                            .classList.add("hidden");
+                    });
+            }
+        });
+    },
 });
 // summary editing
 tinymce.init({
@@ -221,7 +220,9 @@ Sortable.create(keypointgrid, {
     animation: 150, // Smooth transition
     ghostClass: "bg-gray-300", // Class applied to the dragged item
     onEnd: function (evt) {
-        let newOrder =    Array.from(keypointgrid.children).map((el) => el.dataset.keypointid)
+        let newOrder = Array.from(keypointgrid.children).map(
+            (el) => el.dataset.keypointid
+        );
         showProcessFeedback();
         // submit the changes
         let url = baseurl + `/keypoint/reorder`;
@@ -237,9 +238,9 @@ Sortable.create(keypointgrid, {
             .then((response) => response.json())
             .then((data) => {
                 console.log(data);
-                showSuccessFeedback()
+                showSuccessFeedback();
             })
-            .catch(()=>{
+            .catch(() => {
                 showErrorFeedback();
             });
     },
@@ -252,7 +253,9 @@ Sortable.create(snippetsgrid, {
     ghostClass: "bg-gray-300", // Class applied to the dragged item
     onEnd: function (evt) {
         // do not include
-        let newOrder =    Array.from(snippetsgrid.children).map((el) => el.dataset.snippetid)
+        let newOrder = Array.from(snippetsgrid.children).map(
+            (el) => el.dataset.snippetid
+        );
         showProcessFeedback();
         // submit the changes
         let url = baseurl + `/keypoint/reorder`;
@@ -268,14 +271,13 @@ Sortable.create(snippetsgrid, {
             .then((response) => response.json())
             .then((data) => {
                 console.log(data);
-                showSuccessFeedback()
+                showSuccessFeedback();
                 colourSnippetsBackground();
             })
-            .catch(()=>{
+            .catch(() => {
                 showErrorFeedback();
             });
         // Update the background colour of the snippets
-
     },
     filter: "button", // Exclude buttons from being draggable
     preventOnFilter: false, // Ensure buttons remain clickable
@@ -612,11 +614,11 @@ async function getCollectionBySearch() {
                         // add the category to the list
                         const newCategory = document.createElement("li");
                         newCategory.innerHTML = `
-                          <input type="checkbox" id="cb_${category.uuid}" value="${category.uuid}" class="peer hidden"  onchange="window.handleInfoCategoryChange(event)" />
-                          <label for="cb_${category.uuid}"
-                            class="inline-flex items-center justify-between w-full p-5 text-gray-500 bg-white border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:bg-blue-50 hover:text-gray-600 hover:bg-gray-100 peer-checked:text-blue-600">
-                            <div class="w-full text-sm">${category.text}</div>
-                          </label>
+                      <input type="checkbox" id="cb_${category.uuid}" value="${category.uuid}" class="peer hidden"  onchange="window.handleInfoCategoryChange(event)" />
+                  <label for="cb_${category.uuid}"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium border border-gray-300 rounded-full cursor-pointer  bg-white text-gray-700 peer-checked:bg-blue-600 peer-checked:text-white hover:bg-gray-100">
+                    <div class="w-full text-sm">${category.text}</div>
+                  </label>
                         `;
                         document
                             .getElementById("categorieslist")
@@ -653,7 +655,6 @@ window.addSelectedCollections = () => {
     // and the search input
     console.log("selected_info_categories");
     console.log(selected_info_categories);
-
 };
 
 const $publicDetailsTargetEl = document.getElementById("publicDetailsModal");
@@ -699,8 +700,8 @@ window.showSternWarning = () => {
                 .then((response) => response.json())
                 .then((data) => {
                     console.log(data);
-                    window.location.href=`${baseurl}/page/${uuid}/share_view`
-                 //   openPublicDetailsModal();
+                    window.location.href = `${baseurl}/page/${uuid}/share_view`;
+                    //   openPublicDetailsModal();
                 });
         }
     });

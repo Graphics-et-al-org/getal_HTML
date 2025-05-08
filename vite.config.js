@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import laravel from "laravel-vite-plugin";
 import sass from "vite-plugin-sass";
-import path from 'path';
+import path from "path";
 
 export default defineConfig({
     plugins: [
@@ -13,8 +13,9 @@ export default defineConfig({
                 "resources/css/public.css",
                 //"resources/css/backend/template_builder/builder.css",
                 "resources/js/app.js",
-                "resources/js/common/tailwind_classes.js",
+                "resources/js/common/tailwind_safelist.js",
                 "resources/js/frontend/frontend.js",
+                "resources/js/dashboard/dashboard.js",
                 "resources/js/backend/backend.js",
                 "resources/js/backend/pages_templates/index.js",
                 "resources/js/backend/pages_templates/builder_tinymce.js",
@@ -22,10 +23,10 @@ export default defineConfig({
                 "resources/js/backend/template_components/builder_tinymce.js",
                 "resources/js/backend/snippets/index.js",
                 "resources/js/backend/snippets/builder_tinymce.js",
-                'resources/js/backend/snippets_category/index.js',
-                'resources/js/backend/snippets_category/edit.js',
-                'resources/js/backend/project/create.js',
-                'resources/js/backend/project/edit.js',
+                "resources/js/backend/snippets_category/index.js",
+                "resources/js/backend/snippets_category/edit.js",
+                "resources/js/backend/project/create.js",
+                "resources/js/backend/project/edit.js",
                 "resources/js/backend/clipart/index.js",
                 "resources/js/backend/clipart/create.js",
                 "resources/js/backend/clipart/edit.js",
@@ -39,8 +40,8 @@ export default defineConfig({
             ],
             resolve: {
                 alias: {
-                    'tinymce': path.resolve(__dirname, 'node_modules/tinymce')
-                }
+                    tinymce: path.resolve(__dirname, "node_modules/tinymce"),
+                },
             },
             refresh: true,
         }),

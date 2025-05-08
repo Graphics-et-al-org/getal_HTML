@@ -6,17 +6,15 @@ use Ably\AblyRest;
 use Ably;
 use Ably\LaravelBroadcaster\AblyBroadcaster;
 use App\Events\AI\TranslationReadyEvent;
+use App\Helpers\File\FileContentsHelper;
 use App\Helpers\GPT\GPTHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Messaging\AblyController;
 use App\Jobs\AI\SubmitTextForTranslation;
-use App\Models\Clipart\Clipart;
 use App\Models\Page\Compiled\CompiledPage;
 use App\Models\Page\Compiled\CompiledPageComponent;
 use App\Models\Page\Compiled\CompiledPageSnippet;
 use App\Models\Page\Page;
-use App\Models\Page\PageComponent;
-use App\Models\Page\PageComponentCategory;
 use App\Models\Page\PageTemplate;
 use App\Models\Page\SnippetsCategory;
 use App\Models\Tag;
@@ -81,108 +79,37 @@ class ApiController extends Controller
         // strip PII
         $redacted = GPTHelper::anonymize($request->text);
 
-        // dd($request->all());
-
         // get template:
         //@TODO this will be dynamic based on template restriction- user, team, project
         $template_id = PageTemplate::where('is_template', '1')
             ->where('template_type', 'summary')->get()->last()->id;
 
-        // actually submit the job
-        SubmitTextForTranslation::dispatch($redacted, $template_id, $uuid, Auth::user()->id, $request->categories ?? null)->onConnection('database')->onQueue('textprocess');
-
-
-        // return the uuid so we can listen for it
-        return response()->json(['success' => true, 'uuid' => $uuid]);
+        return response()->json(['status' => 0, 'uuid' => $this->_createSummaryPage($template_id, Auth::user()->id, $request->categories, $request->text, $request->file)]);
     }
 
-
-    // just an infographic built from categories available to the user
-    public function createInfoDocument(Request $request)
+    // Create a page: keypoint summary if there's a file or doctor text, an info document if there's no file
+    // @TODO work out who teh user is
+    public function createPageFromApi(Request $request)
     {
-        // a unique identifier
-        $uuid = Str::uuid()->toString();
-        $categories = $request->categories;
-        $snippets = $request->snippets;
-
-        // get template:
-        //@TODO this will be dynamic based on template restriction- user, team, project
-        $template = PageTemplate::where('is_template', '1')
-            ->where('template_type', 'info')->get()->last();
-
-
-        // build the compiled page
-        $outputPage = new CompiledPage(
-            [
-                'uuid' => $uuid,
-                'label' => 'Patient information generated ' . Carbon::now()->toDateTimeString(),
-                'content' => $template->content,
-                //'user_id' => $this->_user_id,
-                'user_id' => -1,
-                'released_at' => null,
-                'from_template_id' => $template->id,
-                'header' => $template->header,
-                'footer' => $template->footer,
-                'title' => $request->title,
-                //'summary' => $response_content['summary'],
-                //'data' => json_encode($response_content),
-                'css' => $template->css,
-            ]
-        );
-
-        $outputPage->save();
-
-// populate the page with the components
-
-foreach ($template->page_templates_components as $templateComponent) {
-
-    // add the component to the page
-    $pageComponent = new CompiledPageComponent(
-        [
-            'uuid' => Str::uuid()->toString(),
-            'type' => $templateComponent->type,
-            'order' => $templateComponent->pivot->order,
-            'content' => $templateComponent->content,
-            'compiled_page_id' => $outputPage->id,
-            'from_page_template_components_id' => $templateComponent->id,
-        ]
-    );
-
-    $pageComponent->save();
-
-    // get the keypoint component and populate
-    switch ($templateComponent->type) {
-        case 'snippets':
-            foreach ($categories as $category_uuid) {
-                // get the category
-                $category = SnippetsCategory::where('uuid', $category_uuid)->first();
-                if ($category) {
-                    // get the snippets in the category
-                    $snippets = $category->snippets;
-                    foreach ($snippets as $snippet) {
-                        // add the snippet to the page
-                        $pageSnippet = new CompiledPageSnippet(
-                            [
-                                'uuid' => Str::uuid()->toString(),
-                                'type' => 'snippet',
-                                'order' => $snippet->pivot->order,
-                                'content' => $snippet->content,
-                                'compiled_page_components_id' => $pageComponent->id,
-                                'from_template_id' => $snippet->id,
-                            ]
-                        );
-                        // replace the image src
-                        $pageSnippet->save();
-                    }
-                }
-            }
-            break;
-        default:
-            // handle other component types if needed
-            break;
+        $categories = explode(',', $request->categories);
+        $snippets = explode(',', $request->snippets);
+        if ($request->text || $request->file) {
+            // get template:
+            //@TODO this will be dynamic based on template restriction- user, team, project
+            $template_id = PageTemplate::where('template_type', 'summary')->get()->last()->id;
+            return response()->json(['status' => 0, 'type' => 'summary', 'uuid' => $this->_createSummaryPage($template_id, Auth::user()->id, $request->categories, $request->text, $request->file)]);
+        } else {
+            // make an info document, return a link to it
+            $template_id = PageTemplate::where('template_type', 'info')->get()->last()->id;
+            return response()->json(['status' => 0, 'type' => 'info', 'uuid' => $this->_createInfoDocument($template_id, $categories, $snippets, $request->title, Auth::user()->id)]);
+        }
     }
-}
-    }
+
+
+
+
+
+
 
     // Rebuild a document summary page- useful for testing
     public function rebuildSummary($uuid)
@@ -273,8 +200,6 @@ foreach ($template->page_templates_components as $templateComponent) {
         //   $template_id = Page::where('is_template', '1')->first()->id;
         //   dd($template_id);
 
-
-
         SubmitTextForTranslation::dispatch('Simulation', $id, $uuid, 1, [], true)->onConnection('database')->onQueue('textprocess');
 
         //dd($job);
@@ -303,5 +228,133 @@ foreach ($template->page_templates_components as $templateComponent) {
         } catch (\Exception $e) {
             return  response()->json(['status' => $e->getMessage()]);
         }
+    }
+
+
+    //////////////////////////////////////////////////////////////
+    // private functions
+    /////////////////////////////////////////////////////////////
+
+    // internal function to create a summary page
+    private function _createSummaryPage($template_id, $user_id, $categories, $text = null, $file = null)
+    {
+        // a unique identifier
+        $uuid = Str::uuid()->toString();
+
+        $content = '';
+        // if there's  a file, extract the text from it
+        if (isset($file)) {
+
+            // extract the string
+            $content = FileContentsHelper::extractContent($file);
+        } elseif (isset($text)) {
+            // if there's no file, use the text
+            $content = $text;
+        }
+        // strip PII
+        if (strlen($content) > 0) {
+            // strip PII
+            $redacted = GPTHelper::anonymize($content);
+        } else {
+            // if there's no content, return an error
+            return response()->json(['status' => 0, 'error' => 'No content provided'], 400);
+        }
+        $redacted = GPTHelper::anonymize($content);
+
+
+        // actually submit the job
+        SubmitTextForTranslation::dispatch($redacted, $template_id, $uuid,  $user_id, $categories ?? null)->onConnection('database')->onQueue('textprocess');
+
+        // return the uuid so we can listen for it
+        return $uuid;
+        //  return response()->json(['success' => true, 'uuid' => $uuid]);
+
+
+    }
+
+    //internal function to create an info document
+    private function _createInfoDocument($template_id, $categories, $snippets, $title, $user_id)
+    {
+        // a unique identifier
+        $uuid = Str::uuid()->toString();
+
+        // get template:
+        //@TODO this will be dynamic based on template restriction- user, team, project
+        $template = PageTemplate::find($template_id);
+
+        // build the compiled page
+        $outputPage = new CompiledPage(
+            [
+                'uuid' => $uuid,
+                'label' => 'Patient information generated ' . Carbon::now()->toDateTimeString(),
+                'content' => $template->content,
+                'user_id' => $user_id,
+                'job_uuid' => $uuid,
+                'released_at' => null,
+                'from_template_id' => $template_id,
+                'header' => $template->header,
+                'footer' => $template->footer,
+                'title' => $title,
+                'summary' => '',
+                'data' => '',
+                'css' => $template->css,
+            ]
+        );
+
+        $outputPage->save();
+
+
+        // populate the page with the components
+
+        foreach ($template->page_templates_components as $templateComponent) {
+
+            // add the component to the page
+            $pageComponent = new CompiledPageComponent(
+                [
+                    'uuid' => Str::uuid()->toString(),
+                    'type' => $templateComponent->type,
+                    'order' => $templateComponent->pivot->order,
+                    'content' => $templateComponent->content,
+                    'compiled_page_id' => $outputPage->id,
+                    'from_page_template_components_id' => $templateComponent->id,
+                ]
+            );
+
+            $pageComponent->save();
+
+            // get the keypoint component and populate
+            switch ($templateComponent->type) {
+                case 'snippets':
+                    foreach ($categories as $category_uuid) {
+                        // get the category
+                        $category = SnippetsCategory::where('uuid', $category_uuid)->first();
+                        if ($category) {
+                            // get the snippets in the category
+                            $snippets = $category->snippets;
+                            foreach ($snippets as $snippet) {
+                                // add the snippet to the page
+                                $pageSnippet = new CompiledPageSnippet(
+                                    [
+                                        'uuid' => Str::uuid()->toString(),
+                                        'type' => 'snippet',
+                                        'order' => $snippet->pivot->order,
+                                        'content' => $snippet->content,
+                                        'compiled_page_components_id' => $pageComponent->id,
+                                        'from_template_id' => $snippet->id,
+                                    ]
+                                );
+                                // replace the image src
+                                $pageSnippet->save();
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    // handle other component types if needed
+                    break;
+            }
+        }
+
+        return $uuid;
     }
 }

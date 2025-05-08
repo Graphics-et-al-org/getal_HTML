@@ -15,7 +15,7 @@
 </head>
 
 <body class="bg-gray-200">
-    <div class="antialiased bg-gray-50 dark:bg-gray-900">
+    <div class="antialiased bg-gray-50 dark:bg-gray-900 min-h-screen ">
         @include('frontend.includes.header')
         @yield('content')
     </div>

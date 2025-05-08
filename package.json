@@ -31,6 +31,7 @@
         "codemirror": "^6.0.1",
         "draggabilly": "^3.0.0",
         "dragula": "^3.7.3",
+        "dropzone": "^6.0.0-beta.2",
         "flowbite": "^2.5.2",
         "font-awesome": "^4.7.0",
         "grapesjs": "^0.22.3",
