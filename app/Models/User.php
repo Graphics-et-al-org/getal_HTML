@@ -49,4 +49,12 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+      // team relationship
+
+
+      public function projects()
+      {
+          return $this->belongsToMany('App\Models\Organisation\Project', 'projects_team_user', 'project_id','user_id'  )->withPivot('project_id', 'user_id');
+      }
 }

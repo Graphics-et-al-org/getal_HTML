@@ -10,6 +10,7 @@ use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Laravel\Socialite\Facades\Socialite;
 use Symfony\Component\HttpFoundation\Response;
 use UnexpectedValueException;
 
@@ -42,7 +43,6 @@ class VerifyAuth0Jwt
         // 3. Decode & verify
         try {
             // You can set leeway if needed: JWT::$leeway = 60;
-
             $decoded = JWT::decode(
                 $token,
                 $keySet,
@@ -53,8 +53,10 @@ class VerifyAuth0Jwt
         }
 
         // 4. Verify issuer & audience
-        $expectedIss = Config::get('services.auth0.base_url');
+        $expectedIss = Config::get('services.auth0.base_url').'/';
         $expectedAud = Config::get('services.auth0.audience');
+       // dd(Config::get('services.auth0'));
+        dd(env('AUTH0_DOMAIN'));
 
         if ($decoded->iss !== $expectedIss) {
             return response()->json(['error' => 'Invalid issuer'], 401);
@@ -72,6 +74,9 @@ class VerifyAuth0Jwt
                 return response()->json(['error' => 'Insufficient scope'], 403);
             }
         }
+
+        // work out who this is
+        dd(Socialite::driver('auth0')->userFromToken($token));
 
         // 6. Bind the payload so controllers can access it
         $request->attributes->set('jwt_payload', $decoded);

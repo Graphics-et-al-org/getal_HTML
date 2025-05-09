@@ -30,17 +30,17 @@
         </style>
 
         @section('content')
-            <div class="fixed top-16 left-0 right-0 bottom-0 overflow-auto bg-white ">
+            <div class="pt-16  overflow-auto bg-white ">
                 <div class="mx-10 mt-2 border border-2 border-gray-500 rounded-md">
                     <div>
                         <h5 class="ml-2 mb-2 text-xl dark:text-white">Generate a diagram from your notes</h5>
                     </div>
-                    <div class="border-b border-gray-900/10 pb-12 mx-2">
+                    <div class="border-b border-gray-900/10 pb-12 mx-2 z-10">
                         <form id="input-form" enctype="multipart/form-data">
                             {{-- <textarea id="hybridInput" name="textContent" placeholder="Type or paste your text here. Or drop a file to upload..."></textarea>
                             <div id="previewContainer"></div> --}}
                             <div id="hybrid-file-input"
-                                class="border p-2 rounded w-full cursor-text bg-gray-100 hover:bg-gray-200 transition relative"
+                                class="border p-2 rounded w-full cursor-text bg-gray-100 hover:bg-gray-200 transition relative "
                                 role="presentation">
                                 <!-- Textarea for text input -->
                                 <textarea id="doctorTextInput" class="w-full h-32 p-2 bg-transparent focus:outline-none cursor-text resize-none rounded"

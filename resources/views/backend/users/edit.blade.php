@@ -43,8 +43,25 @@
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             placeholder="•••••••••" />
                     </div>
+                @else
+                <div class="grid gap-6 mb-6 md:grid-cols-2  providerfield">
+                    <div>
+                        <label for="provider" class="block mb-2 text-sm font-medium ">Provider</label>
+                        <input type="text" id="provider" name="provider" value="{{ $user->provider }}" readonly
+                            class="text-gray-400 bg-gray-100 border border-gray-300  text-sm rounded-lg  block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white "
+                            placeholder="Provider"  />
+                    </div>
+                </div>
+                <div class="grid gap-6 mb-6 md:grid-cols-2  providerfield">
+                    <div>
+                        <label for="provider_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Provider ID</label>
+                        <input type="text" id="provider_id" name="provider_id" value="{{ $user->provider_id }}"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            placeholder="Auth0 user ID"  />
+                    </div>
+                </div>
                 @endif
-                <span class="block text-gray-700 mt-4">Global roles</span>
+                <span class="block mb-2 text-sm font-medium">Global roles</span>
                 <div class="flex flex-wrap justify-start mb-4">
 
                     <select id="roles" multiple name="roles[]" data-placeholder="Select roles for this user..."
@@ -57,7 +74,7 @@
                         @endforeach
                     </select>
                 </div>
-                <span class="block text-gray-700 mt-4">Teams</span>
+                <span class="block mb-2 text-sm font-medium">Teams</span>
                 <div class="flex flex-wrap justify-start mb-4">
                     <select id="teams" multiple name="teams[]" data-placeholder="Select teams for this user..."
                         autocomplete="on" class="block appearance-none w-full">
