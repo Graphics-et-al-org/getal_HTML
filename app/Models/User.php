@@ -6,13 +6,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Lab404\Impersonate\Models\Impersonate;
 use Laratrust\Traits\HasRolesAndPermissions;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, HasRolesAndPermissions;
+    use HasFactory, Notifiable, HasApiTokens, HasRolesAndPermissions, Impersonate;
 
     /**
      * The attributes that are mass assignable.
@@ -50,11 +51,21 @@ class User extends Authenticatable
         ];
     }
 
-      // team relationship
+    // team relationship
 
 
-      public function projects()
-      {
-          return $this->belongsToMany('App\Models\Organisation\Project', 'projects_team_user', 'project_id','user_id'  )->withPivot('project_id', 'user_id');
-      }
+    public function projects()
+    {
+        return $this->belongsToMany('App\Models\Organisation\Project', 'projects_team_user', 'project_id', 'user_id')->withPivot('project_id', 'user_id');
+    }
+
+    /**
+     * Impersonation
+     * @return bool
+     */
+    public function canImpersonate()
+    {
+        // For example
+        return $this->hasRole('superadministrator') == 1;
+    }
 }

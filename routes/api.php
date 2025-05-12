@@ -1,22 +1,20 @@
 <?php
 
 use App\Http\Controllers\Api\ApiController;
-
-use App\Http\Controllers\Backend\PageComponentsController;
+use App\Http\Controllers\Api\Auth0TokenController;
 use App\Http\Controllers\Backend\SnippetsCategoriesController;
 use  App\Http\Controllers\Frontend\Pages\Analytics\CompiledPagesAnalyticsController;
 use App\Http\Controllers\Clipart\ClipartController;
 use App\Http\Controllers\CustomBroadcastAuthController;
 use App\Http\Middleware\EnsureAuth0TokenIsValid;
-use App\Http\Middleware\ValidateJWT;
-use App\Http\Middleware\VerifyAuth0Jwt;
+use App\Http\Middleware\ValidatePublicJWT;
+use App\Http\Middleware\VerifyApiAuth0Jwt;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Http;
+
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str;
-use App\Models\Clipart\ClipartColourway;
-use App\Models\Page\PageComponent;
+
 
 Route::post('/broadcasting/auth', [CustomBroadcastAuthController::class, 'authenticate'])->middleware(EnsureAuth0TokenIsValid::class);
 
@@ -46,11 +44,11 @@ Route::post('/ablytoken', [ApiController::class, 'getAblyToken'])->middleware(En
 Route::post('/extension/upload', [ApiController::class, 'uploadFromExtension'])
     ->middleware(EnsureAuth0TokenIsValid::class);
 
-    // handle an upload from the extension and create a job
+// handle an upload from the extension and create a job
 Route::post('/extension/info', [ApiController::class, 'createInfoDocument'])
-->middleware(EnsureAuth0TokenIsValid::class);
+    ->middleware(EnsureAuth0TokenIsValid::class);
 
-    // handle an upload from the extension and create a job
+// handle an upload from the extension and create a job
 Route::post('/extension/checkjob', [ApiController::class, 'checkJobStatus'])->middleware('guest');
 //->middleware(EnsureAuth0TokenIsValid::class);
 
@@ -79,35 +77,46 @@ Route::get('clipart/searchbytagsandtext', [ClipartController::class, 'searchByTa
 Route::get('clipart/cache', [ClipartController::class, 'uploadJsonToCache']);
 
 
-
 // Tests- remove before production
 // a test route to trigger a job
 Route::get('/extension/testjob/template/{id}', [ApiController::class, 'testuploadFromExtension'])->middleware('guest');
+
+
 // rebuild a page from a template
-Route::get('/rebuild/page/{uuid}', [ApiController::class, 'rebuildSummary'])->middleware('guest');
+//Route::get('/rebuild/page/{uuid}', [ApiController::class, 'rebuildSummary'])->middleware('guest');
 
 // fix the uuids in the clipart colourways table
-Route::get('/clipart/fixuuid', function () {
-    $colourways = App\Models\Clipart\ClipartColourway::all();
-    foreach ($colourways as $colourway) {
-        if ($colourway->uuid == null) {
-            $colourway->uuid = Str::uuid();
-            $colourway->save();
-        }
-    }
-    return response()->json(['status' => 'UUIDs fixed']);
-});
+// Route::get('/clipart/fixuuid', function () {
+//     $colourways = App\Models\Clipart\ClipartColourway::all();
+//     foreach ($colourways as $colourway) {
+//         if ($colourway->uuid == null) {
+//             $colourway->uuid = Str::uuid();
+//             $colourway->save();
+//         }
+//     }
+//     return response()->json(['status' => 'UUIDs fixed']);
+// });
 
+// Public, non authenticated routes (which we're still tracking)
 // analytics capture- with JWT authentication to prevent some shenanigans
-Route::post('page/{uuid}/analytics/flush', [CompiledPagesAnalyticsController::class, 'get_flush'])->middleware(ValidateJWT::class);
+Route::post('page/{uuid}/analytics/flush', [CompiledPagesAnalyticsController::class, 'get_flush'])->middleware(ValidatePublicJWT::class);
 
-// API for the generation of a page
-// handle an upload from the extension and create a job
-//@TODO - add a middleware to check the token
-Route::post('/createpage', [ApiController::class, 'createPageFromApi'])->middleware('guest');
 
-// experiment with Auth0 token validation
-Route::post('/experiment/checktoken', function (Request $request) {
-    dd('yay!');
-})->middleware(VerifyAuth0Jwt::class);
+/**
+ * Machine to machine routes
+ *
+ *
+ *
+ */
+Route::post('/get_token', [Auth0TokenController::class, 'getToken'])->name('api.get_token');
+
+Route::middleware(VerifyApiAuth0Jwt::class)->group(function () {
+    // check a token
+    Route::post('/checktoken', function (Request $request) {
+        return response()->json(['status' => 'Token is valid']);
+    });
+    // @TODO get available collections for this client
+
+    // @TODO submit a request for a page
+});
 

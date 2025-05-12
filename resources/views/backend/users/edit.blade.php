@@ -14,6 +14,7 @@
         <h1 class="text-2xl font-bold mb-4">Update user</h1>
         <form action="{{ route('admin.users.update', $user->id) }}" method="POST" enctype="multipart/form-data" class="group">
             @csrf
+            <input type="hidden" name="_method" value="PATCH">
             <form>
                 <div class="grid gap-6 mb-6 md:grid-cols-2">
                     <div>

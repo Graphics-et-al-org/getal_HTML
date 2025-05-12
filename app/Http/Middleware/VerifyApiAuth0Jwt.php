@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Exception;
 use Firebase\JWT\JWK;
@@ -14,7 +15,16 @@ use Laravel\Socialite\Facades\Socialite;
 use Symfony\Component\HttpFoundation\Response;
 use UnexpectedValueException;
 
-class VerifyAuth0Jwt
+/**
+ * Middleware to verify Auth0 JWT tokens.
+ *
+ * This middleware checks the validity of the JWT token provided in the request.
+ * It fetches the JWKS from Auth0, decodes and verifies the token, and checks
+ * the issuer and audience. Optionally, it can enforce scopes based on route defaults.
+ *
+ * Used for API calls
+ */
+class VerifyApiAuth0Jwt
 {
     /**
      * Handle an incoming request.
@@ -31,8 +41,8 @@ class VerifyAuth0Jwt
         }
 
         // 2. Fetch JWKS (cache for 24h)
-
-        $jwksUri = config('services.auth0.base_url') . '.well-known/jwks.json';
+        //dd(config('services.auth0'));
+        $jwksUri = config('services.auth0.base_url') . '/.well-known/jwks.json';
         // dd(config('services.auth0.base_url'));
         $jwksJson    = Cache::remember('auth0_jwks', now()->addSecond(), function () use ($jwksUri) {
             $resp = (new Client())->get($jwksUri);
@@ -53,10 +63,10 @@ class VerifyAuth0Jwt
         }
 
         // 4. Verify issuer & audience
-        $expectedIss = Config::get('services.auth0.base_url').'/';
+        $expectedIss = Config::get('services.auth0.base_url') . '/';
         $expectedAud = Config::get('services.auth0.audience');
-       // dd(Config::get('services.auth0'));
-        dd(env('AUTH0_DOMAIN'));
+        // dd(Config::get('services.auth0'));
+        //dd(env('AUTH0_DOMAIN'));
 
         if ($decoded->iss !== $expectedIss) {
             return response()->json(['error' => 'Invalid issuer'], 401);
@@ -75,8 +85,18 @@ class VerifyAuth0Jwt
             }
         }
 
-        // work out who this is
-        dd(Socialite::driver('auth0')->userFromToken($token));
+        //Set the internal user
+        //  dd($decoded->);
+        try {
+            $user = User::where([
+                'provider' => 'auth0',
+                'provider_id' => $decoded->azp,
+            ])->firstOrFail();
+        } catch (Exception $e) {
+            //dd($e);
+            return response()->json(['error' => 'Not a registered user'], 401);
+        }
+        // dd($user);
 
         // 6. Bind the payload so controllers can access it
         $request->attributes->set('jwt_payload', $decoded);

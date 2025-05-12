@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class UserController extends Controller
@@ -32,6 +33,7 @@ class UserController extends Controller
             ->with('teams', $teams);
     }
 
+    // Create a new user from teh admin panel
     public function backend_create(Request $request): RedirectResponse
     {
         //   dd($request->get('roles'));
@@ -62,6 +64,7 @@ class UserController extends Controller
     }
 
 
+    // show the update user form
     public function backend_edit(Request $request): View
     {
         $roles = Role::all();
@@ -72,11 +75,11 @@ class UserController extends Controller
             ->with('teams', $teams);
     }
 
-
-    public function backend_update(Request $request): RedirectResponse
+// update the user
+    public function backend_update(Request $request, $id): RedirectResponse
     {
 
-        $user = User::find($request->get('id'));
+        $user = User::find($id);
         if (isset($user->provider_id)) {
             $user->roles()->sync($request->get('roles'), $request->get('teams'));
         } else {
@@ -93,13 +96,14 @@ class UserController extends Controller
             $user->roles()->sync($request->get('roles'), $request->get('teams'));
         }
         $user->update($request->all());
-        return redirect()->route('backend.users.index');
+        return redirect()->route('admin.users.index');
     }
 
+    // delete the user
     public function backend_destroy(User $user): RedirectResponse
     {
         $user->delete();
-        return redirect()->route('backend.users.index');
+        return redirect()->route('admin.users.index');
     }
 
     // check that an email (does not) exists
@@ -127,4 +131,28 @@ class UserController extends Controller
         });
         return response()->json($users);
     }
+
+    // impersonate a user
+    //@TODO log this
+    public function backend_impersonate(Request $request, $id): RedirectResponse
+    {
+        $user = User::find($id);
+        if ($user) {
+            Auth::user()->impersonate($user);
+            session()->flash('flash_success', "Impersonating user " . $user->name);
+            return redirect()->route('admin.users.index');
+        } else {
+            session()->flash('flash_danger', "User not found");
+            return redirect()->route('admin.users.index');
+        }
+    }
+
+    // leave impersonation
+    public function backend_leave_impersonate(): RedirectResponse
+    {
+        Auth::user()->leaveImpersonation();
+        session()->flash('flash_success', "Left impersonation");
+        return redirect()->route('admin.users.index');
+    }
+
 }

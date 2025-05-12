@@ -17,6 +17,7 @@
         "illuminate/cache": "*",
         "imangazaliev/didom": "^2.0",
         "intervention/image": "^3.10",
+        "lab404/laravel-impersonate": "^1.7",
         "laravel/framework": "^11.31",
         "laravel/reverb": "^1.0",
         "laravel/sanctum": "^4.0",

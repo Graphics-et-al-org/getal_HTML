@@ -106,6 +106,7 @@ return [
         'redirect' => env('AUTH0_REDIRECT_URI'),
         'base_url' => env('AUTH0_DOMAIN'),
         'audience' => env('AUTH0_AUDIENCE'),
+        'token_uri' => env('AUTH0_TOKEN_URI'),
     ],
 
     'stripe' => [

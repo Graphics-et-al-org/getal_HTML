@@ -17,11 +17,15 @@ Route::group(['prefix' => 'users', 'namespace' => 'Users'], function () {
     Route::get('checkemail', [UserController::class, 'checkEmail'])->name('users.checkemail');
     Route::get('search', [UserController::class, 'searchusers'])->name('users.search');
 
+    Route::get('leaveimpersonation', [UserController::class, 'backend_leave_impersonate'])->name('users.impersonate.leave');
+
     //Specific user
     Route::group(['prefix' => 'user/{id}'], function () {
         Route::get('edit', [UserController::class, 'backend_edit'])->name('users.edit');
-
         Route::patch('/', [UserController::class, 'backend_update'])->name('users.update');
         Route::delete('/', [UserController::class, 'backend_destroy'])->name('users.destroy');
+
+        // impersonate
+        Route::get('impersonate', [UserController::class, 'backend_impersonate'])->name('users.impersonate');
     });
 });

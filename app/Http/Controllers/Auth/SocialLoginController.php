@@ -31,9 +31,16 @@ class SocialLoginController extends Controller
        // dd($provider);
         // There's a high probability something will go wrong
         //$user = null;
-
-        $socialite = Socialite::driver($provider);
-             return $socialite->redirect();
+        // dd(
+        //     Socialite::driver('auth0')
+        //            ->stateless()
+        //            ->redirect()
+        //            ->getTargetUrl()
+        //   );
+        return Socialite::driver($provider)->redirect();
+      //  dd($socialite);
+        //dd($socialite->stateless()->redirect());
+        //     return $socialite->redirect();
 
         // is there an issue with the
 //        if (!$request->has('code') || $request->has('denied')) {
@@ -77,14 +84,14 @@ class SocialLoginController extends Controller
         //auth()->login($user, true);
 
         // Set session variable so we know which provider user is logged in as, if ever needed
-        session([config('access.socialite_session_name') => $provider]);
+       // session([config('access.socialite_session_name') => $provider]);
 
         //event(new UserLoggedIn(Auth::user()));
 
         // @TODO if first log in, collect demographic data
 
         // Return to the intended url or default to the class property
-        return redirect()->intended(route('home'));
+        //return redirect()->intended(route('home'));
     }
 
     public function callback(){
