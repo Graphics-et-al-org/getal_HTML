@@ -1,7 +1,7 @@
 <?php
 
 
-use App\Http\Controllers\Backend\SnippetsCategoriesController;
+use App\Http\Controllers\Backend\SnippetsCollectionsController;
 use App\Http\Controllers\Backend\SnippetsController;
 use App\Models\Page\SnippetsCategory;
 use Illuminate\Support\Facades\Route;
@@ -41,27 +41,27 @@ Route::group([], function () {
 //
 Route::group([], function () {
     // Page static components Management
-    Route::group(['namespace' => 'SnippetsCategories'], function () {
+    Route::group(['namespace' => 'SnippetsCollections'], function () {
         // index
-        Route::get('snippet_category', [SnippetsCategoriesController::class, 'index'])->name('snippet_category.index');
+        Route::get('snippet_collection', [SnippetsCollectionsController::class, 'index'])->name('snippet_collection.index');
 
         /// show new/create page
-        Route::get('snippet_category/create', [SnippetsCategoriesController::class, 'create'])->name('snippet_category.create');
+        Route::get('snippet_collection/create', [SnippetsCollectionsController::class, 'create'])->name('snippet_collection.create');
 
         // store new
-        Route::post('snippet_category/save', [SnippetsCategoriesController::class, 'store'])->name('snippet_category.store');
+        Route::post('snippet_collection/save', [SnippetsCollectionsController::class, 'store'])->name('snippet_collection.store');
 
         // Search
-        Route::get('snippet_category/search', [SnippetsCategoriesController::class, 'search']);
+        Route::get('snippet_collection/search', [SnippetsCollectionsController::class, 'search']);
 
         // Specific page
-        Route::group(['prefix' => 'snippet_category/{id}'], function () {
+        Route::group(['prefix' => 'snippet_collection/{id}'], function () {
 
-            Route::get('edit', [SnippetsCategoriesController::class, 'edit'])->name('snippet_category.edit');
+            Route::get('edit', [SnippetsCollectionsController::class, 'edit'])->name('snippet_collection.edit');
 
-            Route::patch('/', [SnippetsCategoriesController::class, 'update'])->name('snippet_category.update');
+            Route::patch('/', [SnippetsCollectionsController::class, 'update'])->name('snippet_collection.update');
 
-            Route::get('/destroy', [SnippetsCategoriesController::class, 'destroy'])->name('snippet_category.destroy');
+            Route::get('/destroy', [SnippetsCollectionsController::class, 'destroy'])->name('snippet_collection.destroy');
         });
     });
 });

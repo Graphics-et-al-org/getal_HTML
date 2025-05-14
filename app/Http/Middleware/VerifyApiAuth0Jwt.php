@@ -9,6 +9,7 @@ use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Laravel\Socialite\Facades\Socialite;
@@ -92,6 +93,8 @@ class VerifyApiAuth0Jwt
                 'provider' => 'auth0',
                 'provider_id' => $decoded->azp,
             ])->firstOrFail();
+            Auth::setUser($user);
+            $request->setUserResolver(fn() => $user);
         } catch (Exception $e) {
             //dd($e);
             return response()->json(['error' => 'Not a registered user'], 401);

@@ -52,7 +52,7 @@
         </form>
     </div>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg m-2">
-        {{ $components->onEachSide(5)->links() }}
+        {{ $snippets->onEachSide(5)->links() }}
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
@@ -66,7 +66,7 @@
                         Tags
                     </th>
                     <th scope="col" class="px-6 py-3">
-                        In categories
+                        In collections
                     </th>
                     <th scope="col" class="px-6 py-3">
                         Owner
@@ -77,36 +77,36 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($components as $component)
+                @foreach ($snippets as $snippet)
                     <tr
                         class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                            {{ $component->label }}
+                            {{ $snippet->label }}
                         </th>
                         <td scope="row" class="px-6 py-4 ">
-                            {{ $component->description }}
+                            {{ $snippet->description }}
                         </td>
                         <td class="px-6 py-4">
-                            {{ $component->tags->implode('text', ', ') }}
+                            {{ $snippet->tags->implode('text', ', ') }}
                         </td>
                         <td class="px-6 py-4">
-                            {{ $component->categories->implode('label', ', ') }}
+                            {{ $snippet->collections->implode('label', ', ') }}
                         </td>
                         <td class="px-6 py-4">
-                            {{ $component->owner->name }}
+                            {{ $snippet->owner->name }}
                         </td>
                         <td class="px-6 py-4">
-                            <a href="{{ route('admin.snippet.edit', $component->id) }}"
+                            <a href="{{ route('admin.snippet.edit', $snippet->id) }}"
                                 class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
                             <br />
-                            <a href="{{ route('admin.snippet.destroy', $component->id) }}"
+                            <a href="{{ route('admin.snippet.destroy', $snippet->id) }}"
                                 class="font-medium text-red-600 dark:text-red-500 hover:underline">Delete</a>
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
-        {{ $components->onEachSide(5)->links() }}
+        {{ $snippets->onEachSide(5)->links() }}
     </div>
 
 

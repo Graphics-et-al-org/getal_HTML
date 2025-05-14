@@ -48,9 +48,9 @@ class Snippet extends Model
     }
 
 
-    public function categories()
+    public function collections()
     {
-        return $this->belongsToMany('App\Models\Page\SnippetsCategory', 'snippets_category_snippets', 'snippet_id', 'snippet_category_id')->withPivot('snippet_category_id', 'snippet_id', 'order');
+        return $this->belongsToMany('App\Models\Page\SnippetsCollection', 'snippets_collection_snippets', 'snippet_id', 'snippet_collection_id')->withPivot('snippet_collection_id', 'snippet_id', 'order');
     }
 
     // user relationship

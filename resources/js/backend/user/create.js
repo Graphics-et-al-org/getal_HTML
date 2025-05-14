@@ -29,6 +29,18 @@ new TomSelect("#teams", {
     },
 });
 
+new TomSelect("#projects", {
+    create: true,
+    allowEmptyOption: true,
+    plugins: {
+        clear_button: {
+            title: "Remove all selected options",
+        },
+        remove_button: {
+            title: "Remove this item",
+        },
+    },
+});
 //
 document.addEventListener("DOMContentLoaded", function () {
     // Initialize the pretty-checkbox

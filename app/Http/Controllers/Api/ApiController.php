@@ -16,7 +16,7 @@ use App\Models\Page\Compiled\CompiledPageComponent;
 use App\Models\Page\Compiled\CompiledPageSnippet;
 use App\Models\Page\Page;
 use App\Models\Page\PageTemplate;
-use App\Models\Page\SnippetsCategory;
+use App\Models\Page\SnippetsCollection;
 use App\Models\Tag;
 use App\Traits\AblyFunctions;
 use DiDom\Document;
@@ -88,27 +88,35 @@ class ApiController extends Controller
     }
 
     // Create a page: keypoint summary if there's a file or doctor text, an info document if there's no file
-    // @TODO work out who teh user is
+
     public function createPageFromApi(Request $request)
     {
-        $categories = explode(',', $request->categories);
+        $user = Auth::user();
+        $collections = explode(',', $request->collections);
         $snippets = explode(',', $request->snippets);
         if ($request->text || $request->file) {
             // get template:
             //@TODO this will be dynamic based on template restriction- user, team, project
             $template_id = PageTemplate::where('template_type', 'summary')->get()->last()->id;
-            return response()->json(['status' => 0, 'type' => 'summary', 'uuid' => $this->_createSummaryPage($template_id, Auth::user()->id, $request->categories, $request->text, $request->file)]);
+            return response()->json(['status' => 0, 'type' => 'summary', 'uuid' => $this->_createSummaryPage($template_id, Auth::user()->id, $request->collections, $request->text, $request->file)]);
         } else {
             // make an info document, return a link to it
             $template_id = PageTemplate::where('template_type', 'info')->get()->last()->id;
-            return response()->json(['status' => 0, 'type' => 'info', 'uuid' => $this->_createInfoDocument($template_id, $categories, $snippets, $request->title, Auth::user()->id)]);
+            return response()->json(['status' => 0, 'type' => 'info', 'uuid' => $this->_createInfoDocument($template_id, $collections, $snippets, $request->title, Auth::user()->id)]);
         }
     }
 
+     // get available collections for the user
+    public function getAvailableCollections(Request $request)
+    {
+        $user = Auth::user();
 
-
-
-
+        $collections = SnippetsCollection::isAvailableToUser($user->id)->get();
+        $collections->transform(function ($item, $key) {
+            return ['value' => $item->uuid, 'label' => $item->label, 'description' => $item->description];
+        });
+        return response()->json($collections);
+    }
 
 
     // Rebuild a document summary page- useful for testing
@@ -236,7 +244,7 @@ class ApiController extends Controller
     /////////////////////////////////////////////////////////////
 
     // internal function to create a summary page
-    private function _createSummaryPage($template_id, $user_id, $categories, $text = null, $file = null)
+    private function _createSummaryPage($template_id, $user_id, $collections, $text = null, $file = null)
     {
         // a unique identifier
         $uuid = Str::uuid()->toString();
@@ -263,7 +271,7 @@ class ApiController extends Controller
 
 
         // actually submit the job
-        SubmitTextForTranslation::dispatch($redacted, $template_id, $uuid,  $user_id, $categories ?? null)->onConnection('database')->onQueue('textprocess');
+        SubmitTextForTranslation::dispatch($redacted, $template_id, $uuid,  $user_id, $collections ?? null)->onConnection('database')->onQueue('textprocess');
 
         // return the uuid so we can listen for it
         return $uuid;
@@ -273,7 +281,7 @@ class ApiController extends Controller
     }
 
     //internal function to create an info document
-    private function _createInfoDocument($template_id, $categories, $snippets, $title, $user_id)
+    private function _createInfoDocument($template_id, $collections, $snippets, $title, $user_id)
     {
         // a unique identifier
         $uuid = Str::uuid()->toString();
@@ -325,9 +333,9 @@ class ApiController extends Controller
             // get the keypoint component and populate
             switch ($templateComponent->type) {
                 case 'snippets':
-                    foreach ($categories as $category_uuid) {
+                    foreach ($collections as $collection_uuid) {
                         // get the category
-                        $category = SnippetsCategory::where('uuid', $category_uuid)->first();
+                        $category = SnippetsCollection::where('uuid', $collection_uuid)->first();
                         if ($category) {
                             // get the snippets in the category
                             $snippets = $category->snippets;

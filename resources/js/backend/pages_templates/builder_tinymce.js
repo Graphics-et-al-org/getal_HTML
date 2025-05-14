@@ -245,42 +245,61 @@ tinymce.init({
     relative_urls: false,
     remove_script_host: false,
     /* and here's our custom image picker*/
-    file_picker_callback: function (cb, value, meta) {
-        var input = document.createElement("input");
-        input.setAttribute("type", "file");
-        input.setAttribute("accept", "image/*");
-
-        /*
-        Note: In modern browsers input[type="file"] is functional without
-        even adding it to the DOM, but that might not be the case in some older
-        or quirky browsers like IE, so you might want to add it to the DOM
-        just in case, and visually hide it. And do not forget do remove it
-        once you do not need it anymore.
-      */
-
-        input.onchange = function () {
-            var file = this.files[0];
-
-            var reader = new FileReader();
-            reader.onload = function () {
-                /*
-            Note: Now we need to register the blob in TinyMCEs image blob
-            registry. In the next release this part hopefully won't be
-            necessary, as we are looking to handle it internally.
-          */
-                var id = "blobid" + new Date().getTime();
-                var blobCache = tinymce.activeEditor.editorUpload.blobCache;
-                var base64 = reader.result.split(",")[1];
-                var blobInfo = blobCache.create(id, file, base64);
-                blobCache.add(blobInfo);
-
-                /* call the callback and populate the Title field with the file name */
-                cb(blobInfo.blobUri(), { title: file.name });
+    file_picker_callback: function (callback, value, meta) {
+        const editor = this;
+        if (meta.filetype === "media") {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = "audio/*";
+            input.onchange = () => {
+                const file = input.files[0];
+                const fd = new FormData();
+                fd.append("file", file);
+                fetch(`${baseurl}/admin/media/tinymce_store`, {
+                    method: "POST",
+                    headers: { "X-CSRF-Token": csrfToken },
+                    body: fd,
+                })
+                    .then((r) => r.json())
+                    .then((data) => {
+                        // give TinyMCE the URL + MIME so it knows this is audio
+                        callback(data.location, {
+                            source: data.location,
+                            sourcemime: data.mime || "audio/mpeg",
+                        });
+                    })
+                    .catch(console.error);
             };
-            reader.readAsDataURL(file);
-        };
+            input.click();
+        }
+        if (meta.filetype === "image") {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = "image/*";
 
-        input.click();
+            input.onchange = function () {
+                const file = this.files[0];
+                const formData = new FormData();
+                formData.append("file", file);
+
+                fetch(`${baseurl}/admin/media/tinymce_store`, {
+                    method: "POST",
+                    headers: { "X-CSRF-Token": csrfToken },
+                    body: formData,
+                })
+                    .then((res) => res.json())
+                    .then((data) => {
+                        // Insert and set alt text to filename
+                        callback(data.location, { alt: file.name });
+                    })
+                    .catch((err) => {
+                        console.error("Image upload failed:", err);
+                        alert("Upload failed");
+                    });
+            };
+
+            input.click();
+        }
     },
     setup: (editor) => {
         editor.ui.registry.addButton("codeeditor", {

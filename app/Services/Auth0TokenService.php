@@ -11,6 +11,7 @@ class Auth0TokenService
     {
        // dd($request->all());
         $cfg = config('services.auth0');
+       // dd($cfg);
         $cacheKey = 'auth0_token_' . sha1($cfg['client_id']);
 
 

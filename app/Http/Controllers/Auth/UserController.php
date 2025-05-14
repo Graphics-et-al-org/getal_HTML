@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Organisation\Project;
 use App\Models\Role;
 use App\Models\Team;
 use App\Models\User;
@@ -28,9 +29,11 @@ class UserController extends Controller
     {
         $roles = Role::all();
         $teams = Team::all();
+        $projects = Project::all();
         return view('backend.users.new')
             ->with('roles', $roles)
-            ->with('teams', $teams);
+            ->with('teams', $teams)
+            ->with('projects', $projects);;
     }
 
     // Create a new user from teh admin panel
@@ -59,6 +62,8 @@ class UserController extends Controller
         }
 
         $user->roles()->sync($request->get('roles'), $request->get('teams'));
+        $user->projects()->sync($request->get('projects'));
+
         session()->flash('flash_success', "New user created");
         return redirect()->route('admin.users.index');
     }
@@ -69,10 +74,13 @@ class UserController extends Controller
     {
         $roles = Role::all();
         $teams = Team::all();
+        $projects = Project::all();
         $user = User::find($request->id);
+       // dd($user->roles);
         return view('backend.users.edit')
             ->with('user', $user)->with('roles', $roles)
-            ->with('teams', $teams);
+            ->with('teams', $teams)
+            ->with('projects', $projects);
     }
 
 // update the user
@@ -94,6 +102,7 @@ class UserController extends Controller
                 ]);
             }
             $user->roles()->sync($request->get('roles'), $request->get('teams'));
+            $user->projects()->sync($request->get('projects'));
         }
         $user->update($request->all());
         return redirect()->route('admin.users.index');

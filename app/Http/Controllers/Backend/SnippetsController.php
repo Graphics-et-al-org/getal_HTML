@@ -53,7 +53,7 @@ class SnippetsController extends Controller
             $request['tags'] = session('admin_static_component_tags');
         }
 
-        $components = Snippet::when($request->has('tags'), function ($query) use ($request) {
+        $snippets = Snippet::when($request->has('tags'), function ($query) use ($request) {
             $query->whereHas('tags', function ($q) use ($request) {
                 $q->whereIn('tags.id', $request['tags']);
             });
@@ -68,18 +68,19 @@ class SnippetsController extends Controller
 
 
         return view('backend.snippets.index')
-            ->with('components', $components);
+            ->with('snippets', $snippets);
     }
 
     // show the editor
     public function edit($id)
     {
 
-        $component = Snippet::findOr($id, function () {
+        $snippet = Snippet::findOr($id, function () {
             return view('backend.snippets.index');
         });
+       // dd($snippet);
         return view('backend.snippets.editor_tinymce')
-            ->with('component', $component);
+            ->with('snippet', $snippet);
     }
 
 
@@ -184,8 +185,8 @@ class SnippetsController extends Controller
     // get the data for a snippet
     public function data($id)
     {
-        $component = Snippet::findOrFail($id);
-        return ['content' => $component->content ?? "Create content here"];
+        $snippet = Snippet::findOrFail($id);
+        return ['content' => $snippet->content ?? "Create content here"];
     }
 
     // get some info for a snippet- for when we add it to a list

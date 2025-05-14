@@ -16,22 +16,22 @@
 
 @section('content')
     <div class="w-100 mb-2">
-        {{ isset($component->id) ? 'Update' : 'New' }} page static component
+        {{ isset($snippet->id) ? 'Update' : 'New' }} page static component
     </div>
     <div class="w-100">
         <form id="storeForm"
-            action="{{ isset($component->id) ? route('admin.snippet.update', $component->id) : route('admin.snippet.store') }}"
+            action="{{ isset($snippet->id) ? route('admin.snippet.update', $snippet->id) : route('admin.snippet.store') }}"
             method="POST">
-            @if (isset($component->id))
+            @if (isset($snippet->id))
                 {{ method_field('PATCH') }}
             @endif
             @csrf
-            <input type="hidden" name="id" value="{{ $component->id ?? '-1' }}" />
+            <input type="hidden" name="id" value="{{ $snippet->id ?? '-1' }}" />
             <div class="grid gap-4 mb-4 sm:grid-cols-2">
                 <div class="sm:col-span-2">
                     <label for="label" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Label</label>
                     <input type="text" name="label" id="label"
-                        value="{{ $component->label ?? 'New static component' }}"
+                        value="{{ $snippet->label ?? 'New static component' }}"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                 </div>
                 <div class="sm:col-span-2">
@@ -39,7 +39,7 @@
                         class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
                     <textarea id="description" name="description" rows="5"
                         class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="Write a description...">{{ $component->description ?? '' }}</textarea>
+                        placeholder="Write a description...">{{ $snippet->description ?? '' }}</textarea>
                 </div>
                 <div class="col-span-full flex">
                     <div class="mr-2">
@@ -57,7 +57,7 @@
                     <div class="flex-1">
                         <div class="pretty p-svg p-curve p-smooth p-bigger">
                             <input type="checkbox" name="keypoint" value="true"
-                                {{ isset($component) ? ($component->keypoint ? 'checked' : '') : '' }} />
+                                {{ isset($snippet) ? ($snippet->keypoint ? 'checked' : '') : '' }} />
                             <div class="state p-info">
                                 <svg class="svg svg-icon" viewBox="0 0 20 20">
                                     <path
@@ -162,7 +162,7 @@
 
 @push('after-scripts')
     <script>
-        const component_id = {{ $component->id ?? -1 }}
+        const component_id = {{ $snippet->id ?? -1 }}
         const baseurl = '{{ URL::to('/') }}';
 
         const tailwindcsspath = "{{ Vite::asset('resources/css/app.css') }}";
@@ -170,8 +170,8 @@
 
 
         var tags = [
-            @if (isset($component))
-                @foreach ($component->tags as $tag)
+            @if (isset($snippet))
+                @foreach ($snippet->tags as $tag)
                     {
                         value: "{{ $tag->id }}",
                         text: "{{ $tag->text }}"
@@ -181,9 +181,9 @@
         ]
 
         var users = [
-            @if (isset($component))
-                @if (isset($component->users))
-                    @foreach ($component->users as $user)
+            @if (isset($snippet))
+                @if (isset($snippet->users))
+                    @foreach ($snippet->users as $user)
                         {
                             value: "{{ $user->id }}",
                             text: "{{ $user->name }}"
@@ -194,9 +194,9 @@
         ]
 
         var teams = [
-            @if (isset($component))
-                @if (isset($component->teams))
-                    @foreach ($component->teams as $team)
+            @if (isset($snippet))
+                @if (isset($snippet->teams))
+                    @foreach ($snippet->teams as $team)
                         {
                             value: "{{ $team->id }}",
                             text: "{{ $team->display_name }}"

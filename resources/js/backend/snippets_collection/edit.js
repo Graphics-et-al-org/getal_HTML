@@ -207,11 +207,11 @@ new TomSelect("#users", {
 new TomSelect("#projects", {
     create: false,
     preload:true,
-    options: users,
+    options: projects,
     valueField: "value",
-    // items: projects.map((item) => {
-    //     return item.value;
-    // }),
+    items: projects.map((item) => {
+        return item.value;
+    }),
     load: function (query, callback) {
         var url = baseurl + "/admin/projects/search?q=" + query;
         fetch(url)

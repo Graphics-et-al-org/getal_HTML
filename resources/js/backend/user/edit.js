@@ -3,7 +3,7 @@ import "tom-select/dist/css/tom-select.css";
 import TomSelect from "tom-select";
 
 new TomSelect("#roles",{
-	create: true,
+	create: false,
     allowEmptyOption: true,
     plugins: {
 		'clear_button':{
@@ -16,7 +16,7 @@ new TomSelect("#roles",{
 });
 
 new TomSelect("#teams",{
-	create: true,
+	create: false,
     allowEmptyOption: true,
     plugins: {
 		'clear_button':{
@@ -28,3 +28,15 @@ new TomSelect("#teams",{
 	},
 });
 
+new TomSelect("#projects", {
+    create: false,
+    allowEmptyOption: true,
+    plugins: {
+        clear_button: {
+            title: "Remove all selected options",
+        },
+        remove_button: {
+            title: "Remove this item",
+        },
+    },
+});

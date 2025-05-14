@@ -9,14 +9,14 @@
     </div>
     <div class="inline-flex rounded-md shadow-sm m-2">
 
-        <a href="{{ route('admin.snippet_category.create') }}"
+        <a href="{{ route('admin.snippet_collection.create') }}"
             class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
             New
         </a>
 
     </div>
     <div class="col m-2">
-        <form action="{{ route('admin.snippet_category.index') }}" method="GET">
+        <form action="{{ route('admin.snippet_collection.index') }}" method="GET">
 
             <div class="flex">
                 <div class="flex-initial min-w-80 mr-2">
@@ -52,7 +52,7 @@
         </form>
     </div>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg m-2">
-        {{ $categories->onEachSide(5)->links() }}
+        {{ $collections->onEachSide(5)->links() }}
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
@@ -72,32 +72,32 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($categories as $category)
+                @foreach ($collections as $collection)
                     <tr
                         class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                            {{ $category->label }}
+                            {{ $collection->label }}
                         </th>
                         <td scope="row" class="px-6 py-4 ">
-                            {{ $category->description }}
+                            {{ $collection->description }}
                         </td>
 
 
                         <td class="px-6 py-4">
-                            {{ $category->created_at }}
+                            {{ $collection->created_at }}
                         </td>
                         <td class="px-6 py-4">
-                            <a href="{{ route('admin.snippet_category.edit', $category->id) }}"
+                            <a href="{{ route('admin.snippet_collection.edit', $collection->id) }}"
                                 class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
                             <br />
-                            <a href="{{ route('admin.snippet_category.destroy', $category->id) }}"
+                            <a href="{{ route('admin.snippet_collection.destroy', $collection->id) }}"
                                 class="font-medium text-red-600 dark:text-red-500 hover:underline">Delete</a>
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
-        {{ $categories->onEachSide(5)->links() }}
+        {{ $collections->onEachSide(5)->links() }}
     </div>
 
 
@@ -118,5 +118,5 @@
             @endif
         ]
     </script>
-    @vite('resources/js/backend/snippets_category/index.js')
+    @vite('resources/js/backend/snippets_collection/index.js')
 @endpush

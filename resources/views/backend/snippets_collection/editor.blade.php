@@ -16,22 +16,22 @@
 
 @section('content')
     <div class="w-100 mb-2">
-        {{ isset($category->id) ? 'Update' : 'New' }} page component collection
+        {{ isset($collection->id) ? 'Update' : 'New' }} page component collection
     </div>
     <div class=" pr-2">
         <form id="storeForm"
-            action="{{ isset($category->id) ? route('admin.snippet_category.update', $category->id) : route('admin.snippet_category.store') }}"
+            action="{{ isset($collection->id) ? route('admin.snippet_collection.update', $collection->id) : route('admin.snippet_collection.store') }}"
             method="POST">
-            @if (isset($category->id))
+            @if (isset($collection->id))
                 {{ method_field('PATCH') }}
             @endif
             @csrf
-            <input type="hidden" name="id" value="{{ $category->id ?? '-1' }}" />
+            <input type="hidden" name="id" value="{{ $collection->id ?? '-1' }}" />
             <div class="grid gap-4 mb-4 sm:grid-cols-2">
                 <div class="sm:col-span-2">
                     <label for="label" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Label</label>
                     <input type="text" name="label" id="label"
-                        value="{{ $category->label ?? 'New component category' }}"
+                        value="{{ $collection->label ?? 'New component category' }}"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                 </div>
                 <div class="sm:col-span-2">
@@ -39,7 +39,7 @@
                         class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
                     <textarea id="description" name="description" rows="5"
                         class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="Write a description...">{{ $category->description ?? '' }}</textarea>
+                        placeholder="Write a description...">{{ $collection->description ?? '' }}</textarea>
                 </div>
                 <div class="col-span-full block  font-medium text-gray-900">
                     Restrictions
@@ -112,8 +112,8 @@
                                 </tr>
                             </thead>
                             <tbody id="table_body">
-                                @if (isset($category->snippets))
-                                    @foreach ($category->snippets as $snippet)
+                                @if (isset($collection->snippets))
+                                    @foreach ($collection->snippets as $snippet)
                                         <tr data-id="{{ $snippet->id }}"
                                             class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
                                             <th scope="row"
@@ -167,16 +167,16 @@
 
 @push('after-scripts')
     <script>
-        const category_id = {{ $category->id ?? -1 }}
+        const category_id = {{ $collection->id ?? -1 }}
         const baseurl = '{{ URL::to('/') }}';
 
         const tailwindcsspath = "{{ Vite::asset('resources/css/app.css') }}";
 
 
         var users = [
-            @if (isset($category))
-                @if (isset($category->users))
-                    @foreach ($category->users as $user)
+            @if (isset($collection))
+                @if (isset($collection->users))
+                    @foreach ($collection->users as $user)
                         {
                             value: "{{ $user->id }}",
                             text: "{{ $user->name }}"
@@ -187,9 +187,9 @@
         ]
 
         var teams = [
-            @if (isset($category))
-                @if (isset($category->teams))
-                    @foreach ($category->teams as $team)
+            @if (isset($collection))
+                @if (isset($collection->teams))
+                    @foreach ($collection->teams as $team)
                         {
                             value: "{{ $team->id }}",
                             text: "{{ $team->display_name }}"
@@ -199,10 +199,23 @@
             @endif
         ]
 
+        var projects = [
+            @if (isset($collection))
+                @if (isset($collection->projects))
+                    @foreach ($collection->projects as $project)
+                        {
+                            value: "{{ $project->id }}",
+                            text: "{{ $project->label }}"
+                        },
+                    @endforeach
+                @endif
+            @endif
+        ]
+
         var editor;
     </script>
 
-    @vite('resources/js/backend/snippets_category/edit.js')
+    @vite('resources/js/backend/snippets_collection/edit.js')
 
     {{-- CSS goes *after* js --}}
     {{-- @vite('resources/css/backend/template_builder/builder.css') --}}

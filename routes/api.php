@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Controllers\Api\Auth0TokenController;
-use App\Http\Controllers\Backend\SnippetsCategoriesController;
+use App\Http\Controllers\Backend\SnippetsCollectionsController;
 use  App\Http\Controllers\Frontend\Pages\Analytics\CompiledPagesAnalyticsController;
 use App\Http\Controllers\Clipart\ClipartController;
 use App\Http\Controllers\CustomBroadcastAuthController;
@@ -12,7 +12,7 @@ use App\Http\Middleware\VerifyApiAuth0Jwt;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 
@@ -68,8 +68,8 @@ Route::get(
 // list tags
 Route::get('tags', [ApiController::class, 'tags'])->middleware('guest');
 
-// Search- later, use different middleware
-Route::get('categories/search', [SnippetsCategoriesController::class, 'search'])->middleware('guest');
+// Search- @TODO lock down using tokens or something
+Route::get('collections/search', [SnippetsCollectionsController::class, 'search'])->middleware('guest');
 
 
 // open clipart search (for now)
@@ -113,9 +113,11 @@ Route::post('/get_token', [Auth0TokenController::class, 'getToken'])->name('api.
 Route::middleware(VerifyApiAuth0Jwt::class)->group(function () {
     // check a token
     Route::post('/checktoken', function (Request $request) {
+        //dd(Auth::user());
         return response()->json(['status' => 'Token is valid']);
     });
     // @TODO get available collections for this client
+    Route::get('/collections', [ApiController::class, 'getAvailableCollections']);
 
     // @TODO submit a request for a page
 });

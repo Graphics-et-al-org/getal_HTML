@@ -40,21 +40,21 @@ class Project extends Model
         return $this->belongsToMany('App\Models\Team', 'projects_team_user', 'team_id', 'project_id')->withPivot('team_id', 'project_id');
     }
 
-    // team relationship
+    // pages relationship
 
-    public function pages()
+    public function page_templates()
     {
-        return $this->belongsToMany('App\Models\Page\Page', 'projects_pages', 'page_id', 'project_id')->withPivot('page_id', 'project_id');
+        return $this->belongsToMany('App\Models\Page\PageTemplate', 'projects_pages', 'page_id', 'project_id')->withPivot('page_id', 'project_id');
     }
 
     public function components()
     {
-        return $this->belongsToMany('App\Models\Page\PageComponent', 'snippets_category_projects', 'snippets_component_category_id', 'project_id')->withPivot('page_component_category_id', 'project_id');
+        return $this->belongsToMany('App\Models\Page\PageComponent', 'page_template_components_projects', 'page_template_component_id', 'project_id')->withPivot('page_template_component_id', 'project_id');
     }
 
-    public function categories()
+    public function collections()
     {
-        return $this->belongsToMany('App\Models\Page\PageComponentCategory', 'page_component_category_components', 'page_component_category_id', 'project_id')->withPivot('page_component_category_id', 'project_id');
+        return $this->belongsToMany('App\Models\Page\SnippetsCollection', 'snippets_collection_projects', 'snippet_collection_id', 'project_id')->withPivot('snippet_collection_id', 'project_id');
     }
 
     // clipart tags
