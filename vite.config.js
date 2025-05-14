@@ -15,7 +15,7 @@ export default defineConfig({
                 "resources/js/app.js",
                 "resources/js/common/tailwind_safelist.js",
                 "resources/js/frontend/frontend.js",
-                "resources/js/dashboard/dashboard.js",
+                "resources/js/frontend/dashboard/dashboard.js",
                 "resources/js/backend/backend.js",
                 "resources/js/backend/pages_templates/index.js",
                 "resources/js/backend/pages_templates/builder_tinymce.js",
