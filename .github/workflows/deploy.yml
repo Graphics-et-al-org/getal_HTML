@@ -76,6 +76,7 @@ jobs:
             "AUTH0_CLIENT_ID": "${{ secrets.AUTH0_CLIENT_ID }}",
             "AUTH0_CLIENT_SECRET": "${{ secrets.AUTH0_CLIENT_SECRET }}",
             "AUTH0_REDIRECT_URI": "https://mediguides-dev.azurewebsites.net/login/auth0/callback",
+            "AUTH0_TOKEN_URI":"/oauth/token",
             "APP_ENV": "production",
             "APP_DEBUG": "true",
             "APP_KEY": "${{ secrets.APP_KEY }}",
