@@ -27,6 +27,7 @@ export default defineConfig({
                 "resources/js/backend/snippets_collection/edit.js",
                 "resources/js/backend/project/create.js",
                 "resources/js/backend/project/edit.js",
+                "resources/js/backend/project/index.js",
                 "resources/js/backend/clipart/index.js",
                 "resources/js/backend/clipart/create.js",
                 "resources/js/backend/clipart/edit.js",

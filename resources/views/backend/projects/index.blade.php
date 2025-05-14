@@ -118,5 +118,5 @@
             @endif
         ]
     </script>
-    @vite('resources/js/backend/page_component_category/index.js')
+    @vite('resources/js/backend/project/index.js')
 @endpush
