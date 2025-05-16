@@ -108,6 +108,8 @@ jobs:
             "DB_DATABASE": "${{ secrets.PROD_DB_DATABASE }}",
             "DB_USERNAME": "${{ secrets.PROD_DB_USERNAME }}",
             "DB_PASSWORD": "${{ secrets.PROD_DB_PASSWORD }}",
+            "DB_SSL_MODE": "require",
+            "DB_SSL_CA":"/home/site/certs/BaltimoreCyberTrustRoot.crt.pem",
             "SESSION_DRIVER": "database",
             "SESSION_LIFETIME": "120",
             "SESSION_ENCRYPT": "false",
