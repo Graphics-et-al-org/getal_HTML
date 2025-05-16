@@ -1,5 +1,5 @@
 #name
-name: DEV Deploy G et al app to Azure
+name: PROD Deploy G et al app to Azure
 
 #trigger
 on:
@@ -11,7 +11,7 @@ on:
 # the actual actions
 jobs:
   build-and-deploy:
-    name: Build and Deploy web app
+    name: Build and Deploy web app to Prod
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -127,12 +127,12 @@ jobs:
           }
           EOF
 
-      - name: Set DEV Laravel Environment Variables in Azure
+      - name: Set PROD Laravel Environment Variables in Azure
         run: |
-          az webapp config appsettings set --resource-group MediGuides_dev_ResourceGroup \
-          --name mediguides-dev --settings @appsettings.json
+          az webapp config appsettings set --resource-group MediGuides_prod_ResourceGroup \
+          --name mediguides-prod --settings @appsettings.json
 
-      - name: DEV Deploy to Azure
+      - name: PROD Deploy to Azure
         uses: azure/webapps-deploy@v2
         with:
           app-name: mediguides-prod

@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             LaratrustSeeder::class,
-            PagesSeeder::class,
+            //PagesSeeder::class,
             TagsSeeder::class,
             ClipartColourwayColoursSeeder::class
         ]);
