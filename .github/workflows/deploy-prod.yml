@@ -122,7 +122,7 @@ jobs:
             "WEBJOBS_ENABLED":"1",
             "WEBSITE_SKIP_RUNNING_KUDUAGENT":"false",
             "WEBSITE_VNET_ROUTE_ALL":"1",
-            "VITE_APP_URL":"https://mediguides-dev.azurewebsites.net/",
+            "VITE_APP_URL":"https://mediguides-prod.azurewebsites.net/",
             "JWT_SECRET":"${{ secrets.JWT_SECRET }}"
           }
           EOF
@@ -135,7 +135,7 @@ jobs:
       - name: DEV Deploy to Azure
         uses: azure/webapps-deploy@v2
         with:
-          app-name: mediguides-dev
+          app-name: mediguides-prod
           publish-profile: ${{ secrets.PROD_AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
 
