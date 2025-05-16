@@ -127,10 +127,10 @@ jobs:
           }
           EOF
 
-      - name: Set DEV Laravel Environment Variables in Azure
+      - name: Set PROD Laravel Environment Variables in Azure
         run: |
-          az webapp config appsettings set --resource-group MediGuides_dev_ResourceGroup \
-          --name mediguides-dev --settings @appsettings.json
+          az webapp config appsettings set --resource-group MediGuides_prod_ResourceGroup \
+          --name mediguides-prod --settings @appsettings.json
 
       - name: PROD Deploy to Azure
         uses: azure/webapps-deploy@v2
