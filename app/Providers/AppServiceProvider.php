@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,8 +22,17 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
+        if (config('app.env') === 'production') {
+            URL::forceScheme('https'); // Forces HTTPS on all URLs
+        }
+
         Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
             $event->extendSocialite('auth0', \SocialiteProviders\Auth0\Provider::class);
         });
+
+        // increase timeout
+        Http::globalOptions([
+            'timeout' => 600,
+        ]);
     }
 }

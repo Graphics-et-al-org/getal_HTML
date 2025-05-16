@@ -14,13 +14,31 @@ class Clipart extends Model
     protected $table = 'clipart';
 
     protected $fillable = [
-        'owner_id', 'name', 'description', 'type', 'created_by', 'thumb'
+        'owner_id',
+        'name',
+        'type',
+        'preferred',
+        'fallback',
+        'description',
+        'preferred_description',
+        'fallback_description',
+        'gpt4_description',
+        'bert_text_embedding_b64',
+        'clip_image_embedding_b64',
+        'created_by',
+        'thumb'
     ];
 
     //
     public function colourways()
     {
         return $this->hasMany('App\Models\Clipart\ClipartColourway', 'clipart_id', 'id');
+    }
+
+    public function baseline()
+    {
+        $baseline_colour_id = ClipartColourwayColour::where('name', '=', 'baseline')->first()->id;
+        return $this->colourways->where('colour_id', '=', $baseline_colour_id)->first();
     }
 
     // clipart tags
@@ -34,5 +52,4 @@ class Clipart extends Model
     {
         return $this->hasOne('App\Models\User', 'id', 'owner_id');
     }
-
 }

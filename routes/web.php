@@ -19,9 +19,6 @@ Route::get('/', function () {
     //return view('welcome');
 })->name('home');
 
-// Route::get('/dashboard', function () {
-//     return view('dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -29,10 +26,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-
-
 /*
- * Fronend Routes
+ * Frontend Routes
  * Namespaces indicate folder structure
  */
 Route::group(['namespace' => 'Frontend', 'as' => 'frontend.', 'middleware' => 'auth'], function () {
@@ -61,6 +56,17 @@ Route::group(['namespace' => 'Backend', 'prefix' => 'admin', 'as' => 'admin.', '
      * These routes can not be hit if the password is expired
      */
     include_route_files(__DIR__ . '/backend/');
+});
+
+/*
+ * Public Routes
+ * Namespaces indicate folder structure
+ */
+Route::group(['namespace' => 'Public', 'prefix' => 'public', 'as' => 'public.'], function () {
+    /*
+     * These routes are open to the public
+     */
+    include_route_files(__DIR__ . '/public/');
 });
 
 require __DIR__.'/auth.php';

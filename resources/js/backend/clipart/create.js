@@ -1,9 +1,12 @@
 import "tom-select/dist/css/tom-select.css";
+import "pretty-checkbox/dist/pretty-checkbox.min.css";
+
 
 import TomSelect from "tom-select";
 
 new TomSelect("#tags",{
 	create: true,
+    preload: true,
     load: function(query, callback) {
         var url = baseurl+'/api/tags?q=' + query;
         fetch(url)

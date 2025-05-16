@@ -1,15 +1,17 @@
 #name
-name: Deploy G et al app to Azure
+name: DEV Deploy G et al app to Azure
 
 #trigger
 on:
   push:
     branches:
-      - main
+      # - main
+      - dev
 
 # the actual actions
 jobs:
   build-and-deploy:
+    name: Build and Deploy web app
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,91 +22,6 @@ jobs:
           php-version: "8.2"
           extensions: mbstring, xml, ctype, json, curl, pdo_mysql, bcmath, zip, gd, intl
 
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      # - name: Setup Node.js
-      #   uses: actions/setup-node@v3
-      #   with:
-      #     node-version: "20"
-
-      # - name: Install NPM dependencies
-      #   run: npm install
-
-      # # Run Vite build
-      # - name: Build Vite Assets
-      #   run: npm run build
-
-      # # Upload Build Artifacts (Optional)
-      # - name: Upload Vite Build Output
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: vite-build
-      #     path: public/build/ # Laravel Vite output directory
-
-      - name: Generate Azure App Settings JSON
-        run: |
-          cat <<EOF > appsettings.json
-          {
-            "APP_ENV": "development",
-            "APP_DEBUG": "true",
-            "APP_KEY": "${{ secrets.APP_KEY }}",
-            "APP_URL": "https://web-laravel.azurewebsites.net/",
-            "VITE_APP_URL":"https://web-laravel.azurewebsites.net/",
-            "APP_MAINTENANCE_DRIVER": "file",
-            "APP_LOCALE": "en",
-            "APP_FALLBACK_LOCALE": "en",
-            "APP_FAKER_LOCALE": "en_US",
-            "PHP_CLI_SERVER_WORKERS": "4",
-            "BCRYPT_ROUNDS": "12",
-            "LOG_CHANNEL": "stack",
-            "LOG_STACK": "single",
-            "LOG_DEPRECATIONS_CHANNEL": "null",
-            "LOG_LEVEL": "debug",
-            "BROADCAST_CONNECTION": "ably",
-            "FILESYSTEM_DISK": "local",
-            "QUEUE_CONNECTION": "database",
-            "AUTH0_DOMAIN": "${{ secrets.AUTH0_DOMAIN }}",
-            "AUTH0_CLIENT_ID": "${{ secrets.AUTH0_CLIENT_ID }}",
-            "AUTH0_CLIENT_SECRET": "${{ secrets.AUTH0_CLIENT_SECRET }}",
-            "CACHE_STORE": "database",
-            "CACHE_PREFIX": "",
-            "DB_CONNECTION": "mysql",
-            "DB_HOST": "mysql-laravel.privatelink.mysql.database.azure.com",
-            "DB_PORT": "3306",
-            "DB_DATABASE": "laravel_db",
-            "DB_USERNAME": "${{ secrets.DB_USERNAME }}",
-            "DB_PASSWORD": "${{ secrets.DB_PASSWORD }}",
-            "SESSION_DRIVER": "database",
-            "SESSION_LIFETIME": "120",
-            "SESSION_ENCRYPT": "false",
-            "SESSION_PATH": "/",
-            "SESSION_DOMAIN": "",
-            "AZURE_STORAGE_NAME": "${{ secrets.AZURE_STORAGE_NAME }}",
-            "AZURE_STORAGE_KEY": "${{ secrets.AZURE_STORAGE_KEY }}",
-            "AZURE_CONTAINER": "laravel-files",
-            "ABLY_KEY": "${{ secrets.ABLY_KEY }}"
-          }
-          EOF
-
-      - name: Set Laravel Environment Variables in Azure
-        run: |
-          az webapp config appsettings set --resource-group laravelResourceGroup \
-          --name web-laravel --settings @appsettings.json
-
-      # - name: Test MySQL Connection
-      #   run: |
-      #         mysql -h mysql-laravel.mysql.database.azure.com -u ${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }} -e "SHOW DATABASES;"
-
-      - name: Deploy to Azure
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: web-laravel
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: .
-
       - name: Check if composer.json exists
         id: check_files
         uses: andstor/file-existence-action@v1
@@ -114,3 +31,151 @@ jobs:
       - name: Run composer install if composer.json exists
         if: steps.check_files.outputs.files_exists == 'true'
         run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
+
+      - name: Generate autoload files
+        if: steps.check_files.outputs.files_exists == 'true'
+        run: composer dump-autoload --optimize
+
+      # This will only work if you have a database setup
+      - name: Optimize views n routes etc
+        if: steps.check_files.outputs.files_exists == 'true'
+        run: php artisan route:clear && php artisan view:clear && php artisan config:clear
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install NPM dependencies
+        run: npm install
+
+      # Run Vite build
+      - name: Build Vite Assets
+        run: npm run build
+
+      # Upload Build Artifacts (Optional)
+      - name: Upload Vite Build Output
+        uses: actions/upload-artifact@v4
+        with:
+          name: vite-build
+          path: public/build/ # Laravel Vite output directory
+
+      - name: Generate Azure App Settings JSON
+        run: |
+          cat <<EOF > appsettings.json
+          {
+            "ABLY_KEY": "${{ secrets.ABLY_KEY }}",
+            "AI_MAIN_FUNC_URL": "https://mediguides-dev-main-func.azurewebsites.net/api/function",
+            "AUTH0_AUDIENCE": "https://dev.graphicsetal.com/api",
+            "AUTH0_DOMAIN": "${{ secrets.AUTH0_DOMAIN }}",
+            "AUTH0_CLIENT_ID": "${{ secrets.AUTH0_CLIENT_ID }}",
+            "AUTH0_CLIENT_SECRET": "${{ secrets.AUTH0_CLIENT_SECRET }}",
+            "AUTH0_REDIRECT_URI": "https://mediguides-dev.azurewebsites.net/login/auth0/callback",
+            "AUTH0_TOKEN_URI":"/oauth/token",
+            "APP_ENV": "production",
+            "APP_DEBUG": "true",
+            "APP_KEY": "${{ secrets.APP_KEY }}",
+            "APP_URL": "https://mediguides-dev.azurewebsites.net/",
+            "APP_MAINTENANCE_DRIVER": "file",
+            "APP_LOCALE": "en",
+            "APP_FALLBACK_LOCALE": "en",
+            "APP_FAKER_LOCALE": "en_US",
+            "AZURE_STORAGE_NAME": "${{ secrets.AZURE_STORAGE_NAME }}",
+            "AZURE_STORAGE_KEY": "${{ secrets.AZURE_STORAGE_KEY }}",
+            "AZURE_STORAGE_CONNECTION_STRING": "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}",
+            "AZURE_STORAGE_CONTAINER_NAME": "mediguide-dev-files",
+            "AZURE_CONTAINER": "laravel-files",
+            "AZURE_STORAGE_URL": "https://mediguidesdevstorage.blob.core.windows.net/mediguide-dev-files",
+            "BCRYPT_ROUNDS": "12",
+            "BROADCAST_CONNECTION": "ably",
+            "PHP_CLI_SERVER_WORKERS": "4",
+            "LOG_CHANNEL": "stack",
+            "LOG_STACK": "single",
+            "LOG_DEPRECATIONS_CHANNEL": "null",
+            "LOG_LEVEL": "debug",
+            "FILESYSTEM_DISK": "local",
+            "QUEUE_CONNECTION": "database",
+            "CACHE_STORE": "database",
+            "CACHE_PREFIX": "",
+            "DB_CONNECTION": "mysql",
+            "DB_HOST": "${{ secrets.DEV_DB_HOST }}",
+            "DB_PORT": "3306",
+            "DB_DATABASE": "${{ secrets.DEV_DB_DATABASE }}",
+            "DB_USERNAME": "${{ secrets.DEV_DB_USERNAME }}",
+            "DB_PASSWORD": "${{ secrets.DEV_DB_PASSWORD }}",
+            "SESSION_DRIVER": "database",
+            "SESSION_LIFETIME": "120",
+            "SESSION_ENCRYPT": "false",
+            "SESSION_PATH": "/",
+            "SESSION_DOMAIN": "",
+            "CAIRO_URL":"https://mediguides-dev-svg2png.azurewebsites.net/api/convert",
+            "SVG_PROCESS_URL":"https://mediguides-dev-process-svg.azurewebsites.net/api/process",
+            "PHP_INI_SCAN_DIR":":/home/site/config/php",
+            "PHP_CLI_SERVER_WORKERS":"5",
+            "WEBSITES_ENABLE_APP_SERVICE_STORAGE":"true",
+            "WEBSITE_CONTENTOVERVNET":"1",
+            "WEBJOBS_ENABLED":"1",
+            "WEBSITE_SKIP_RUNNING_KUDUAGENT":"false",
+            "WEBSITE_VNET_ROUTE_ALL":"1",
+            "VITE_APP_URL":"https://mediguides-dev.azurewebsites.net/",
+            "JWT_SECRET":"${{ secrets.JWT_SECRET }}"
+          }
+          EOF
+
+      - name: Set DEV Laravel Environment Variables in Azure
+        run: |
+          az webapp config appsettings set --resource-group MediGuides_dev_ResourceGroup \
+          --name mediguides-dev --settings @appsettings.json
+
+      - name: DEV Deploy to Azure
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: mediguides-dev
+          publish-profile: ${{ secrets.DEV_AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: .
+
+  # deploy-webjobs:
+  #   name: Deploy Laravel WebJobs
+  #   runs-on: ubuntu-latest
+  #   needs: build-and-deploy
+
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v3
+
+  #     - name: Set up SSH for Azure Web App
+  #       uses: azure/webapps-deploy@v2
+  #       with:
+  #         app-name: ${{ secrets.DEV_AZURE_WEBAPP_NAME }}
+  #         publish-profile: ${{ secrets.DEV_AZURE_WEBAPP_PUBLISH_PROFILE }}
+
+  #     - name: Create WebJobs Directory
+  #       run: |
+  #         mkdir -p webjobs/continuous/svgprocess
+
+  #     - name: Create WebJob Script (Laravel Queue Worker)
+  #       run: |
+  #         echo "#!/bin/bash
+  #         while true; do php artisan queue:work --tries=3 --queue=svgprocess; sleep 1; done" > webjobs/continuous/svgprocess/run.sh
+  #         chmod +x webjobs/continuous/svgprocess/run.sh
+
+  #     - name: Create WebJob Script (Laravel Queue Worker)
+  #       run: |
+  #        echo '{
+  #           "is_in_place": true,
+  #           "run_mode": "continuous",
+  #           "log": "output.log"
+  #         }' > webjobs/continuous/svgprocess/settings.job
+
+  #     - name: Deploy WebJobs to Azure Web App
+  #       run: |
+  #         scp -o StrictHostKeyChecking=no -r webjobs/continuous mediguides-dev@mediguides-dev.scm.azurewebsites.net:/wwwroot/App_Data/jobs/
+
+  #     - name: Restart Azure Web App
+  #       run: |
+  #         az webapp restart --resource-group mediguides_dev_resourcegroup --name mediguides_dev

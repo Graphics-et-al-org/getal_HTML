@@ -79,8 +79,11 @@
                             </form>
 
 <br/>
-                            <a href=""
-                                class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600">Log in as...</a>
+@canImpersonate($guard = null)
+    <a class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600" href="{{ route('admin.users.impersonate', $user->id) }}">Impersonate this user</a>
+@endCanImpersonate
+                            {{-- <a href=""
+                                class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600">Log in as...</a> --}}
 
                         </td>
                     </tr>

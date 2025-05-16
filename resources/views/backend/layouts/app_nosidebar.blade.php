@@ -18,12 +18,14 @@
     @stack('after-styles')
 
 </head>
-@include('backend.includes.header')
+
 
 <body class="bg-gray-200">
-    <div class="flex pt-16 h-screen">
+    @include('backend.includes.header')
+
+    <div class="fixed top-16 left-0 right-0 bottom-0 overflow-auto">
            <!-- Scrollable Main Content -->
-           <main class="flex-1 overflow-y-auto">
+           <main class="w-full p-4">
                 @include('includes.flashmessages')
                 @yield('content')
         </main>

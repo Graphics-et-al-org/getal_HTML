@@ -14,6 +14,7 @@
         <h1 class="text-2xl font-bold mb-4">Update user</h1>
         <form action="{{ route('admin.users.update', $user->id) }}" method="POST" enctype="multipart/form-data" class="group">
             @csrf
+            <input type="hidden" name="_method" value="PATCH">
             <form>
                 <div class="grid gap-6 mb-6 md:grid-cols-2">
                     <div>
@@ -43,8 +44,25 @@
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             placeholder="•••••••••" />
                     </div>
+                @else
+                <div class="grid gap-6 mb-6 md:grid-cols-2  providerfield">
+                    <div>
+                        <label for="provider" class="block mb-2 text-sm font-medium ">Provider</label>
+                        <input type="text" id="provider" name="provider" value="{{ $user->provider }}" readonly
+                            class="text-gray-400 bg-gray-100 border border-gray-300  text-sm rounded-lg  block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white "
+                            placeholder="Provider"  />
+                    </div>
+                </div>
+                <div class="grid gap-6 mb-6 md:grid-cols-2  providerfield">
+                    <div>
+                        <label for="provider_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Provider ID</label>
+                        <input type="text" id="provider_id" name="provider_id" value="{{ $user->provider_id }}"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            placeholder="Auth0 user ID"  />
+                    </div>
+                </div>
                 @endif
-                <span class="block text-gray-700 mt-4">Global roles</span>
+                <span class="block mb-2 text-sm font-medium">Global roles</span>
                 <div class="flex flex-wrap justify-start mb-4">
 
                     <select id="roles" multiple name="roles[]" data-placeholder="Select roles for this user..."
@@ -52,20 +70,32 @@
                         <option value="">None</option>
                         @foreach ($roles as $role)
                             <option value="{{ $role->getKey() }}"
-                                {{ in_array($role->getKey(), $user->roles->pluck('id')->toArray() ?? []) ? 'selected' : '' }}>
+                                {{ in_array($role->getKey(), $user->roles?$user->roles->pluck('id')->toArray() : []) ? 'selected' : '' }}>
                                 {{ $role->display_name ?? $role->name }}</option>
                         @endforeach
                     </select>
                 </div>
-                <span class="block text-gray-700 mt-4">Teams</span>
+                <span class="block mb-2 text-sm font-medium">Teams</span>
                 <div class="flex flex-wrap justify-start mb-4">
                     <select id="teams" multiple name="teams[]" data-placeholder="Select teams for this user..."
                         autocomplete="on" class="block appearance-none w-full">
                         <option value="">None</option>
                         @foreach ($teams as $team)
                             <option value="{{ $team->getKey() }}"
-                                {{ in_array($team->getKey(), old('teams') ?? []) ? 'selected' : '' }}>
+                                {{ in_array($team->getKey(), $user->teams?$user->teams->pluck('id')->toArray() : []) ? 'selected' : '' }}>
                                 {{ $team->display_name ?? $team->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <span class="block mb-2 text-sm font-medium">Projects</span>
+                <div class="flex flex-wrap justify-start mb-4">
+                    <select id="projects" multiple name="projects[]" data-placeholder="Select projects for this user..."
+                        autocomplete="on" class="block appearance-none w-full">
+                        <option value="">None</option>
+                        @foreach ($projects as $project)
+                            <option value="{{ $project->getKey() }}"
+                                {{ in_array($project->getKey(),$user->projects->pluck('id')->toArray() ?? []) ? 'selected' : '' }}>
+                                {{ $project->label ?? $project->name }}</option>
                         @endforeach
                     </select>
                 </div>

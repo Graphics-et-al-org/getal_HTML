@@ -15,15 +15,19 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->softDeletes();
-
             $table->bigInteger('owner_id');
             $table->string('name');
             $table->string('type');
-            $table->text('description')->nullable();
+            $table->boolean('preferred')->nullable();
+            $table->boolean('fallback')->nullable();
+            $table->text('preferred_description')->nullable();
+            $table->text('fallback_description')->nullable();
+            $table->text('gpt4_description')->nullable();
+            $table->text('bert_text_embedding_b64')->nullable();
+            $table->text('clip_image_embedding_b64')->nullable();
             $table->bigInteger('created_by')->nullable();
             $table->binary('thumb')->nullable();
         });
-
     }
 
     /**

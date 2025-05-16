@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Clipart\ClipartController;
-use App\Http\Controllers\Frontend\Pages\PagesController;
+
 use Illuminate\Support\Facades\Route;
 
 //
@@ -12,13 +12,18 @@ Route::group([], function () {
         Route::get('clipart', [ClipartController::class, 'index'])->name('clipart.index');
         Route::get('clipart/create', [ClipartController::class, 'create'])->name('clipart.create');
         Route::post('clipart/store', [ClipartController::class, 'store'])->name('clipart.store');
-        Route::post('clipart/delete', [ClipartController::class, 'delete'])->name('clipart.delete');
-        Route::post('clipart/bulkimport', [ClipartController::class, 'bulkImport'])->name('clipart.bulkimport');
 
-        // Specific page
+        Route::post('clipart/bulkimport', [ClipartController::class, 'bulkImport'])->name('clipart.bulkimport');
+        Route::post('clipart/refreshallaimetadata', [ClipartController::class, 'refreshAllAiMetadata']);
+        Route::post('clipart/processpendingaimetadata', [ClipartController::class, 'processPendingAiMetadata']);
+
+        // Specific clipart
         Route::group(['prefix' => 'clipart/{id}'], function () {
             Route::get('edit', [ClipartController::class, 'edit'])->name('clipart.edit');
-        });
 
+            Route::patch('/', [ClipartController::class, 'update'])->name('clipart.update');
+
+            Route::get('/', [ClipartController::class, 'destroy'])->name('clipart.destroy');
+        });
     });
 });
