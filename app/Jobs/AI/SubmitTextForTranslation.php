@@ -21,6 +21,7 @@ use App\Models\Page\PageTemplate;
 use App\Models\Page\PageTemplateComponent;
 use App\Models\Page\Snippet;
 use App\Models\Page\SnippetsCategory;
+use App\Models\Page\SnippetsCollection;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
@@ -244,7 +245,7 @@ class SubmitTextForTranslation implements ShouldQueue
                 case 'snippets':
                     foreach ($this->_extras as $category_uuid) {
                         // get the category
-                        $category = SnippetsCategory::where('uuid', $category_uuid)->first();
+                        $category = SnippetsCollection::where('uuid', $category_uuid)->first();
                         if ($category) {
                             // get the snippets in the category
                             $snippets = $category->snippets;
