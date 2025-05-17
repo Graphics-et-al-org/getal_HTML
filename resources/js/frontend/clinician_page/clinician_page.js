@@ -17,6 +17,10 @@ import "tinymce/plugins/preview";
 import "tinymce/plugins/media";
 import "tinymce/plugins/fullscreen";
 
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("Document is ready");
+});
+
 // document initialisation
 document.addEventListener("DOMContentLoaded", function () {
     console.log("Document is ready");
@@ -44,70 +48,25 @@ const snippetsgrid = document.getElementsByClassName("snippets").item(0);
 const keypointLayout = document
     .getElementsByClassName("keypoint-container")
     .item(0);
-const keypointLayoutClone = keypointLayout.cloneNode(true);
+
+var keypointLayoutClone;
+if (keypointLayout) {
+    keypointLayout.cloneNode(true);
+}
 
 const deleteButtons = document.getElementsByClassName("deletebutton");
 
-// title editing
-tinymce.init({
-    selector: "#title",
-    toolbar: false,
-    menubar: false,
-    inline: true,
-    setup: (editor) => {
-        // handle change event
-        editor.on("change", (e) => {
-            let editorContent = editor.getContent();
-            if (editorContent.length > 0) {
-                var url = baseurl + `/page/${uuid}/summary_update`;
-                let formData = new FormData();
-                //formData.append("keypointid", id);
-                formData.append("keypoint_text", content);
-                //console.log(id, content);
-                //  return;
-                // little bit of feedback goes here
-                container
-                    .querySelector(".keypoint_image_waiting")
-                    .classList.remove("hidden");
-                fetch(url, {
-                    method: "POST",
-                    body: formData,
-                    headers: {
-                        "X-CSRF-Token": csrfToken,
-                    },
-                })
-                    .then((response) => response.json())
-                    .then((data) => {
-                        console.log(data);
-                        if (data.status == 0) {
-                            // Success feedback goes here
-                            container
-                                .querySelector(".keypoint_image_waiting")
-                                .classList.add("hidden");
-                        } else {
-                            container
-                                .querySelector(".keypoint_image_waiting")
-                                .classList.add("hidden");
-                            showErrorFeedback();
-                        }
-                    })
-                    .catch((error) => {
-                        showErrorFeedback();
-                        container
-                            .querySelector(".keypoint_image_waiting")
-                            .classList.add("hidden");
-                    });
-            }
+// background colour the snipptets
+const colourSnippetsBackground = () => {
+    snippetsgrid
+        .querySelectorAll(".component:not(.heading)")
+        .forEach((snippet) => {
+            snippet.style.backgroundColor =
+                snippets_bg_colours[snippets_current_bg_colour];
+            snippets_current_bg_colour =
+                (snippets_current_bg_colour + 1) % snippets_bg_colours.length;
         });
-    },
-});
-// summary editing
-tinymce.init({
-    selector: "#summary",
-    toolbar: false,
-    menubar: false,
-    inline: true,
-});
+};
 
 // keypoint editing
 const activateKeypointTinyMCE = (element) => {
@@ -115,6 +74,7 @@ const activateKeypointTinyMCE = (element) => {
         selector: '[data-field="keypoint-text"]',
         toolbar: false,
         menubar: false,
+        license_key: "gpl",
         inline: true,
         placeholder: "Type here...",
         setup: (editor) => {
@@ -212,41 +172,105 @@ const setupKeypointTinyMCE = (editor) => {
     // },
 };
 
+// title editing
+tinymce.init({
+    selector: "#title",
+    toolbar: false,
+    menubar: false,
+    inline: true,
+    license_key: "gpl",
+    setup: (editor) => {
+        // handle change event
+        editor.on("change", (e) => {
+            let editorContent = editor.getContent();
+            if (editorContent.length > 0) {
+                var url = baseurl + `/page/${uuid}/summary_update`;
+                let formData = new FormData();
+                //formData.append("keypointid", id);
+                formData.append("keypoint_text", content);
+                //console.log(id, content);
+                //  return;
+                // little bit of feedback goes here
+                container
+                    .querySelector(".keypoint_image_waiting")
+                    .classList.remove("hidden");
+                fetch(url, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-CSRF-Token": csrfToken,
+                    },
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        console.log(data);
+                        if (data.status == 0) {
+                            // Success feedback goes here
+                            container
+                                .querySelector(".keypoint_image_waiting")
+                                .classList.add("hidden");
+                        } else {
+                            container
+                                .querySelector(".keypoint_image_waiting")
+                                .classList.add("hidden");
+                            showErrorFeedback();
+                        }
+                    })
+                    .catch((error) => {
+                        showErrorFeedback();
+                        container
+                            .querySelector(".keypoint_image_waiting")
+                            .classList.add("hidden");
+                    });
+            }
+        });
+    },
+});
+// summary editing
+tinymce.init({
+    selector: "#summary",
+    toolbar: false,
+    menubar: false,
+    inline: true,
+});
+
 // // delete snippet
 // window.deleteSnippet = (uuid) => {};
 
 // Enable Sorting
-Sortable.create(keypointgrid, {
-    animation: 150, // Smooth transition
-    ghostClass: "bg-gray-300", // Class applied to the dragged item
-    onEnd: function (evt) {
-        let newOrder = Array.from(keypointgrid.children).map(
-            (el) => el.dataset.keypointid
-        );
-        showProcessFeedback();
-        // submit the changes
-        let url = baseurl + `/keypoint/reorder`;
-        let formData = new FormData();
-        formData.append("order", newOrder);
-        fetch(url, {
-            method: "POST",
-            body: formData,
-            headers: {
-                "X-CSRF-Token": csrfToken,
-            },
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                console.log(data);
-                showSuccessFeedback();
+if (keypointgrid) {
+    Sortable.create(keypointgrid, {
+        animation: 150, // Smooth transition
+        ghostClass: "bg-gray-300", // Class applied to the dragged item
+        onEnd: function (evt) {
+            let newOrder = Array.from(keypointgrid.children).map(
+                (el) => el.dataset.keypointid
+            );
+            showProcessFeedback();
+            // submit the changes
+            let url = baseurl + `/keypoint/reorder`;
+            let formData = new FormData();
+            formData.append("order", newOrder);
+            fetch(url, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                },
             })
-            .catch(() => {
-                showErrorFeedback();
-            });
-    },
-    filter: "button, div.addbutton", // Exclude buttons and the 'add keypoint from being draggable
-    preventOnFilter: false, // Ensure buttons remain clickable
-});
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data);
+                    showSuccessFeedback();
+                })
+                .catch(() => {
+                    showErrorFeedback();
+                });
+        },
+        filter: "button, div.addbutton", // Exclude buttons and the 'add keypoint from being draggable
+        preventOnFilter: false, // Ensure buttons remain clickable
+    });
+}
 
 Sortable.create(snippetsgrid, {
     animation: 150, // Smooth transition
@@ -705,18 +729,6 @@ window.showSternWarning = () => {
                 });
         }
     });
-};
-
-// background colour the snipptets
-const colourSnippetsBackground = () => {
-    snippetsgrid
-        .querySelectorAll(".component:not(.heading)")
-        .forEach((snippet) => {
-            snippet.style.backgroundColor =
-                snippets_bg_colours[snippets_current_bg_colour];
-            snippets_current_bg_colour =
-                (snippets_current_bg_colour + 1) % snippets_bg_colours.length;
-        });
 };
 
 const showProcessFeedback = () => {
