@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         // rename the table
-        Schema::rename('page_static_components', 'page_components');
+        if(Schema::hasTable('page_static_components')) {
+           Schema::rename('page_static_components', 'page_components');
+        }
+
         // add some other fields
         // update the page component category
         Schema::table('page_components', function (Blueprint $table) {
