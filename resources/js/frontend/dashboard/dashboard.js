@@ -1,3 +1,5 @@
+import Swal from "sweetalert2";
+
 // Laravel security token for AJAX calls
 const csrfToken = document
     .querySelector('meta[name="csrf-token"]')
@@ -14,11 +16,9 @@ let isLoading = false;
 let fileError = "";
 let doctor_text = "";
 
-let acceptedFiles = []
-
+let acceptedFiles = [];
 
 let rejectedFiles = [];
-
 
 const openFilePicker = () => {
     const fileInput = document.getElementById("fileInput");
@@ -42,58 +42,61 @@ document.addEventListener("DOMContentLoaded", () => {
     document
         .getElementById("open-filepicker-button")
         .addEventListener("click", openFilePicker);
-        document
+    document
         .getElementById("removeFileButton")
         .addEventListener("click", resetfileInput);
-// form submit
-    document
-        .getElementById("submitButton")
-        .addEventListener("click", (e) => {
-            e.preventDefault();
-            const fileInput = document.getElementById("fileInput");
-            console.log('submitButton');
-            console.log(fileInput);
-            const doctorTextInput = document.getElementById("doctorTextInput");
-            // if (acceptedFiles.length==0 && doctorTextInput.value === "") {
-            //     alert("Please select a file or enter text.");
-            //     return;
-            // }
-            // submit the form
-            const formData = new FormData();
-            if (fileInput.files[0]) {
-                formData.append("file",acceptedFiles[0]);
-            }
-            if (doctorTextInput.value) {
-                formData.append("doctor_text", doctorTextInput.value);
-            }
-            // Add any other form data you need
+    // form submit
+    document.getElementById("submitButton").addEventListener("click", (e) => {
+        document.getElementById("loading-modal").classList.remove("hidden");
+        e.preventDefault();
+        const fileInput = document.getElementById("fileInput");
+        console.log("submitButton");
+        console.log(fileInput);
+        const doctorTextInput = document.getElementById("doctorTextInput");
+        // if (acceptedFiles.length==0 && doctorTextInput.value === "") {
+        //     alert("Please select a file or enter text.");
+        //     return;
+        // }
+        // submit the form
+        const formData = new FormData();
+        if (fileInput.files[0]) {
+            formData.append("file", acceptedFiles[0]);
+        }
+        if (doctorTextInput.value) {
+            formData.append("doctor_text", doctorTextInput.value);
+        }
+        // Add any other form data you need
 
-             formData.append("categories", selected_info_categories);
-            // Send the form data to the server
-            fetch(`${baseurl}/createpage`, {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-CSRF-Token": csrfToken,
-                },
+        formData.append("collections", selected_collections);
+        // Send the form data to the server
+        fetch(`${baseurl}/createpage`, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRF-Token": csrfToken,
+            },
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
             })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error("Network response was not ok");
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    console.log("Success:", data);
-                    // Handle success (e.g., show a success message)
-                })
-                .catch((error) => {
-                    console.error("Error:", error);
-                    // Handle error (e.g., show an error message)
+            .then((data) => {
+                document.getElementById("loading-modal").classList.add("hidden");
+                showSuccessFeedback().then(() => {
+                    location.href = `${baseurl}/page/${data.uuid}`;
                 });
+            })
+            .catch((error) => {
+                document.getElementById("loading-modal").classList.add("hidden");
+                console.error("Error:", error);
+                showErrorFeedback();
+                // Handle error (e.g., show an error message)
+            });
 
-            console.log("Form submitted");
-        });
+        console.log("Form submitted");
+    });
 });
 
 // handle the file selection
@@ -113,7 +116,6 @@ const handleFileSelection = (event) => {
             handleFile(file);
 
             //doctorTextInput.classList.add("hidden");
-
         });
     }
 };
@@ -138,7 +140,6 @@ const handleDrop = (event) => {
         triggerLoading(() => {
             handleFile(file);
             console.log("File selected:", file);
-
         });
     }
 };
@@ -156,17 +157,16 @@ const resetfileInput = () => {
     previewContainer.classList.add("hidden"); // Hide the preview container
     doctorTextInput.classList.remove("hidden"); // Show the text input
     previewLabel.innerHTML = ""; // Clear the preview label
-}
+};
 
 // text input
 const handleInput = (event) => {
-    if(fileInput.value != "") {
+    if (fileInput.value != "") {
         fileInput.value = "";
         previewContainer.classList.add("hidden");
         doctorTextInput.classList.remove("hidden");
     }
     console.log(event);
-
 };
 
 const triggerLoading = (callback) => {
@@ -183,19 +183,15 @@ const preventDefaults = (event) => {
     event.stopPropagation();
 };
 
-
 const handleFile = (file) => {
+    // empty the array
+    acceptedFiles.length = 0;
+    // push the file to the end
+    acceptedFiles.push(file);
 
-  // empty the array
-  acceptedFiles.length = 0;
-  // push the file to the end
-  acceptedFiles.push(file);
-
-
-  previewContainer.classList.remove("hidden");
-  previewLabel.innerHTML = file.name;
-
-}
+    previewContainer.classList.remove("hidden");
+    previewLabel.innerHTML = file.name;
+};
 
 ////////////////////////////////////////////////
 // seach snippets api
@@ -203,13 +199,16 @@ const handleFile = (file) => {
 
 var isSearching = false;
 var info_categories = [];
-var selected_info_categories = [];
+var selected_collections = [];
 
 // Define the actual search function
 async function getCollectionBySearch(query) {
     console.log("getCollectionBySearch called with:", query);
     if (!query) {
-        resultsDiv.innerHTML = "";
+        document.getElementById(
+            "categorieslist"
+        ).innerHTML = `<div style="color:red;">Please enter a search term.</div>`;
+
         return;
     }
     try {
@@ -222,7 +221,7 @@ async function getCollectionBySearch(query) {
         console.log(data);
         // are any of these already selected?
         info_categories = info_categories.filter((item) =>
-            selected_info_categories.includes(item.uuid)
+            selected_collections.includes(item.uuid)
         );
         data.forEach((category) => {
             // check if the category is already in the list
@@ -277,16 +276,60 @@ window.handleInfoCategoryChange = (e) => {
     //add to selected static components list
     console.log(e.target.value);
     if (e.target.checked) {
-        if (!selected_info_categories.includes(e.target.value)) {
-            selected_info_categories.push(e.target.value);
+        if (!selected_collections.includes(e.target.value)) {
+            selected_collections.push(e.target.value);
         }
     } else {
-        selected_info_categories.includes(e.target.value) &&
-            selected_info_categories.splice(
-                selected_info_categories.indexOf(e.target.value),
+        selected_collections.includes(e.target.value) &&
+            selected_collections.splice(
+                selected_collections.indexOf(e.target.value),
                 1
             );
     }
 };
 
 //@TODO submit form, make a choice if no text/foile to make just n info sheet
+const showSuccessFeedback = () => {
+    let promise = new Promise((resolve, reject) => {
+        Swal.fire({
+            showClass: {
+                popup: "animate__animated animate__backInDown",
+            },
+            hideClass: {
+                popup: "animate__animated animate__backInUp",
+            },
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+            icon: "success",
+            title: "Success!",
+        }).then(() => {
+            resolve(true);
+        });
+    });
+    return promise;
+};
+
+const showErrorFeedback = () => {
+     let promise = new Promise((resolve, reject) => {
+        Swal.fire({
+            showClass: {
+                popup: "animate__animated animate__backInDown",
+            },
+            hideClass: {
+                popup: "animate__animated animate__backInUp",
+            },
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+           icon: "error",
+        title: "Error!",
+        }).then(() => {
+            resolve(true);
+        });
+    });
+    return promise;
+};
+

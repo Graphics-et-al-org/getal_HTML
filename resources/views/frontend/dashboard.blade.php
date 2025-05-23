@@ -3,34 +3,34 @@
 @section(__('Dashboard'))
     @push('before-styles')
         <style>
-            #hybridInput {
-                width: 100%;
-                height: 200px;
-                padding: 10px;
-                font-size: 16px;
-                border: 2px dashed #aaa;
-                background: #f9f9f9;
-                resize: vertical;
-            }
+            /* #hybridInput {
+                        width: 100%;
+                        height: 200px;
+                        padding: 10px;
+                        font-size: 16px;
+                        border: 2px dashed #aaa;
+                        background: #f9f9f9;
+                        resize: vertical;
+                    }
 
-            #hybridInput.dragover {
-                border-color: #28a745;
-                background: #e6ffee;
+                    #hybridInput.dragover {
+                        border-color: #28a745;
+                        background: #e6ffee;
 
 
-            }
+                    }
 
-            .preview-item {
-                margin-top: 10px;
-                padding: 8px;
-                border: 1px dashed #ccc;
-                background: #f8f8f8;
-                border-radius: 6px;
-            }
+                    .preview-item {
+                        margin-top: 10px;
+                        padding: 8px;
+                        border: 1px dashed #ccc;
+                        background: #f8f8f8;
+                        border-radius: 6px;
+                    } */
         </style>
 
         @section('content')
-            <div class="pt-16  overflow-auto bg-white ">
+            <div class="pt-16 bg-white ">
                 <div class="mx-10 mt-2 border border-2 border-gray-500 rounded-md">
                     <div>
                         <h5 class="ml-2 mb-2 text-xl dark:text-white">Generate a diagram from your notes</h5>
@@ -40,8 +40,7 @@
                             {{-- <textarea id="hybridInput" name="textContent" placeholder="Type or paste your text here. Or drop a file to upload..."></textarea>
                             <div id="previewContainer"></div> --}}
                             <div id="hybrid-file-input"
-                                class="border p-2 rounded w-full cursor-text bg-gray-100 hover:bg-gray-200 transition relative "
-                                role="presentation">
+                                class="border p-2 rounded w-full cursor-text bg-gray-100 hover:bg-gray-200 transition relative ">
                                 <!-- Textarea for text input -->
                                 <textarea id="doctorTextInput" class="w-full h-32 p-2 bg-transparent focus:outline-none cursor-text resize-none rounded"
                                     placeholder="Enter text or drop a file..."></textarea>
@@ -150,6 +149,35 @@
                     </div>
                 </div>
 
+            </div>
+
+            <!-- Loading Modal -->
+            <div id="loading-modal" class="hidden fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50"
+                role="alert" aria-live="assertive" aria-busy="true">
+                <div class=" rounded-lg p-6 flex flex-col items-center gap-4">
+                    <!-- Spinner -->
+                    <svg width="64" height="64" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <style>
+                                            .spinner_5nOS {
+                                                transform-origin: center;
+                                                animation: spinner_sEAn 1.5s infinite linear;
+                                            }
+
+                                            @keyframes spinner_sEAn {
+                                                100% {
+                                                    transform: rotate(360deg);
+                                                }
+                                            }
+                                        </style>
+                                        <path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+                                            opacity=".25" />
+                                        <path
+                                            d="M10.72,19.9a8,8,0,0,1-6.5-9.79A7.77,7.77,0,0,1,10.4,4.16a8,8,0,0,1,9.49,6.52A1.54,1.54,0,0,0,21.38,12h.13a1.37,1.37,0,0,0,1.38-1.54,11,11,0,1,0-12.7,12.39A1.54,1.54,0,0,0,12,21.34h0A1.47,1.47,0,0,0,10.72,19.9Z"
+                                            class="spinner_5nOS" />
+                                    </svg>
+                    <!-- Label -->
+
+                </div>
             </div>
 
 

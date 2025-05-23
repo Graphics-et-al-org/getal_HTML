@@ -27,13 +27,11 @@ Route::group([], function () {
             Route::get('share_view', [CompiledPagesController::class, 'share_view'])->name('page.share_view');
 
             Route::post('add_keypoint/',  [CompiledPagesController::class, 'add_keypoint'])->name('page.add_keypoint');
+            
 
+            Route::post('add_collections/',  [CompiledPagesController::class, 'add_collections'])->name('page.add_collections');
 
             Route::get('qrcode', [CompiledPagesController::class, 'getQRcode'])->name('page.qrcode');
-
         });
-
-
-
     });
 });

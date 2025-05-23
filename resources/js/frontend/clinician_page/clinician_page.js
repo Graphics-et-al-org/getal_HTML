@@ -4,9 +4,9 @@ import Swal from "sweetalert2";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tinymce/tinymce";
-import "tinymce/skins/ui/oxide/skin.min.css";
-import "tinymce/skins/content/default/content.min.css";
-import "tinymce/skins/content/default/content.css";
+// import "tinymce/skins/ui/oxide/skin.min.css";
+// import "tinymce/skins/content/default/content.min.css";
+//import "tinymce/skins/content/default/content.css";
 import "tinymce/icons/default/icons";
 import "tinymce/themes/silver/theme";
 import "tinymce/models/dom/model";
@@ -51,21 +51,28 @@ const keypointLayout = document
 
 var keypointLayoutClone;
 if (keypointLayout) {
-    keypointLayout.cloneNode(true);
+    keypointLayoutClone = keypointLayout.cloneNode(true);
 }
+
+const snippetLayout = document
+    .getElementsByClassName("snippet-container")
+    .item(0);
 
 const deleteButtons = document.getElementsByClassName("deletebutton");
 
 // background colour the snipptets
 const colourSnippetsBackground = () => {
-    snippetsgrid
-        .querySelectorAll(".component:not(.heading)")
-        .forEach((snippet) => {
-            snippet.style.backgroundColor =
-                snippets_bg_colours[snippets_current_bg_colour];
-            snippets_current_bg_colour =
-                (snippets_current_bg_colour + 1) % snippets_bg_colours.length;
-        });
+    // maximum compatibility: :has() is not supported in pre-2023 browsers
+    let snippets = snippetsgrid.querySelectorAll("div.snippet-container");
+    let noHeading = Array.from(snippets).filter(
+        (el) => !el.querySelector("div.heading")
+    );
+    noHeading.forEach((snippet) => {
+        snippet.style.backgroundColor =
+            snippets_bg_colours[snippets_current_bg_colour];
+        snippets_current_bg_colour =
+            (snippets_current_bg_colour + 1) % snippets_bg_colours.length;
+    });
 };
 
 // keypoint editing
@@ -74,6 +81,8 @@ const activateKeypointTinyMCE = (element) => {
         selector: '[data-field="keypoint-text"]',
         toolbar: false,
         menubar: false,
+        skin: false, // ← turn off skin loading
+        content_css: false, // ← also disable content CSS
         license_key: "gpl",
         inline: true,
         placeholder: "Type here...",
@@ -178,6 +187,8 @@ tinymce.init({
     toolbar: false,
     menubar: false,
     inline: true,
+    skin: false, // ← turn off skin loading
+    content_css: false, // ← also disable content CSS
     license_key: "gpl",
     setup: (editor) => {
         // handle change event
@@ -231,6 +242,9 @@ tinymce.init({
     selector: "#summary",
     toolbar: false,
     menubar: false,
+    skin: false, // ← turn off skin loading
+    content_css: false, // ← also disable content CSS
+    license_key: "gpl",
     inline: true,
 });
 
@@ -280,11 +294,13 @@ Sortable.create(snippetsgrid, {
         let newOrder = Array.from(snippetsgrid.children).map(
             (el) => el.dataset.snippetid
         );
+      
         showProcessFeedback();
         // submit the changes
-        let url = baseurl + `/keypoint/reorder`;
+        let url = baseurl + `/snippets/reorder`;
         let formData = new FormData();
         formData.append("order", newOrder);
+        formData.append("component_id", snippetsgrid.dataset.componentid);
         fetch(url, {
             method: "POST",
             body: formData,
@@ -327,55 +343,6 @@ const options = {
     onToggle: () => {
         console.log("modal has been toggled");
     },
-};
-
-// Add a keypoint div
-window.addKeypoint = () => {
-    console.log("adding keypoint");
-    // make some random ID
-    let _id = `keypoint_${crypto.randomUUID()}`;
-
-    // get a keypoint template based on the keypoint layout
-    let keypointTemplate = keypointLayoutClone.cloneNode(true);
-    // Get the container to which you want to add the cloned node
-    // Append the cloned node to the container
-    keypointgrid.insertBefore(keypointTemplate, keypointgrid.lastElementChild);
-    // clean up some parameters
-    // update the element.closest("[data-keypoint_id]").dataset.keypoint_id
-    keypointTemplate.closest("[data-keypointid]").dataset.keypointid = -1;
-    // set new temp id
-    keypointTemplate.setAttribute("id", _id);
-    // flag it as new
-    keypointTemplate.classList.add("new");
-    // reset the text
-    keypointTemplate.querySelector('[data-field="keypoint-text"]').innerText =
-        "Click to edit";
-    // add some identifier to the fields
-    keypointTemplate.querySelector(
-        '[data-field="keypoint-text"]'
-    ).dataset.keypointid = _id;
-
-    // reset the image
-    keypointTemplate.querySelector('[data-field="keypoint-image"] img').src =
-        baseurl + "/static/img/questionmark.svg";
-    // add some identifier to
-    // keypointTemplate
-    //     .querySelector('[data-field="keypoint-image"] img')
-    //     .setAttribute("data-keypointid", _id);
-    // show the new keypoint button
-    console.log(keypointTemplate.querySelector(".get-keypoint-image-btn"));
-    // keypointTemplate
-    //     .querySelector(".get-keypoint-image-btn")
-    //     .classList.remove("hidden");
-
-    keypointTemplate.querySelector(".get-keypoint-image-btn").dataset.target =
-        _id;
-    // kick tippy to enable the tooltips
-    tippy("[data-tippy-content]");
-    // activate the tinymce editor
-    activateKeypointTinyMCE(
-        keypointTemplate.querySelector('[data-field="keypoint-text"]')
-    );
 };
 
 // window.closeAddKeypointModal = () => {
@@ -595,8 +562,8 @@ window.closeAddCollectionModal = () => {
 var scheduled_function;
 const delay_by_in_ms = 700;
 var isSearching = false;
-var info_categories = [];
-var selected_info_categories = [];
+var collections = [];
+var selected_collections = [];
 
 // handle the text entry,
 window.handleCollectionTextEntry = (e) => {
@@ -612,12 +579,12 @@ window.handleCollectionTextEntry = (e) => {
 };
 
 async function getCollectionBySearch() {
-    if (document.getElementById("categorysearch").value.length > 1) {
+    if (document.getElementById("collectionsearch").value.length > 1) {
         isSearching = true;
         let url =
             baseurl +
             `/categories/search?q=${
-                document.getElementById("categorysearch").value
+                document.getElementById("collectionsearch").value
             }`;
         fetch(url, {
             method: "GET",
@@ -629,24 +596,24 @@ async function getCollectionBySearch() {
             .then((data) => {
                 console.log(data);
                 // are any of these already selected?
-                info_categories = info_categories.filter((item) =>
-                    selected_info_categories.includes(item.uuid)
+                collections = collections.filter((item) =>
+                    selected_collections.includes(item.uuid)
                 );
-                data.forEach((category) => {
+                data.forEach((collection) => {
                     // check if the category is already in the list
-                    if (!document.getElementById(`cb_${category.uuid}`)) {
+                    if (!document.getElementById(`cb_${collection.uuid}`)) {
                         // add the category to the list
-                        const newCategory = document.createElement("li");
-                        newCategory.innerHTML = `
-                      <input type="checkbox" id="cb_${category.uuid}" value="${category.uuid}" class="peer hidden"  onchange="window.handleInfoCategoryChange(event)" />
-                  <label for="cb_${category.uuid}"
+                        const newCollection = document.createElement("li");
+                        newCollection.innerHTML = `
+                      <input type="checkbox" id="cb_${collection.uuid}" value="${collection.uuid}" class="peer hidden"  onchange="window.handleCollectionChange(event)" />
+                  <label for="cb_${collection.uuid}"
                     class="inline-flex items-center px-4 py-2 text-sm font-medium border border-gray-300 rounded-full cursor-pointer  bg-white text-gray-700 peer-checked:bg-blue-600 peer-checked:text-white hover:bg-gray-100">
-                    <div class="w-full text-sm">${category.text}</div>
+                    <div class="w-full text-sm">${collection.text}</div>
                   </label>
                         `;
                         document
-                            .getElementById("categorieslist")
-                            .appendChild(newCategory);
+                            .getElementById("collectionslist")
+                            .appendChild(newCollection);
                     }
                 });
 
@@ -657,29 +624,114 @@ async function getCollectionBySearch() {
 }
 
 // handle a selection of a static component
-window.handleInfoCategoryChange = (e) => {
+window.handleCollectionChange = (e) => {
     //add to selected static components list
     console.log(e.target.value);
     if (e.target.checked) {
-        if (!selected_info_categories.includes(e.target.value)) {
-            selected_info_categories.push(e.target.value);
+        if (!selected_collections.includes(e.target.value)) {
+            selected_collections.push(e.target.value);
         }
     } else {
-        selected_info_categories.includes(e.target.value) &&
-            selected_info_categories.splice(
-                selected_info_categories.indexOf(e.target.value),
+        selected_collections.includes(e.target.value) &&
+            selected_collections.splice(
+                selected_collections.indexOf(e.target.value),
                 1
             );
     }
 };
 
 window.addSelectedCollections = () => {
-    // get the selected categories from the backend as an html string, whack it on the end of the snippets grid
-    // and then clear the selected categories list
-    // and the search input
-    console.log("selected_info_categories");
-    console.log(selected_info_categories);
+    console.log("add selected collections");
+    console.log(selected_collections);
+    document.getElementById("loading-modal").classList.remove("hidden");
+    addCollectionModal.hide();
+    // send the signal to confirm
+    let url = baseurl + `/page/${uuid}/add_collections`;
+    let components = document.getElementsByClassName("snippets");
+    let component_id = components[components.length - 1].dataset.componentid;
+    let formData = new FormData();
+    formData.append("collections", JSON.stringify(selected_collections));
+    formData.append("compiled_page_components_id", component_id);
+    fetch(url, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-CSRF-Token": csrfToken,
+        },
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            // add selected collections to the snippets grid
+            console.log(data.data);
+            data.data.forEach((item) => {
+                addSnippet(item);
+            });
+            //document.getElementById("loadingmodal").classList.remove("hidden");
+            //window.location.reload();
+        })
+        .finally(() => {
+            document.getElementById("loading-modal").classList.add("hidden");
+            colourSnippetsBackground();
+        });
 };
+
+// Add a snippet div
+const addSnippet = (data) => {
+    console.log("adding snippet");
+    // make some random ID
+    // get a keypoint template based on the keypoint layout
+    let snippetDiv = document.createElement("div");
+    snippetDiv.classList.add("snippet-container");
+    snippetDiv.dataset.snippetid = data.id;
+    snippetDiv.dataset.snippetuuid = data.uuid;
+    //snippetDiv.datase.componentid = data.componentid;
+    snippetDiv.innerHTML = data.content;
+    // Get the container to which you want to add the cloned node
+    // Append the cloned node to the container
+    snippetsgrid.appendChild(snippetDiv);
+    // clean up some parameters
+};
+
+window.deleteSnippet = (e) => {
+console.log("delete keypoint");
+    console.log(e);
+    console.log(e.currentTarget.closest(".keypoint-container"));
+    let container = e.currentTarget.closest(".keypoint-container");
+
+    console.log(container.classList.contains("new"));
+    //return;
+    if (container.dataset.keypointid > 0) {
+        // some ui feedback
+        showProcessFeedback();
+
+        // send the signal to remove keypoint
+        let url =
+            baseurl + `/snippet/${container.dataset.snippetuuid}/remove`;
+        fetch(url, {
+            method: "GET",
+            headers: {
+                "X-CSRF-Token": csrfToken,
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data);
+                if (data.status == 0) {
+                    // remove the keypoint from the DOM
+                    showSuccessFeedback();
+                    container.remove();
+                } else {
+                    // show error feedback
+                    showErrorFeedback();
+                }
+            })
+            .catch((error) => {
+                showErrorFeedback();
+            });
+    } else {
+        container.remove();
+    }
+}
 
 const $publicDetailsTargetEl = document.getElementById("publicDetailsModal");
 

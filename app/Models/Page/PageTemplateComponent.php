@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
 
 // This is the page templates components. We use
 class PageTemplateComponent extends Model
@@ -62,6 +63,39 @@ class PageTemplateComponent extends Model
      {
          return $this->belongsToMany('App\Models\Organisation\Project', 'page_template_components_projects', 'page_template_component_id', 'project_id')->withPivot('project_id', 'page_template_component_id');
      }
+
+     public function scopeIsInUsersProjects($query, $userId)
+    {
+        return $query->whereHas('projects', function (Builder $projectQ) use ($userId) {
+            $projectQ->whereHas('users', function (Builder $userQ) use ($userId) {
+                $userQ->where('users.id', $userId);
+            });
+        });
+    }
+
+    public function scopeIsInUsersTeams($query, $userId)
+    {
+        return $query->whereHas('teams', function (Builder $projectQ) use ($userId) {
+            $projectQ->whereHas('users', function (Builder $userQ) use ($userId) {
+                $userQ->where('users.id', $userId);
+            });
+        });
+    }
+
+    public function scopeIsAvailableToUser($query, $userId)
+    {
+        return $query->whereHas('projects', function (Builder $q) use ($userId) {
+            $q->whereHas('users', function (Builder $q2) use ($userId) {
+                $q2->where('users.id', $userId);
+            });
+        })->orWhereHas('teams', function (Builder $q) use ($userId) {
+            $q->whereHas('users', function (Builder $q2) use ($userId) {
+                $q2->where('users.id', $userId);
+            });
+        })
+            ->orWhereDoesntHave('projects')
+            ->orWhereDoesntHave('teams');
+    }
 
 
 }

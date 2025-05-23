@@ -1,5 +1,5 @@
 <header class="antialiased">
-    <nav class="bg-green-200 border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800 h-16 fixed w-full">
+    <nav class="bg-green-200 border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800 h-16 fixed w-full z-50">
         <div class="flex flex-wrap justify-between items-center">
             <div class="flex justify-start items-center">
              Frontend
@@ -93,7 +93,7 @@
                     <img class="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="user photo">
                 </button>
                 <!-- Dropdown menu -->
-                <div class="hidden z-auto my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600" id="dropdown">
+                <div class="hidden my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600" id="dropdown">
                     <div class="py-3 px-4">
                         <span class="block text-sm font-semibold text-gray-900 dark:text-white"> <div class="relative">
                             {{ Auth::user()->name }}

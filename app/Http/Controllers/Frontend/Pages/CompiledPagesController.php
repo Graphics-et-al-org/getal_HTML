@@ -10,6 +10,7 @@ use App\Models\Page\Compiled\CompiledPage;
 use App\Models\Page\Compiled\CompiledPageComponent;
 use App\Models\Page\Compiled\CompiledPageSnippet;
 use App\Models\Page\Snippet;
+use App\Models\Page\SnippetsCollection;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use chillerlan\QRCode\Common\EccLevel;
@@ -118,62 +119,144 @@ class CompiledPagesController extends Controller
     }
 
     // add a keypoint to the data from the clinician interface
-    // public function remove_keypoint($uuid, $keypoint_uuid)
-    // {
-    //     // remove the keypoint from the page
-    //     //dd($keypoint_uuid);
-    //     // @TODO does this page have a keypoint
-    //     $page = CompiledPage::where('uuid', $uuid)->first();
-    //     // remove the keypoint from the page
-    //     $keypoint = CompiledPageSnippet::where('uuid', $keypoint_uuid)->first();
-    //     if ($keypoint) {
-    //         $keypoint->delete();
-    //         // log the action
-    //         CompiledSnippetEvent::create([
-    //             'page_id' => $page->id,
-    //             'action' => 'remove',
-    //             'old_value' => '',
-    //             'new_value' => '',
-    //             'snippet_id' => $keypoint->id,
-    //         ]);
-    //         return response()->json(['status' => '0']);
-    //     }
-    //     return response()->json(['status' => '1']);
-    // }
+    public function remove_keypoint($uuid, $keypoint_uuid)
+    {
+        // remove the keypoint from the page
+        //dd($keypoint_uuid);
+        // @TODO does this page have a keypoint
+        $page = CompiledPage::where('uuid', $uuid)->first();
+        // remove the keypoint from the page
+        $keypoint = CompiledPageSnippet::where('uuid', $keypoint_uuid)->first();
+        if ($keypoint) {
+            $keypoint->delete();
+            // log the action
+            CompiledSnippetEvent::create([
+                'page_id' => $page->id,
+                'action' => 'remove',
+                'old_value' => '',
+                'new_value' => '',
+                'snippet_id' => $keypoint->id,
+            ]);
+            return response()->json(['status' => '0']);
+        }
+        return response()->json(['status' => '1']);
+    }
 
-    // update a keypoint to the data from the clinician interface
-    // public function update_keypoint(Request $request, $uuid, $keypoint_uuid)
-    // {
-    //     // remove the keypoint from the page
-    //     dd($keypoint_uuid);
-    //     // @TODO does this page have a keypoint
-    //     $page = CompiledPage::where('uuid', $uuid)->first();
-    //     // remove the keypoint from the page
-    //     $keypoint = CompiledPageSnippet::where('uuid', $keypoint_uuid)->first();
-    //     if ($keypoint) {
-    //         $keypoint->update();
-    //         // log the action
-    //         CompiledSnippetEvent::create([
-    //             'page_id' => $page->id,
-    //             'action' => 'remove',
-    //             'old_value' => '',
-    //             'new_value' => '',
-    //             'snippet_id' => $keypoint->id,
-    //         ]);
-    //         return response()->json(['status' => '0']);
-    //     }
-    //     return response()->json(['status' => '1']);
-    // }
+    //update a keypoint to the data from the clinician interface
+    public function update_keypoint(Request $request, $uuid, $keypoint_uuid)
+    {
+        // remove the keypoint from the page
+       // dd($keypoint_uuid);
+        // @TODO does this page have a keypoint
+        $page = CompiledPage::where('uuid', $uuid)->first();
+        // remove the keypoint from the page
+        $keypoint = CompiledPageSnippet::where('uuid', $keypoint_uuid)->first();
+        if ($keypoint) {
+            $keypoint->update();
+            // log the action
+            CompiledSnippetEvent::create([
+                'page_id' => $page->id,
+                'action' => 'remove',
+                'old_value' => '',
+                'new_value' => '',
+                'snippet_id' => $keypoint->id,
+            ]);
+            return response()->json(['status' => '0']);
+        }
+        return response()->json(['status' => '1']);
+    }
 
 
     // reorder the keypoints
-    public function reorder_keypoints(Request $request, $uuid, $component_id)
+    public function reorder_keypoints(Request $request, $uuid)
     {
         $page = CompiledPage::where('uuid', $uuid)->first();
         // get keypoints for the page, record new order
         return response()->json(['status' => '1']);
     }
 
+    // add a keypoint to the data from the clinician interface
+    public function add_collections(Request $request, $uuid)
+    {
+        //   dd($request);
+        // find the page
+        // validate the data
+        // get collections
+        $collections = json_decode($request['collections']);
+        $returned_data = [];
+
+        foreach ($collections as $collection_uuid) {
+            // get the category
+            $collection = SnippetsCollection::where('uuid', $collection_uuid)->first();
+           // dd($collection->snippets);
+            if ($collection) {
+                // get the snippets in the category
+                $snippets = $collection->snippets;
+                // get the next order
+                $order = CompiledPageComponent::find($request['compiled_page_components_id'])->snippets->last()->order;
+             //   dd($order  );
+                foreach ($snippets as $snippet) {
+                    // add the snippet to the page
+                    $order++;
+                    $pageSnippet = new CompiledPageSnippet(
+                        [
+                            'uuid' => Str::uuid()->toString(),
+                            'type' => 'snippet',
+                            'order' => $order,
+                            'content' => $snippet->content,
+                            'compiled_page_components_id' =>  $request['compiled_page_components_id'],
+                            'from_template_id' => $snippet->id,
+                        ]
+                    );
+                    // replace the image src
+                    $pageSnippet->save();
+                    $returned_data[] = [
+                        'id' => $pageSnippet->id,
+                        'uuid' => $pageSnippet->uuid,
+                        'content' => $pageSnippet->content,
+                        //'order' => $pageSnippet->order,
+                        //'type' => $pageSnippet->type,
+                    ];
+                }
+            }
+        }
+
+        return response()->json(['status' => '0', 'data' => $returned_data]);
+    }
+
+
+        // reorder the keypoints
+    public function reorder_snippets(Request $request, $uuid)
+    {
+                 //$snippets = $snippet->snippets;
+            foreach ($snippets as $key => $snippet) {
+                $snippet->order = $request['order'][$key];
+                $snippet->save();
+            }
+             // get keypoints for the page, record new order
+        return response()->json(['status' => '1']);
+    }
+
+        // reorder the keypoints
+    public function remove_snippet(Request $request, $uuid)
+    {
+        $snippet = CompiledPageSnippet::where('uuid', $uuid)->first();
+        $page = $snippet->component->page;
+        if($snippet) {
+             CompiledSnippetEvent::create([
+                'page_id' => $page->id,
+                'action' => 'remove',
+                'old_value' => '',
+                'new_value' => '',
+                'snippet_id' => $snippet->id,
+            ]);
+            $snippet->delete();
+            // log the action
+
+        }
+        // get keypoints for the page, record new order
+        return response()->json(['status' => '1']);
+    }
     // update the page from the clinician view
     //@TODO authorisation, redirect
     public function summary_update(Request $request, $uuid)
@@ -211,7 +294,7 @@ class CompiledPagesController extends Controller
         $page = CompiledPage::where('uuid', $uuid)->first();
         $analyticsToken = $this->generateAnalyticsApiToken(route('public.page.public.show', $page->uuid));
         if (isset($page->released_at)) {
-            return view('public.page.public_view', ['page' => $page, 'auth_token'=>$analyticsToken]);
+            return view('public.page.public_view', ['page' => $page, 'auth_token' => $analyticsToken]);
         }
         abort(404);
     }

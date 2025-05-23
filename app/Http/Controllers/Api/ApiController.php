@@ -91,18 +91,20 @@ class ApiController extends Controller
 
     public function createPageFromApi(Request $request)
     {
-        $user = Auth::user();
+        //$user = Auth::user();
         $collections = explode(',', $request->collections);
         $snippets = explode(',', $request->snippets);
+
         if ($request->text || $request->file) {
             // get template:
             //@TODO this will be dynamic based on template restriction- user, team, project
             $template_id = PageTemplate::where('template_type', 'summary')->get()->last()->id;
-            return response()->json(['status' => 0, 'type' => 'summary', 'uuid' => $this->_createSummaryPage($template_id, Auth::user()->id, $request->collections, $request->text, $request->file)]);
+            return response()->json(['status' => 0, 'type' => 'summary', 'uuid' => $this->_createSummaryPage($template_id, Auth::user()->id, $collections,$snippets, $request->text, $request->file)]);
         } else {
             // make an info document, return a link to it
+
             $template_id = PageTemplate::where('template_type', 'info')->get()->last()->id;
-            return response()->json(['status' => 0, 'type' => 'info', 'uuid' => $this->_createInfoDocument($template_id, $collections, $snippets, $request->title, Auth::user()->id)]);
+            return response()->json(['status' => 0, 'type' => 'info', 'uuid' => $this->_createInfoDocument($template_id, Auth::user()->id, $collections, $snippets, $request->title)]   );
         }
     }
 
@@ -116,6 +118,17 @@ class ApiController extends Controller
             return ['value' => $item->uuid, 'label' => $item->label, 'description' => $item->description];
         });
         return response()->json($collections);
+    }
+
+    public function searchAvailableSnippets(Request $request)
+    {
+        $user = Auth::user();
+
+        // $snippets = SnippetsCollection::isAvailableToUser($user->id)->get();
+        // $snippets->transform(function ($item, $key) {
+        //     return ['value' => $item->uuid, 'label' => $item->label, 'description' => $item->description];
+        // });
+      //  return response()->json($snippets);
     }
 
 
@@ -244,7 +257,7 @@ class ApiController extends Controller
     /////////////////////////////////////////////////////////////
 
     // internal function to create a summary page
-    private function _createSummaryPage($template_id, $user_id, $collections, $text = null, $file = null)
+    private function _createSummaryPage($template_id, $user_id, $collections, $snippets, $text = null, $file = null)
     {
         // a unique identifier
         $uuid = Str::uuid()->toString();
@@ -281,14 +294,17 @@ class ApiController extends Controller
     }
 
     //internal function to create an info document
-    private function _createInfoDocument($template_id, $collections, $snippets, $title, $user_id)
+    private function _createInfoDocument($template_id,  $user_id, $collections, $snippets, $title)
     {
         // a unique identifier
+
         $uuid = Str::uuid()->toString();
 
         // get template:
         //@TODO this will be dynamic based on template restriction- user, team, project
         $template = PageTemplate::find($template_id);
+
+     //   dd($collections);
 
         // build the compiled page
         $outputPage = new CompiledPage(

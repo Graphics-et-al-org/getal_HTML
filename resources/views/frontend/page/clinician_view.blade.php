@@ -50,7 +50,8 @@
                         <div
                             class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 grid-flow-row auto-cols-auto gap-6 border border-2 border-red-500 rounded-md justify-center justify-items-center items-center  p-2 keypoints">
                             @foreach ($component->snippets as $snippet)
-                                <div class="relative object-contain keypoint-container" data-keypointid="{{ $snippet->id }}" data-keypointuuid='{{ $snippet->uuid }}' data-componentid='{{ $component->id }}'
+                                <div class="relative object-contain keypoint-container" data-keypointid="{{ $snippet->id }}"
+                                    data-keypointuuid='{{ $snippet->uuid }}' data-componentid='{{ $component->id }}'
                                     id="keypoint_{{ $snippet->uuid }}">
                                     {!! $snippet->content !!}
                                     {{-- Add remove button --}}
@@ -74,9 +75,9 @@
                                         </svg>
                                     </button>
                                     {{-- Feedback --}}
-                                    <div  class="object-contain w-full h-full absolute top-3 left-3 keypoint_image_waiting hidden" alt="">
-                                        <svg width="24" height="24" viewBox="0 0 24 24"
-                                            xmlns="http://www.w3.org/2000/svg">
+                                    <div class="object-contain w-full h-full absolute top-3 left-3 keypoint_image_waiting hidden"
+                                        alt="">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <style>
                                                 .spinner_5nOS {
                                                     transform-origin: center;
@@ -89,8 +90,7 @@
                                                     }
                                                 }
                                             </style>
-                                            <path
-                                                d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+                                            <path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
                                                 opacity=".25" />
                                             <path
                                                 d="M10.72,19.9a8,8,0,0,1-6.5-9.79A7.77,7.77,0,0,1,10.4,4.16a8,8,0,0,1,9.49,6.52A1.54,1.54,0,0,0,21.38,12h.13a1.37,1.37,0,0,0,1.38-1.54,11,11,0,1,0-12.7,12.39A1.54,1.54,0,0,0,12,21.34h0A1.47,1.47,0,0,0,10.72,19.9Z"
@@ -99,7 +99,7 @@
                                     </div>
                                 </div>
                             @endforeach
-                           {{-- New keypoint button --}}
+                            {{-- New keypoint button --}}
                             <div data-type="keypoints" data-tippy-content="New Keypoint"
                                 class="self-auto relative grid w-48 min-h-48 border border-dashed border-2 border-gray-500 rounded-md addbutton cursor-pointer"
                                 onclick="window.addKeypoint()">
@@ -125,11 +125,25 @@
                     @case('snippets')
                         <div class="nonclinical-title text-xl font-semibold text-center mb-4 text-gray-700">Some extra Information
                             for you</div>
-                        <div class="w-full border border-2 border-blue-500 rounded-md p-2 snippets">
+                        <div id="component_{{ $component->id }}" data-componentid='{{ $component->id }}'
+                            class="w-full border border-2 border-blue-500 rounded-md p-2 snippets">
+
                             @foreach ($component->snippets as $snippet)
-                            <div data-snippetid="{{ $snippet->id }}" data-snippetuuid='{{ $snippet->uuid }}' data-componentid='{{ $component->id }}'>
-                                {!! $snippet->content !!}
-                            </div>
+                                <div data-snippetid="{{ $snippet->id }}" data-snippetuuid='{{ $snippet->uuid }}'
+                                    class="snippet-container relative" >
+
+                                    {!! $snippet->content !!}
+                                    <button type="button" class="remove-keypoint-button absolute top-1 right-1"
+                                        data-tippy-content="Remove" data-uuid="{{ $snippet->uuid }}"
+                                        onclick="window.deleteSnippet(event)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#721c24"
+                                            class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                                            <path
+                                                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z" />
+                                        </svg>
+                                    </button>
+                                </div>
+
                             @endforeach
                         </div>
                     @break
@@ -201,5 +215,33 @@
     <div id="publicDetailsModal" role="dialog" tabindex="-1" aria-hidden="true"
         class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
         @include('frontend.page.form.public_info')
+    </div>
+
+    <!-- Loading Modal -->
+    <div id="loading-modal" class="hidden fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50"
+        role="alert" aria-live="assertive" aria-busy="true">
+        <div class=" rounded-lg p-6 flex flex-col items-center gap-4">
+            <!-- Spinner -->
+            <svg width="64" height="64" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <style>
+                    .spinner_5nOS {
+                        transform-origin: center;
+                        animation: spinner_sEAn 1.5s infinite linear;
+                    }
+
+                    @keyframes spinner_sEAn {
+                        100% {
+                            transform: rotate(360deg);
+                        }
+                    }
+                </style>
+                <path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25" />
+                <path
+                    d="M10.72,19.9a8,8,0,0,1-6.5-9.79A7.77,7.77,0,0,1,10.4,4.16a8,8,0,0,1,9.49,6.52A1.54,1.54,0,0,0,21.38,12h.13a1.37,1.37,0,0,0,1.38-1.54,11,11,0,1,0-12.7,12.39A1.54,1.54,0,0,0,12,21.34h0A1.47,1.47,0,0,0,10.72,19.9Z"
+                    class="spinner_5nOS" />
+            </svg>
+            <!-- Label -->
+
+        </div>
     </div>
 @endsection

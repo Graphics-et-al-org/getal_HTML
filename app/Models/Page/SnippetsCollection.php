@@ -63,13 +63,28 @@ class SnippetsCollection extends Model
         });
     }
 
-    public function scopeIsAvailableToUser($query, $userId)
+    public function scopeIsInUsersTeams($query, $userId)
     {
-        return $query->whereHas('projects', function (Builder $projectQ) use ($userId) {
+        return $query->whereHas('teams', function (Builder $projectQ) use ($userId) {
             $projectQ->whereHas('users', function (Builder $userQ) use ($userId) {
                 $userQ->where('users.id', $userId);
             });
-        })->orWhereDoesntHave('projects');
+        });
+    }
+
+    public function scopeIsAvailableToUser($query, $userId)
+    {
+        return $query->whereHas('projects', function (Builder $q) use ($userId) {
+            $q->whereHas('users', function (Builder $q2) use ($userId) {
+                $q2->where('users.id', $userId);
+            });
+        })->orWhereHas('teams', function (Builder $q) use ($userId) {
+            $q->whereHas('users', function (Builder $q2) use ($userId) {
+                $q2->where('users.id', $userId);
+            });
+        })
+            ->orWhereDoesntHave('projects')
+            ->orWhereDoesntHave('teams');
     }
 
 

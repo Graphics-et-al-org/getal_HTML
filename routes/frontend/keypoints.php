@@ -16,7 +16,7 @@ Route::group([], function () {
 
             Route::get('/remove',  [CompiledSnippetsController::class, 'remove_keypoint'])->name('keypoint.remove');
 
-            Route::post('/update',  [CompiledSnippetsController::class, 'update_keypoint'])->name('page.update');
+            Route::post('/update',  [CompiledSnippetsController::class, 'update_keypoint'])->name('keypoint.update');
         });
     });
 });

@@ -21,14 +21,14 @@
         <div class="p-4 md:p-5">
 
             <div class="flex-initial min-w-80 mb-4">
-                <input type="text" name="search" id="categorysearch" onkeyup="window.handleCollectionTextEntry()"
+                <input type="text" name="search" id="collectionsearch" onkeyup="window.handleCollectionTextEntry()"
                     class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                     placeholder="Type to search...">
 
             </div>
             {{-- Selection here --}}
             <div class="min-w-80 mb-4" >
-                <ul class="w-full flex " id="categorieslist">
+                <ul class="w-full flex " id="collectionslist">
                 </ul>
             </div>
             {{-- <div class="min-w-80 mb-4 bg-gray-100 border border-solid border-2 border-gray-500 rounded-md flex"
@@ -39,7 +39,7 @@
             <div class="space-y-4">
                 <div>
                     <button role="button" type="button" onclick="window.addSelectedCollections()"
-                        class="w-full disabled:text-gray-500 text-white bg-blue-700 disabled:bg-blue-300 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Add</button>
+                        class="w-full text-white bg-blue-700 disabled:bg-blue-300 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Add</button>
                 </div>
             </div>
         </div>
