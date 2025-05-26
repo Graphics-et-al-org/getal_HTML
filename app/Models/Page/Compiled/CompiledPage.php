@@ -45,7 +45,8 @@ class CompiledPage extends Model
         'released_at',
         'data',
         'title',
-        'summary'
+        'summary',
+        'target_uuid'
     ];
 
     public function components():HasMany

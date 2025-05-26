@@ -294,7 +294,7 @@ Sortable.create(snippetsgrid, {
         let newOrder = Array.from(snippetsgrid.children).map(
             (el) => el.dataset.snippetid
         );
-      
+
         showProcessFeedback();
         // submit the changes
         let url = baseurl + `/snippets/reorder`;
@@ -693,14 +693,13 @@ const addSnippet = (data) => {
 };
 
 window.deleteSnippet = (e) => {
-console.log("delete keypoint");
+console.log("delete snippet");
     console.log(e);
-    console.log(e.currentTarget.closest(".keypoint-container"));
-    let container = e.currentTarget.closest(".keypoint-container");
+    console.log(e.currentTarget.closest(".snippet-container"));
+    let container = e.currentTarget.closest(".snippet-container");
 
-    console.log(container.classList.contains("new"));
     //return;
-    if (container.dataset.keypointid > 0) {
+    if (container.dataset.snippetid > 0) {
         // some ui feedback
         showProcessFeedback();
 
@@ -720,6 +719,7 @@ console.log("delete keypoint");
                     // remove the keypoint from the DOM
                     showSuccessFeedback();
                     container.remove();
+                    colourSnippetsBackground();
                 } else {
                     // show error feedback
                     showErrorFeedback();

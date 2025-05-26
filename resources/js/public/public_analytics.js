@@ -18,11 +18,11 @@ let analyticsDisabled = false;
 // browser detection
 const browser = Bowser.getParser(window.navigator.userAgent);
 
-console.log(browser)
+// console.log(browser)
 
-console.log(browser.getPlatform())
+// console.log(browser.getPlatform())
 
-console.log(sessionid)
+// console.log(sessionid)
 
 
 

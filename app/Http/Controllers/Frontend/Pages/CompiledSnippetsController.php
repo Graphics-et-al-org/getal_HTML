@@ -111,95 +111,47 @@ class CompiledSnippetsController extends Controller
         return response()->json(['status' => '0']);
     }
 
-    // update the page from the clinician view
-    public function clinican_update_page(Request $request)
+  // add a keypoint to the data from the clinician interface
+    public function remove_snippet($uuid)
     {
-        return $request;
-    }
+        // remove the keypoint from the page
+        //dd($keypoint_uuid);
+        // @TODO does this page have a keypoin
+        // remove the keypoint from the page
+        $snippet = CompiledPageSnippet::where('uuid', $uuid)->first();
 
-    // approve the model from the clinician view
-    //@TODO authorisation, redirect
-    public function clinician_approve($uuid)
-    {
-        $page = CompiledPage::where('uuid', $uuid)->first();
-        //   dd($page);
-        $page->released_at = Carbon::now();
-        $page->save();
-        return response()->json(['status' => '0']);
-    }
-
-
-    // show the share view- this is where a clinician selects the sharing options
-    //@TODO authorisation
-    public function share_view($uuid)
-    {
-        $page = CompiledPage::where('uuid', $uuid)->first();
-        return view('frontend.page.share_view', ['page' => $page]);
-    }
-
-    // a public view of the page
-    public function public_view($uuid)
-    {
-        $page = CompiledPage::where('uuid', $uuid)->first();
-        if (isset($page->released_at)) {
-            return view('public.page.public_view', ['page' => $page]);
+        if ($snippet) {
+            $snippet_id = $snippet->id;
+            $page = $snippet->component->page;
+            $snippet->delete();
+            // log the action
+            CompiledSnippetEvent::create([
+                'page_id' => $page->id,
+                'action' => 'remove',
+                'old_value' => '',
+                'new_value' => '',
+                'snippet_id' => $snippet_id,
+            ]);
+            return response()->json(['status' => '0']);
         }
-        abort(404);
+        return response()->json(['status' => '1']);
     }
 
-    public function getQRcode(Request $request, $uuid)
+
+
+    // reorder the snippets
+    public function reorder_snippets(Request $request)
     {
-        $page = CompiledPage::where('uuid', $uuid)->first();
-        $manager = new ImageManager(new Driver());
-        // dd($board->lab->lab_icon);
-        if ($page) {
-            // is the board allowed to be public?
-            if (isset($page->released_at)) {
-                // dd(public_path ('/static/img/Graphics-et-al-transparent.png'));
-                $image = $manager->read(public_path('/static/img/Graphics-et-al-transparent.png'))->contain(50, 50);
 
-                $options = new QROptions();
-
-                $options->returnResource     = true;
-                $options->scale               = 5;
-                $options->outputBase64        = false;
-                $options->eccLevel            = EccLevel::H;
-                $options->addLogoSpace        = true;
-                $options->logoSpaceWidth      = 10;
-                $options->logoSpaceHeight     = 10;
-                $qrcode = new QRCode($options);
-                $qrcode->addByteSegment(route('public.page.public.show', $page->uuid));
-
-                $qrOutputInterface = new QRImageWithLogo($options, ($qrcode)->getQRMatrix());
-                //  dd($qrOutputInterface->dump());
-                if (isset($request['download']) && ($request['download'] == '1')) {
-                    $headers = [
-                        'Content-Type' => 'image/png',
-                        'Content-Disposition' => 'attachment; filename=' . $page->label . '_qrcode.png',
-                    ];
-                    $qrcode = $manager->read($qrOutputInterface->dump())->place($image, 'center', 0, 0, 50)->toPng();
-                    return response()->stream(function () use ($qrcode) {
-                        echo $qrcode;
-                    }, 200, $headers);
-                } else {
-                    //dd($image);
-                    //$qrcode = $manager->read($qrOutputInterface->dump(null, $image))->toPng();
-                    $response = new \Illuminate\Http\Response($manager->read($qrOutputInterface->dump())->place($image, 'center', 0, 0, 50)->toPng(), '200');
-                    //$response = \Illuminate\Http\Response::make($image->encode('png'));
-                    // set content-type
-                    $response->header('Content-Type', 'image/png');
-                    // output
-                    return $response;
+        foreach (explode(',', $request->order) as $index=>$order) {
+            if ($order > 0) {
+                $snippet = CompiledPageSnippet::find($order);
+                if ($snippet) {
+                    $snippet->update(['order'=>$index]);
                 }
-            } else {
-                abort(403, 'Page not released.');
             }
         }
-    }
-
-    // send a text/email/whatever
-    public function notify_public(Request $request, $uuid)
-    {
-        abort(501, 'Not implemented yet.');
+        // get keypoints for the page, record new order
+        return response()->json(['status' => '0']);
     }
 }

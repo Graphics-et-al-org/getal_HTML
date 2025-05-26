@@ -35,15 +35,19 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // background colour the snipptets
+// background colour the snipptets
 const colourSnippetsBackground = () => {
-    snippetsgrid
-        .querySelectorAll(".component:not(.heading)")
-        .forEach((snippet) => {
-            snippet.style.backgroundColor =
-                snippets_bg_colours[snippets_current_bg_colour];
-            snippets_current_bg_colour =
-                (snippets_current_bg_colour + 1) % snippets_bg_colours.length;
-        });
+    // maximum compatibility: :has() is not supported in pre-2023 browsers
+    let snippets = snippetsgrid.querySelectorAll("div.snippet-container");
+    let noHeading = Array.from(snippets).filter(
+        (el) => !el.querySelector("div.heading")
+    );
+    noHeading.forEach((snippet) => {
+        snippet.style.backgroundColor =
+            snippets_bg_colours[snippets_current_bg_colour];
+        snippets_current_bg_colour =
+            (snippets_current_bg_colour + 1) % snippets_bg_colours.length;
+    });
 };
 
 const showProcessFeedback = () => {

@@ -211,7 +211,7 @@
                                 onclick="toggleMetrics()">E</button>
                             <button
                                 class="bg-blue-500 text-white px-3 py-2 rounded focus:outline-none hover:bg-blue-600 text-sm"
-                                onclick="copyOriginalUrl()">Copy patient URL</button>
+                                onclick="window.copyPatientUrl()">Copy patient URL</button>
 
                         </div>
                         {{-- <div class="flex justify-center p-2 gap-2 w-full border border-solid border-2  border-indigo-500">
@@ -236,7 +236,7 @@
                         {{-- Little dot to look a bit like a camera --}}
                         <div class="absolute top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-800 rounded-full"></div>
                         {{-- Iframe --}}
-                        <iframe class="w-full h-full" src="{{ route('public.page.public.show', $page->uuid) }}"
+                        <iframe class="w-full h-full" src="{{ route('public.page.public.show', $page->uuid) }}?disableAnalytics=1"
                             frameborder="0"></iframe>
                     </div>
                 </div>
@@ -273,7 +273,7 @@
                         <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                            QR code
                         </h3>
-                        
+
                         <button type="button"
                             class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
                             onclick="window.closeQrCodeModal()">
@@ -294,7 +294,7 @@
                                 </div>
                             </div>
                             <img  src="{{ route('frontend.page.qrcode', $page->uuid) }}" alt="QR Code" class="mx-auto" />
-                            
+
                         </div>
                         <div class="flex items-center mt-4 justify-between gap-2">
                            <button type="button" onclick="window.printQrCode()" class="grow text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">

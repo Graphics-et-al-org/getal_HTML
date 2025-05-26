@@ -101,7 +101,6 @@ Route::get('/extension/testjob/template/{id}', [ApiController::class, 'testuploa
 // analytics capture- with JWT authentication to prevent some shenanigans
 Route::post('page/{uuid}/analytics/flush', [CompiledPagesAnalyticsController::class, 'get_flush'])->middleware(ValidatePublicJWT::class);
 
-
 /**
  * Machine to machine routes
  *

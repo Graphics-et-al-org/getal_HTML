@@ -21,22 +21,24 @@
     <main class="p-4 h-auto">
 
         <div class="container mx-auto">
-            {{-- Title --}}
-            <div class="text-center mb-6 border-b border-gray-300">
-                <h1 id="title"
-                    class="text-3xl font-semibold px-2 py-1 focus:rounded-md  focus:border-2 focus:outline-none focus:border-blue-500 focus:border">
-                    {{ $page->title }}
-                </h1>
-            </div>
-
+            @if ($page->title)
+                {{-- Title --}}
+                <div class="text-center mb-6 border-b border-gray-300">
+                    <h1 id="title"
+                        class="text-3xl font-semibold px-2 py-1 focus:rounded-md  focus:border-2 focus:outline-none focus:border-blue-500 focus:border">
+                        {{ $page->title }}
+                    </h1>
+                </div>
+            @endif
             {{-- summary --}}
+            @if ($page->summary)
+                <div class=" items-center mb-4 ">
+                    <div id="summary"
+                        class="w-full p-4 text-xl border-2 border-gray-300 rounded-md focus:outline-none focus:border-blue-500 resize-none">
+                        {{ $page->summary }}</div>
 
-            <div class=" items-center mb-4 ">
-                <div id="summary"
-                    class="w-full p-4 text-xl border-2 border-gray-300 rounded-md focus:outline-none focus:border-blue-500 resize-none">
-                    {{ $page->summary }}</div>
-
-            </div>
+                </div>
+            @endif
             {{-- Keypoints --}}
             {{-- <h1 class="text-2xl font-bold text-gray-900 dark:text-white text-center">
                 Summary
@@ -130,7 +132,7 @@
 
                             @foreach ($component->snippets as $snippet)
                                 <div data-snippetid="{{ $snippet->id }}" data-snippetuuid='{{ $snippet->uuid }}'
-                                    class="snippet-container relative" >
+                                    class="snippet-container relative">
 
                                     {!! $snippet->content !!}
                                     <button type="button" class="remove-keypoint-button absolute top-1 right-1"
@@ -143,7 +145,6 @@
                                         </svg>
                                     </button>
                                 </div>
-
                             @endforeach
                         </div>
                     @break

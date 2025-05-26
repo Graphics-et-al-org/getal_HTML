@@ -225,17 +225,6 @@ class CompiledPagesController extends Controller
     }
 
 
-        // reorder the keypoints
-    public function reorder_snippets(Request $request, $uuid)
-    {
-                 //$snippets = $snippet->snippets;
-            foreach ($snippets as $key => $snippet) {
-                $snippet->order = $request['order'][$key];
-                $snippet->save();
-            }
-             // get keypoints for the page, record new order
-        return response()->json(['status' => '1']);
-    }
 
         // reorder the keypoints
     public function remove_snippet(Request $request, $uuid)
