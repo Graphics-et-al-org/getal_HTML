@@ -94,7 +94,7 @@ jobs:
             "BCRYPT_ROUNDS": "12",
             "BROADCAST_CONNECTION": "ably",
             "PHP_CLI_SERVER_WORKERS": "4",
-            "LOG_CHANNEL": "stack",
+            "LOG_CHANNEL": "daily",
             "LOG_STACK": "single",
             "LOG_DEPRECATIONS_CHANNEL": "null",
             "LOG_LEVEL": "debug",

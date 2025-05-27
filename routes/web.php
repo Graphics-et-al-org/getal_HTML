@@ -69,4 +69,6 @@ Route::group(['namespace' => 'Public', 'prefix' => 'public', 'as' => 'public.'],
     include_route_files(__DIR__ . '/public/');
 });
 
+
+
 require __DIR__.'/auth.php';

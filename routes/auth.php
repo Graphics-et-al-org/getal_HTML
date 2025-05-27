@@ -36,8 +36,8 @@ Route::middleware('guest')->group(function () {
         ->name('password.store');
 
     // Socialite Routes. Currently locked to auth0, more later maybe
-     Route::get('login/{provider}', [SocialLoginController::class, 'sociallogin'])->name('social.login');
-     Route::get('login/{provider}/callback', [SocialLoginController::class, 'callback']);
+     Route::get('login/{provider}', [SocialLoginController::class, 'sociallogin'])->name('socialite.redirect');
+     Route::get('login/{provider}/callback', [SocialLoginController::class, 'callback'])->name('socialite.callback');;
 });
 
 Route::middleware('auth')->group(function () {

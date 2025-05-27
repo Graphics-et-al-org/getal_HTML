@@ -16,3 +16,4 @@ Route::get('templates', [TemplatesController::class, 'index'])
 Route::get('editor', [TemplatesController::class, 'editor'])
     ->name('templates.editor');
 
+Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);

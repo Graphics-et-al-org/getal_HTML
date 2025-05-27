@@ -28,70 +28,9 @@ class SocialLoginController extends Controller
      */
     public function sociallogin(Request $request, $provider)
     {
-       // dd($provider);
-        // There's a high probability something will go wrong
-        //$user = null;
-        // dd(
-        //     Socialite::driver('auth0')
-        //            ->stateless()
-        //            ->redirect()
-        //            ->getTargetUrl()
-        //   );
+
         return Socialite::driver($provider)->redirect();
-      //  dd($socialite);
-        //dd($socialite->stateless()->redirect());
-        //     return $socialite->redirect();
 
-        // is there an issue with the
-//        if (!$request->has('code') || $request->has('denied')) {
-//            return redirect()->route(home_route())->withFlashDanger('Something went wrong :(');
-//        }
-
-        // // If the provider is not an acceptable third party than kick back
-        // if (! in_array($provider, $this->socialiteHelper->getAcceptedProviders(), true)) {
-        //     return redirect()->route(home_route())->withFlashDanger(__('auth.socialite.unacceptable', ['provider' => e($provider)]));
-        // }
-
-        /*
-         * The first time this is hit, request is empty
-         * It's redirected to the provider and then back here, where request is populated
-         * So it then continues creating the user
-         */
-
-        // Create the user if this is a new social account or find the one that is already there.
-        // try {
-        //    // dd($this->userRepository);
-        //     $user = $this->userRepository->findOrCreateProvider($this->getProviderUser($provider), $provider);
-        // } catch (Ex $e) {
-        //     return redirect()->route(home_route())->withFlashDanger($e->getMessage());
-        // }
-
-        // if ($user === null) {
-        //     return redirect()->route(home_route())->withFlashDanger(__('exceptions.frontend.auth.unknown'));
-        // }
-
-        // // Check to see if they are active.
-        // if (! $user->isActive()) {
-        //     throw new GeneralException(__('exceptions.frontend.auth.deactivated'));
-        // }
-
-        // // Account approval is on
-        // if ($user->isPending()) {
-        //     throw new GeneralException(__('exceptions.frontend.auth.confirmation.pending'));
-        // }
-
-        // User has been successfully created or already exists
-        //auth()->login($user, true);
-
-        // Set session variable so we know which provider user is logged in as, if ever needed
-       // session([config('access.socialite_session_name') => $provider]);
-
-        //event(new UserLoggedIn(Auth::user()));
-
-        // @TODO if first log in, collect demographic data
-
-        // Return to the intended url or default to the class property
-        //return redirect()->intended(route('home'));
     }
 
     public function callback(){
