@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        dd('Running migration');
+        //dd('Running migration');
         if (!Schema::hasTable('cache')) {
             Schema::create('cache', function (Blueprint $table) {
                 $table->string('key')->primary();

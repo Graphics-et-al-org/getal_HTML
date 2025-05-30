@@ -34,7 +34,7 @@ class MediaController extends Controller
 
     public function index(Request $request, $id = null)
     {
-       
+
         if (isset($request['tags'])) {
             if (!$request->has('search')) {
                 Session::forget('admin_media_search');
@@ -55,13 +55,12 @@ class MediaController extends Controller
 
         if (isset($request['page'])) {
             session(['admin_media_page' => $request['page']]);
-
         }
 
         $currentPage = session('admin_media_page');
-            Paginator::currentPageResolver(function () use ($currentPage) {
-                return $currentPage;
-            });
+        Paginator::currentPageResolver(function () use ($currentPage) {
+            return $currentPage;
+        });
 
         if (Session::has('admin_media_search')) {
             $request['search'] = session('admin_media_search');
@@ -76,11 +75,11 @@ class MediaController extends Controller
                 $q->whereIn('tags.id', $request['tags']);
             });
         })->when($request->has('search'), function ($query) use ($request) {
-                $query->where(function ($q) use ($request) {
-                    $q->where('name', 'like', "%{$request['search']}%")
-                        ->orWhere('description', 'LIKE', "%{$request['search']}%");
-                });
-            })->paginate(10);
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', "%{$request['search']}%")
+                    ->orWhere('description', 'LIKE', "%{$request['search']}%");
+            });
+        })->paginate(10);
 
 
         $tags = Tag::all();
@@ -133,7 +132,21 @@ class MediaController extends Controller
             ]);
 
             $media->save();
-            $media->tags()->sync($request->input('tags', []));
+
+            if (isset($request['tags'])) {
+                $tags = [];
+                foreach ($request['tags'] as $tag) {
+                    if (!(Tag::where('id', $tag)->exists())) {
+                        if (strlen($tag) > 0) {
+                            $tags[] = Tag::updateOrCreate(['text' => $tag])->id;
+                        }
+                    } else {
+                        $tags[] = $tag;
+                    }
+                }
+                $media->tags()->sync($tags);
+            }
+
             ///  make a thumb
             $manager = new ImageManager(new Driver());
             if (Str::contains($media->type, 'image')) {
@@ -152,34 +165,12 @@ class MediaController extends Controller
                 }
             }
 
-            // if (Str::contains($media->type, 'audio')) {
-            //     try {
-            //         $image = $manager->read(Storage::disk('public')->path('/') . $media->location);
-            //         // resize image
-            //         $image->cover(200, 200);
-            //         // create thumb path
-            //         $image->thumb = $image->toPng();
-            //         // update media with thumb path
-            //         //     $media->thumb =
-            //         $media->save();
-            //     } catch (\Exception $e) {
-            //         // handle exception, maybe log it
 
-            //     }
-            // }
 
 
 
             session()->flash('flash_success', 'Created media Successfully');
             return redirect()->route('admin.media.index');
-
-            // return array(
-            //     'uuid' => $media->uuid,
-            //     'location' => str_starts_with($media->type, 'audio')?route('public.media.stream', $media->uuid):route('public.media.show', $media->uuid),
-            //     'mime' => $media->type
-            // );
-            //  dd($media);
-
         }
     }
 
@@ -235,7 +226,19 @@ class MediaController extends Controller
         ]);
 
         $media->save();
-        $media->tags()->sync($request->input('tags', []));
+        if (isset($request['tags'])) {
+            $tags = [];
+            foreach ($request['tags'] as $tag) {
+                if (!(Tag::where('id', $tag)->exists())) {
+                    if (strlen($tag) > 0) {
+                        $tags[] = Tag::updateOrCreate(['text' => $tag])->id;
+                    }
+                } else {
+                    $tags[] = $tag;
+                }
+            }
+            $media->tags()->sync($tags);
+        }
         ///  make a thumb
         if ($request->hasFile('file')) {
             $manager = new ImageManager(new Driver());
