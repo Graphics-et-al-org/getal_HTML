@@ -98,12 +98,8 @@ tinymce.init({
     extended_valid_elements:
         "svg[*],defs[*],pattern[*],desc[*],metadata[*],g[*],mask[*],path[*],line[*],marker[*],rect[*],circle[*],ellipse[*],polygon[*],polyline[*],linearGradient[*],radialGradient[*],stop[*],image[*],view[*],text[*],textPath[*],title[*],tspan[*],glyph[*],symbol[*],switch[*],use[*],a[class|name|href|target|title|onclick|rel],script[type|src],iframe[src|style|width|height|scrolling|marginwidth|marginheight|frameborder],img[class|src|border=0|alt|title|hspace|vspace|width|height|align|onmouseover|onmouseout|name]",
     relative_urls: false,
-    remove_script_host: false,
-    // images_upload_url: 'postAcceptor.php',
-    //    images_upload_url: `${baseurl}/admin/media/tinymce_store`,
-    //    images_upload_credentials: true,      // send cookies/CSRF token
-    //    automatic_uploads: true,
-    /* and here's our custom media picker*/
+    remove_script_host: true,
+
     file_picker_callback: function (callback, value, meta) {
         const editor = this;
         if (meta.filetype === "media") {

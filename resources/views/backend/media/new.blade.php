@@ -10,7 +10,7 @@
             <div class="space-y-12">
                 <div class="border-b border-gray-900/10 pb-12">
                     <div class="mt-10 grid grid-cols-1 sm:grid-cols-6">
-                        <div class="sm:col-span-4">
+                        {{-- <div class="sm:col-span-4">
                             <label for="name" class="block text-sm/6 font-medium text-gray-900">Asset name</label>
                             <div class="mt-2">
                                 <div class="flex items-center rounded-md bg-white  focus-within:outline-indigo-600">
@@ -20,7 +20,7 @@
                                 </div>
 
                             </div>
-                        </div>
+                        </div> --}}
 
                         <div class="col-span-full">
                             <label for="description" class="block text-sm/6 font-medium text-gray-900">Description</label>
@@ -40,7 +40,7 @@
                             </div>
                         </div>
 
-                        <div class="col-span-full mb-2">
+                        {{-- <div class="col-span-full mb-2">
                             <label for="type_radio" class="block text-sm/6 font-medium text-gray-900">Type</label>
                             <div class="col-md-10">
                                 <div class="form-check form-control-lg">
@@ -51,7 +51,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                {{-- <div class="form-check form-control-lg">
+                           <div class="form-check form-control-lg">
                                     <div class="form-check form-control-lg">
                                         <div class="pretty p-default p-curve  p-smooth p-bigger">
                                             <input type="radio" name="type_radio" value="bodymovin" />
@@ -61,9 +61,9 @@
                                         </div>
                                     </div>
 
-                                </div> --}}
+                                </div>
                             </div>
-                        </div>
+                        </div> --}}
 
 
                         <div class="col-span-full border-t border-gray-600 mt-2">
@@ -72,10 +72,10 @@
                                 <div class="row ">
                                     <div class="col">
                                         <div class="form-group">
-                                            <label for="mediafile" class="block font-medium">Upload file</label>
+                                            <label for="file" class="block font-medium">Upload file</label>
                                             <input
                                                 class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                                                name="mediafile" type="file">
+                                                name="file" type="file">
                                         </div>
                                     </div>
 
@@ -104,5 +104,5 @@
         const baseurl = '{{ URL::to('/') }}';
     </script>
 
-    @vite('resources/js/backend/clipart/create.js')
+    @vite('resources/js/backend/media/create.js')
 @endpush

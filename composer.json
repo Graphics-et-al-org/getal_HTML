@@ -30,7 +30,8 @@
         "santigarcor/laratrust": "8.4.1",
         "smalot/pdfparser": "^2.12",
         "socialiteproviders/auth0": "^4.2",
-        "squigg/azure-queue-laravel": "^11.0"
+        "squigg/azure-queue-laravel": "^11.0",
+        "wotz/laravel-swagger-ui": "^1.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

@@ -95,7 +95,7 @@ class ClipartController extends Controller
     public function baseline($id){
         return response(Clipart::find($id)->baseline()->data, 200)
         ->header('Content-Type', 'image/svg+xml');
-        
+
     }
     /**
      * Show the form for creating a clipart

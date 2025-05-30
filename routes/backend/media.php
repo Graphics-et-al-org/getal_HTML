@@ -15,14 +15,15 @@ Route::group([], function () {
 
         Route::post('media/tinymce_store', [MediaController::class, 'tinymce_store'])->name('media.tinymce_store');
 
-
         // Specific clipart
-        Route::group(['prefix' => 'media/{id}'], function () {
+        Route::group(['prefix' => 'media/{uuid}'], function () {
             Route::get('edit', [MediaController::class, 'edit'])->name('media.edit');
 
             Route::patch('/', [MediaController::class, 'update'])->name('media.update');
 
-            Route::get('/', [MediaController::class, 'destroy'])->name('media.destroy');
+            Route::get('/delete', [MediaController::class, 'destroy'])->name('media.destroy');
+
+             Route::get('thumb/{size}', [MediaController::class, 'thumb'])->name('media.thumb');
         });
     });
 });

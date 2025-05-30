@@ -29,6 +29,7 @@ class Snippet extends Model
         'user_id',
         'team_id',
         'keypoint',
+        'snippet_template',
         'label',
         'description',
         'content',

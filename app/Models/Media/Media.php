@@ -17,6 +17,7 @@ class Media extends Model
 
         'uuid',
         'name',
+        'description',
         'type',
         'path',
         'location',
@@ -45,10 +46,10 @@ class Media extends Model
         return $this->belongsToMany('App\Models\Organisation\Project', 'media_team_user', 'media_id', 'project_id')->withPivot('project_id', 'media_id');
     }
 
-    // // clipart tags
-    // public function tags()
-    // {
-    //     return $this->belongsToMany('App\Models\Tag', 'clipart_tags', 'tag_id', 'clipart_id')->withPivot('tag_id', 'clipart_id');
-    // }
+    // // Media tags
+    public function tags()
+    {
+        return $this->belongsToMany('App\Models\Tag', 'media_tags', 'tag_id', 'media_id')->withPivot('tag_id', 'media_id');
+    }
 
 }

@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Clipart\ClipartColourway;
-use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Drivers\Imagick\Driver;
 use App\Models\Clipart\ClipartColourwayColour;
 use App\Models\Media\Media;
 use Illuminate\Support\Facades\DB;
@@ -34,59 +34,60 @@ class MediaController extends Controller
 
     public function index(Request $request, $id = null)
     {
-
-        // if (isset($request['tags'])) {
-        //     if (!$request->has('search')) {
-        //         Session::forget('admin_clipart_search');
-        //     }
-        //     session(['admin_clipart_page' => 1]);
-        //     session(['admin_clipart_tags' => $request['tags']]);
-        // }
-
-
-        // if ($request->has('search')) {
-        //     if (!$request->has('tags')) {
-        //         Session::forget('admin_clipart_tags');
-        //     }
-        //     session(['admin_clipart_page' => 1]);
-        //     session(['admin_clipart_search' => $request['search']]);
-        // }
+       
+        if (isset($request['tags'])) {
+            if (!$request->has('search')) {
+                Session::forget('admin_media_search');
+            }
+            session(['admin_media_page' => 1]);
+            session(['admin_media_tags' => $request['tags']]);
+        }
 
 
-        // if (isset($request['page'])) {
-        //     session(['admin_clipart_page' => $request['page']]);
-        //     $currentPage = session('admin_clipart_page');
-        //     Paginator::currentPageResolver(function () use ($currentPage) {
-        //         return $currentPage;
-        //     });
-        // }
+        if ($request->has('search')) {
+            if (!$request->has('tags')) {
+                Session::forget('admin_media_tags');
+            }
+            session(['admin_media_page' => 1]);
+            session(['admin_media_search' => $request['search']]);
+        }
 
-        // if (Session::has('admin_clipart_search')) {
-        //     $request['search'] = session('admin_clipart_search');
-        // }
 
-        // if (Session::has('admin_clipart_tags')) {
-        //     $request['tags'] = session('admin_clipart_tags');
-        // }
+        if (isset($request['page'])) {
+            session(['admin_media_page' => $request['page']]);
 
-        // $clipart = Clipart::when($request->has('tags'), function ($query) use ($request) {
-        //     $query->whereHas('tags', function ($q) use ($request) {
-        //         $q->whereIn('tags.id', $request['tags']);
-        //     });
-        // })
-        //     ->when($request->has('search'), function ($query) use ($request) {
-        //         $query->where(function ($q) use ($request) {
-        //             $q->where('name', 'like', "%{$request['search']}%")
-        //                 ->orWhere('description', 'LIKE', "%{$request['search']}%");
-        //         });
-        //     })
-        $media = Media::paginate(10);
+        }
+
+        $currentPage = session('admin_media_page');
+            Paginator::currentPageResolver(function () use ($currentPage) {
+                return $currentPage;
+            });
+
+        if (Session::has('admin_media_search')) {
+            $request['search'] = session('admin_media_search');
+        }
+
+        if (Session::has('admin_media_tags')) {
+            $request['tags'] = session('admin_media_tags');
+        }
+
+        $media = Media::when($request->has('tags'), function ($query) use ($request) {
+            $query->whereHas('tags', function ($q) use ($request) {
+                $q->whereIn('tags.id', $request['tags']);
+            });
+        })->when($request->has('search'), function ($query) use ($request) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('name', 'like', "%{$request['search']}%")
+                        ->orWhere('description', 'LIKE', "%{$request['search']}%");
+                });
+            })->paginate(10);
+
 
         $tags = Tag::all();
 
 
         return view('backend.media.index')
-
+            ->with('tags', $tags)
             ->with('media', $media);
     }
 
@@ -97,7 +98,7 @@ class MediaController extends Controller
     public function create()
     {
         //$tags = Tag::all();
-        $colourway_colours = ClipartColourwayColour::all();
+        //$colourway_colours = ClipartColourwayColour::all();
 
         return view('backend.media.new');
         //->with('tags', $tags);
@@ -110,16 +111,76 @@ class MediaController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function backend_store(Request $request)
+    public function store(Request $request)
     {
-        dd($request->all());
-        // save clipart metadata
+        $file = $request->file('file');
+        //    dd($file->mimeType);
+        $size = $file->getSize();
+        // $extension = $file->extension();
+        //dd($file->getClientOriginalName());
+        $storagePath = $file->storePubliclyAs('media', $file->hashName(), 'public');
+
+        if ($storagePath) {
+            $media = new Media([
+                'uuid' => (string) Str::uuid(),
+                'name' => $file->getClientOriginalName(),
+                'type' => File::mimeType(Storage::disk('public')->path('/') . $storagePath),
+                'path' => Storage::url($storagePath),
+                'location' => $storagePath,
+                'description' => $request->input('description', ''),
+                'size' => $size,
+                'created_by' => Auth::user()->id,
+            ]);
+
+            $media->save();
+            $media->tags()->sync($request->input('tags', []));
+            ///  make a thumb
+            $manager = new ImageManager(new Driver());
+            if (Str::contains($media->type, 'image')) {
+                try {
+                    $image = $manager->read(Storage::disk('public')->path('/') . $media->location);
+                    // resize image
+                    $image->cover(200, 200);
+                    // create thumb path
+                    $media->thumb = $image->toPng();
+                    // update media with thumb path
+                    //     $media->thumb =
+                    $media->save();
+                } catch (\Exception $e) {
+                    // handle exception, maybe log it
+
+                }
+            }
+
+            // if (Str::contains($media->type, 'audio')) {
+            //     try {
+            //         $image = $manager->read(Storage::disk('public')->path('/') . $media->location);
+            //         // resize image
+            //         $image->cover(200, 200);
+            //         // create thumb path
+            //         $image->thumb = $image->toPng();
+            //         // update media with thumb path
+            //         //     $media->thumb =
+            //         $media->save();
+            //     } catch (\Exception $e) {
+            //         // handle exception, maybe log it
+
+            //     }
+            // }
 
 
 
-        // make a thumbnail
-        session()->flash('flash_success', 'Created Media Successfully');
-        return redirect()->route('admin.media.index');
+            session()->flash('flash_success', 'Created media Successfully');
+            return redirect()->route('admin.media.index');
+
+            // return array(
+            //     'uuid' => $media->uuid,
+            //     'location' => str_starts_with($media->type, 'audio')?route('public.media.stream', $media->uuid):route('public.media.show', $media->uuid),
+            //     'mime' => $media->type
+            // );
+            //  dd($media);
+
+        }
     }
 
 
@@ -135,8 +196,7 @@ class MediaController extends Controller
 
 
         return view('backend.media.edit')
-            ->with('media', $media)
-            ;
+            ->with('media', $media);
     }
 
     /**
@@ -152,35 +212,93 @@ class MediaController extends Controller
     public function update(Request $request, $id)
     {
         // new clipart entry
-         dd($request->all());
 
-        session()->flash('flash_success', 'Updated Clipart Successfully');
-        return redirect()->route('admin.clipart.index');
+        $media = Media::find($id);
+        if ($request->hasFile('file')) {
+            // dd($request->file('file'));
+            $file = $request->file('file');
+            //    dd($file->mimeType);
+            $size = $file->getSize();
+            // $extension = $file->extension();
+            //dd($file->getClientOriginalName());
+            $storagePath = $file->storePubliclyAs('media', $file->hashName(), 'public');
+        }
+
+        $media->update([
+            'name' => $request->input('name', $media->name),
+            'type' => $request->hasFile('file') ? File::mimeType(Storage::disk('public')->path('/') . $storagePath) : $media->type,
+            'description' => $request->input('description', $media->description),
+            'path' => $request->hasFile('file') ? Storage::url($storagePath) : $media->path,
+            'location' => $request->hasFile('file') ? $storagePath : $media->location,
+            'size' => $request->hasFile('file') ? $size : $media->size,
+            'updated_by' => Auth::user()->id,
+        ]);
+
+        $media->save();
+        $media->tags()->sync($request->input('tags', []));
+        ///  make a thumb
+        if ($request->hasFile('file')) {
+            $manager = new ImageManager(new Driver());
+            if (Str::contains($media->type, 'image')) {
+                try {
+                    $image = $manager->read(Storage::disk('public')->path('/') . $media->location);
+                    // resize image
+                    $image->cover(200, 200);
+                    // create thumb path
+                    $media->thumb = $image->toPng();
+                    // update media with thumb path
+                    //     $media->thumb =
+                    $media->save();
+                } catch (\Exception $e) {
+                    // handle exception, maybe log it
+
+                }
+            }
+        }
+        session()->flash('flash_success', 'Updated media Successfully');
+        return redirect()->route('admin.media.index');
     }
 
 
 
     public
-    function destroy(Request $request)
+    function destroy($uuid)
     {
-        dd($request->all());
-        $media = Media::find($request['id']);
-                // clean up tags
+        //  dd($uuid);
+        $media = Media::where('uuid', $uuid)->first();
+        // clean up tags
         $media->tags()->detach();
         // delete file
         // remove clipart
         $media->delete();
-
-        return redirect()->route('admin.media.index')->withFlashSuccess('Clipart deleted success!');
+        return ['status' => 'success'];
+        //return redirect()->route('admin.media.index')->withFlashSuccess('Media deleted success!');
     }
 
     // @TODO does the user have the ability to retrive this clipart?
-    public function thumb($id,  $size = 200,)
+    public function thumb($uuid,  $size = 200)
     {
-         dd($id);
-        $colour_id = ClipartColourwayColour::where('name', '=', $colour)->first()->id;
 
+        $media = Media::where('uuid', $uuid)->first();
+        if ($media->thumb) {
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($media->thumb);
+            // resize image
+            $image->cover($size, $size);
+            // create response and add encoded image data
+            $response = new \Illuminate\Http\Response($image->toPng(), 200);
+            // set content-type
+            $response->header('Content-Type', 'image/png');
 
+            // output
+            return $response;
+            // $image = Storage::disk('public')->get($media->thumb);
+            // $response = new \Illuminate\Http\Response($image, '200');
+            // $response->header('Content-Type', 'image/png');
+            // return $response;
+        } else {
+            return response()->json(['error' => 'No thumbnail available'], 404);
+        }
     }
 
     // seach by tags or text, returning a json array
@@ -195,9 +313,9 @@ class MediaController extends Controller
     {
 
         $file = $request->file('file');
-    //    dd($file->mimeType);
+        //    dd($file->mimeType);
         $size = $file->getSize();
-        $extension = $file->extension();
+        // $extension = $file->extension();
         //dd($file->getClientOriginalName());
         $storagePath = $file->storePubliclyAs('media', $file->hashName(), 'public');
 
@@ -216,7 +334,7 @@ class MediaController extends Controller
             //dd($mime);
             return array(
                 'uuid' => $media->uuid,
-                'location' => str_starts_with($media->type, 'audio')?route('public.media.stream', $media->uuid):route('public.media.show', $media->uuid),
+                'location' => str_starts_with($media->type, 'audio') ? route('public.media.stream', $media->uuid) : route('public.media.show', $media->uuid),
                 'mime' => $media->type
             );
             //  dd($media);
@@ -234,7 +352,7 @@ class MediaController extends Controller
         //  dd($file);
         if ($media) {
             $size     = File::size($path);
-            $mime     = $media->type;//File::mimeType($path);
+            $mime     = $media->type; //File::mimeType($path);
             // dd($mime);
             $start    = 0;
             $length   = $size;
